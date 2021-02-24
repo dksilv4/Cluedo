@@ -25,7 +25,6 @@ public class Data {
             JSONObject jsonData = new JSONObject(data);
         }
     }
-
     private String readTxt(String file_name){
         try {
             File file = new File("src/Cluedo/Data/"+file_name);

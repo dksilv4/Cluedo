@@ -5,11 +5,13 @@ import java.util.List;
 
 public class Board {
     String board_data;
+    List<List<Object>> grid;
 
     public Board() {
         this.board_data = new Data("board.txt").board;
-        System.out.println(board_data);
-        this.Lexer();
+        this.grid = this.getGrid(20,20);
+        this.printGrid();
+        this.changeGridTile(1, 1, "X");
     }
 
     public static void main(String[] args) {
@@ -20,29 +22,43 @@ public class Board {
         List<List<Object>> board = new ArrayList<List<Object>>();
         for (String row : this.board_data.split("\n")) {
             String[] d = row.split(" ");
-//            System.out.println(Arrays.toString(d));
             List<Object> col_list = new ArrayList<Object>();
             for (String obj : d) {
-//                System.out.println(obj + obj.length());
                 if (String.valueOf(obj.charAt(0)).equals("R")) {
-                    Room room = new Room(obj.substring(1,obj.length()));
-//                    System.out.println(room.toString());
-                    col_list.add(room);
+                    col_list.add(new Room(obj.substring(1,obj.length())));
                 }
                 if (String.valueOf(obj.charAt(0)).equals("d")) {
-                    Door door = new Door();
-//                    System.out.println(door.toString());
-                    col_list.add(door);
+                    col_list.add(new Door());
                 }
                 if (String.valueOf(obj.charAt(0)).equals("x")) {
-                    Space space = new Space(obj.length());
-//                    System.out.println(space.toString());
-                    col_list.add(space);
+                    col_list.add(new Space(obj.length()));
                 }
             }
-//            System.out.println(col_list);
             board.add(col_list);
         }
         System.out.println(board);
+        for(List<Object> row: board){
+            System.out.println(row);
+        }
+    }
+
+    public List<List<Object>> getGrid(int rows, int columns){
+        List<List<Object>> grid = new ArrayList<List<Object>>();
+        for(int x=0;x<rows;x++){
+            List<Object> row = new ArrayList<>();
+            for(int y=0;y<columns;y++){
+                row.add(new Tile());
+            }
+            grid.add(row);
+        }
+        return grid;
+    }
+    public void printGrid(){
+        for(List<Object> row: this.grid){
+            System.out.println(row);
+        }
+    }
+    public void changeGridTile(int row, int column, Object value){
+
     }
 }

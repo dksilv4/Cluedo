@@ -1,6 +1,29 @@
 {
-  "item": "item",
-  "cards": {
-    "Example": "Example"
+  "Player Pieces": {
+    "0": "Col Mustard",
+    "1":"Prof Plum" ,
+    "2": "Rev Green",
+    "3": "Mrs Peacock",
+    "4": "Miss Scarlett",
+    "5": "Mrs White"
+  },
+  "Weapons": {
+    "0": "Dagger",
+    "1":"Candlestick" ,
+    "2": "Revolver",
+    "3": "Rope",
+    "4": "Lead Piping",
+    "5": "Spanner"
+  },
+  "Rooms": {
+    "0": "Study",
+    "1":"Lounge" ,
+    "2": "Hall",
+    "3": "Library",
+    "4": "Billiard Room",
+    "5": "Ball Room",
+    "6": "Kitchen",
+    "7":"Dining Room" ,
+    "8": "Conservatory"
   }
 }
