@@ -1,7 +1,7 @@
 {
-  "Player Pieces": {
+  "PlayerPieces": {
     "0": "Col Mustard",
-    "1": "Prof Plum" ,
+    "1": "Prof Plum",
     "2": "Rev Green",
     "3": "Mrs Peacock",
     "4": "Miss Scarlett",
@@ -15,7 +15,7 @@
     "4": "Lead Piping",
     "5": "Spanner"
   },
-  "Original Board": {
+  "OriginalBoard": {
     "Rooms": {
       "X": {
         "name": "X",
