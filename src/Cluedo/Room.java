@@ -1,7 +1,5 @@
 package Cluedo;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +10,6 @@ public class Room {
     int size_x;
     int size_y;
     public Room(String name){
-        JSONObject data = new Data("data.json").jsonData;
-//        data.getClass("Rooms")
         this.name = name;
         this.checkName();
     }

@@ -9,6 +9,7 @@ public class Board {
 
 
     public Board() {
+
         this.board_data = new Data("board.txt").board;
         this.grid = this.getGrid(25, 25);
         this.printGrid();
@@ -59,7 +60,6 @@ public class Board {
                         }
                     }catch (StringIndexOutOfBoundsException e){
                         col_list.add(new Door());
-
                     }
                 }
                 if (String.valueOf(obj.charAt(0)).equals("x")) {
