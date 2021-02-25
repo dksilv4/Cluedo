@@ -8,6 +8,7 @@ import org.json.*;
 
 public class Data {
     String board;
+    JSONObject jsonData;
     public Data(String file_name){
         this.readFile(file_name);
     }
@@ -22,7 +23,7 @@ public class Data {
     private void readJSON(String file_name){
         String data = readTxt(file_name); //assign your JSON String here
         if (data != null) {
-            JSONObject jsonData = new JSONObject(data);
+            this.jsonData = new JSONObject(data);
         }
     }
     private String readTxt(String file_name){

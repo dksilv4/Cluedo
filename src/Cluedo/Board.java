@@ -10,14 +10,14 @@ public class Board {
     public Board() {
         this.board_data = new Data("board.txt").board;
         this.grid = this.getGrid(20,20);
+        this.addRoom(5, 5, 0, 3, new Room("TEST"));
         this.printGrid();
-        this.changeGridTile(1, 1, "X");
+
     }
 
     public static void main(String[] args) {
         Board board = new Board();
     }
-
     public void Lexer() {
         List<List<Object>> board = new ArrayList<List<Object>>();
         for (String row : this.board_data.split("\n")) {
@@ -41,7 +41,6 @@ public class Board {
             System.out.println(row);
         }
     }
-
     public List<List<Object>> getGrid(int rows, int columns){
         List<List<Object>> grid = new ArrayList<List<Object>>();
         for(int x=0;x<rows;x++){
@@ -59,6 +58,14 @@ public class Board {
         }
     }
     public void changeGridTile(int row, int column, Object value){
-
+        this.grid.get(row).set(column, value);
+//        this.printGrid();
+    }
+    public void addRoom(int size_x, int size_y, int start_row, int start_column, Room room){
+        for(int x=start_row;x<start_row+size_x;x++){
+            for(int y=start_column;y<start_column+size_y;y++){
+                this.changeGridTile(x, y, room);
+            }
+        }
     }
 }
