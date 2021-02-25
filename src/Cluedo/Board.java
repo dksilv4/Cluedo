@@ -9,7 +9,7 @@ public class Board {
 
 
     public Board() {
-        
+
         this.board_data = new Data("board.txt").board;
         this.grid = this.getGrid(25, 25);
         this.printGrid();
