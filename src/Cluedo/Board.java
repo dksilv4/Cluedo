@@ -9,27 +9,28 @@ public class Board {
 
 
     public Board() {
+        
         this.board_data = new Data("board.txt").board;
         this.grid = this.getGrid(25, 25);
         this.printGrid();
-        List<List<Object>> board = this.Lexer();
-        this.getRoomDoors(board);
-//        Room room = new Room("Test");
-//        room.doors.add("T");
-//        room.doors.add("R");
-//        room.doors.add("B");
-//        room.doors.add("L");
-//        room.setSize(5, 5);
-//        this.addRoom(room, 3, 3);
-//        this.printGrid();
-//        Room room1 = new Room("ATEST");
-//        room1.doors.add("B");
-//        room1.setSize(3, 4);
-//        this.addRoom(room1 , 10, 10);
-//        Room room2 = new Room("BTEST");
-//        room2.doors.add("R");
-//        room2.setSize(2, 4);
-//        this.addRoom(room2 , 17, 1);
+//        List<List<Object>> board = this.Lexer();
+//        this.getRoomDoors(board);
+        Room room = new Room("Test");
+        room.doors.add("T");
+        room.doors.add("R");
+        room.doors.add("B");
+        room.doors.add("L");
+        room.setSize(5, 5);
+        this.addRoom(room, 3, 3);
+        this.printGrid();
+        Room room1 = new Room("ATEST");
+        room1.doors.add("B");
+        room1.setSize(3, 4);
+        this.addRoom(room1 , 10, 10);
+        Room room2 = new Room("BTEST");
+        room2.doors.add("R");
+        room2.setSize(2, 4);
+        this.addRoom(room2 , 17, 1);
     }
 
     public static void main(String[] args) {
@@ -59,7 +60,6 @@ public class Board {
                         }
                     }catch (StringIndexOutOfBoundsException e){
                         col_list.add(new Door());
-
                     }
                 }
                 if (String.valueOf(obj.charAt(0)).equals("x")) {

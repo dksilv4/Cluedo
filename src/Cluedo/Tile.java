@@ -20,7 +20,6 @@ public class Tile {
                 return "\u001B[34mw\u001B[0m";
             default:
                 return "x";
-
         }
     }
     public void setBelongsTo(Room room){
