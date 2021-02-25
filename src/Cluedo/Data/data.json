@@ -1,7 +1,7 @@
 {
   "PlayerPieces": {
     "0": "Col Mustard",
-    "1":"Prof Plum" ,
+    "1": "Prof Plum" ,
     "2": "Rev Green",
     "3": "Mrs Peacock",
     "4": "Miss Scarlett",
@@ -9,7 +9,7 @@
   },
   "Weapons": {
     "0": "Dagger",
-    "1":"Candlestick" ,
+    "1": "Candlestick" ,
     "2": "Revolver",
     "3": "Rope",
     "4": "Lead Piping",

@@ -24,6 +24,5 @@ public class Tile {
     }
     public void setBelongsTo(Room room){
         this.belongsTo = room;
-
     }
 }

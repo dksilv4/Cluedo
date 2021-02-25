@@ -16,6 +16,7 @@ public class Room {
     public String toString(){
 //        return "Room:"+this.name;
         return "\u001B[32m"+this.name.charAt(0)+"\u001B[0m";
+
     }
     public void setSize(int size_x, int size_y){
         this.size_x = size_x;
