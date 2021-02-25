@@ -1,28 +1,28 @@
 package Cluedo;
 
 public class Tile {
-    boolean isOccupied = false;
-    boolean isDoor;
-    boolean isRoom;
-
-//    public Tile(boolean isDoor, boolean isRoom){
-//        this.isDoor = isDoor;
-//        this.isRoom = isRoom;
-//    }
-
-    public boolean getIsDoor(){
-        return this.isDoor;
-    }
-    public boolean getIsRoom(){
-        return this.isRoom;
-    }
-    public boolean getIsOccupied(){
-        return this.isOccupied;
-    }
-    public void setIsOccupied(boolean isOccupied){
-        this.isOccupied = isOccupied;
+    String type;
+    Room belongsTo;
+    int row;
+    int column;
+    public Tile(String type, int row, int column){
+        this.type = type;
+        this.row = row;
+        this.column = column;
     }
     public String toString(){
-        return "x";
+        switch (type){
+            case "door":
+                return "\u001B[31md\u001B[0m";
+            case "room":
+                return belongsTo.toString();
+            case "wall":
+                return "\u001B[34mw\u001B[0m";
+            default:
+                return "x";
+        }
+    }
+    public void setBelongsTo(Room room){
+        this.belongsTo = room;
     }
 }

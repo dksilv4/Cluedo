@@ -3,3 +3,5 @@ N = no doors for the rooms in previous row
 RX = room with name X
 d = door
 x = space
+w = wall
+

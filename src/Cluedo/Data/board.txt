@@ -1,11 +1,12 @@
-n
+x x x x x x x x
 RKitchen xx d RBallRoom d xx d RConservatory
-d xx d d xxxxxxx
-n
-RDiningRoom d xx RClue xxx d RBilliardRoom
-d xx xx d
-d
-xxxxxxxxxxxxxxxx d RLibrary
-n
-d xx dd xx d
-RLounge xx RHall d xx RStudy
+d x x dd x x x x
+x x x x x x x x
+RDiningRoom d xx x x x d RBilliardRoom
+d x x x x x x d
+x x x x x x x d
+x x x x x x d RLibrary
+x x x x x x x x
+d x x dd x x x d
+RLounge x x RHall d x x RStudy
+x x x x x x x x
