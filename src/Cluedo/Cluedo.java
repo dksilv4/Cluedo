@@ -8,6 +8,6 @@ public class Cluedo {
         Data data = new Data("data.json");
         JSONObject playerPieces = (JSONObject) data.jsonData.get("PlayerPieces");
         System.out.println(playerPieces.get("0"));
-        
+
     }
 }
