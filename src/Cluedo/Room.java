@@ -28,7 +28,6 @@ public class Room {
             }
             this.tiles.add(row);
         }
-        System.out.println(this.tiles);
     }
     public void changeTile(int row, int column, Tile tile){
         this.tiles.get(row).set(column, tile);

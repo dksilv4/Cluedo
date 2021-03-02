@@ -15,7 +15,7 @@
     "4": "Lead Piping",
     "5": "Spanner"
   },
-  "Original Board": {
+  "OriginalBoard": {
     "Rooms": {
       "X": {
         "name": "X",
@@ -38,7 +38,7 @@
         "size": "6x5"
       },
       "BilliardRoom": {
-        "name": "Billiard Room",
+        "name": "Billiard",
         "size": "6x5"
       },
       "BallRoom": {

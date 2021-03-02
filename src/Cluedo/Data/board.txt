@@ -2,7 +2,7 @@ x x x x x x x x
 RKitchen xx d RBallRoom d xx d RConservatory
 d x x dd x x x x
 x x x x x x x x
-RDiningRoom d xx x x x d RBilliardRoom
+RDiningRoom d x RX x x d RBilliardRoom
 d x x x x x x d
 x x x x x x x d
 x x x x x x d RLibrary
