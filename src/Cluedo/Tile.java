@@ -18,8 +18,8 @@ public class Tile {
         return isOccupied;
     }
 
-    public void setOccupied(boolean occupied) {
-        isOccupied = occupied;
+    public void setOccupied(boolean isOccupied) {
+        this.isOccupied = isOccupied;
     }
 
     public String getType() {
@@ -31,11 +31,8 @@ public class Tile {
 
     }
 
-    public boolean available(PlayerPiece piece){
-        if(this.isOccupied() == false && piece.movingState() > 0 && this.getType() != "wall"){
-            return true;
-        }
-        return false;
+    public boolean available(){
+        return !this.isOccupied() && !this.getType().equals("wall");
     }
 
     public String toString(){
