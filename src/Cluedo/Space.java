@@ -8,4 +8,8 @@ public class Space {
     public String toString(){
         return this.amount+ " spaces";
     }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
 }

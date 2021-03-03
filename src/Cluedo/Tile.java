@@ -1,15 +1,41 @@
 package Cluedo;
 
 public class Tile {
+
     String type;
     Room belongsTo;
     int row;
     int column;
+    boolean isOccupied;
+
     public Tile(String type, int row, int column){
         this.type = type;
         this.row = row;
         this.column = column;
     }
+
+    public boolean isOccupied() {
+        return isOccupied;
+    }
+
+    public void setOccupied(boolean isOccupied) {
+        this.isOccupied = isOccupied;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+
+    public void setBelongsTo(Room room){
+        this.belongsTo = room;
+
+    }
+
+    public boolean available(){
+        return !this.isOccupied() && !this.getType().equals("wall");
+    }
+
     public String toString(){
         switch (type){
             case "door":
@@ -21,8 +47,5 @@ public class Tile {
             default:
                 return "x";
         }
-    }
-    public void setBelongsTo(Room room){
-        this.belongsTo = room;
     }
 }

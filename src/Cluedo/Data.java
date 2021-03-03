@@ -29,7 +29,7 @@ public class Data {
     private String readTxt(String file_name){
         try {
             File file = new File("src/Cluedo/Data/"+file_name);
-            System.out.println(file.getAbsolutePath());
+//            System.out.println(file.getAbsolutePath());
             Scanner myReader = new Scanner(file);
             StringBuilder data = new StringBuilder();
             while (myReader.hasNextLine()) {
