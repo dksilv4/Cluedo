@@ -26,6 +26,7 @@ public class Tile {
         return type;
     }
 
+
     public void setBelongsTo(Room room){
         this.belongsTo = room;
 
@@ -46,8 +47,5 @@ public class Tile {
             default:
                 return "x";
         }
-    }
-    public void setBelongsTo(Room room){
-        this.belongsTo = room;
     }
 }
