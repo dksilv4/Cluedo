@@ -1,5 +1,8 @@
 package Cluedo;
 
+/**
+ * Tile represents the tiles on a grid
+ */
 public class Tile {
 
     String type;
@@ -8,34 +11,62 @@ public class Tile {
     int column;
     boolean isOccupied;
 
+    /**
+     * Constructs a Tile
+     * @param type a type string of a Tile
+     * @param row the number of row
+     * @param column the number of column
+     */
     public Tile(String type, int row, int column){
         this.type = type;
         this.row = row;
         this.column = column;
     }
 
+    /**
+     * Checks if a Tile is occupied
+     * @return boolean
+     */
     public boolean isOccupied() {
         return isOccupied;
     }
 
+    /**
+     * Sets whether a Tile is occupied or not
+     * @param isOccupied boolean
+     */
     public void setOccupied(boolean isOccupied) {
         this.isOccupied = isOccupied;
     }
 
+    /**
+     * Returns the type of a Tile
+     * @return a type string
+     */
     public String getType() {
         return type;
     }
 
-
+    /**
+     * Sets which Room a Tile belongs to
+     * @param room a Room object
+     */
     public void setBelongsTo(Room room){
         this.belongsTo = room;
-
     }
 
+    /**
+     * Checks if a Player can move to a Tile
+     * @return boolean
+     */
     public boolean available(){
         return !this.isOccupied() && !this.getType().equals("wall");
     }
 
+    /**
+     * Returns the information of a Tile as a string
+     * @return a string
+     */
     public String toString(){
         switch (type){
             case "door":

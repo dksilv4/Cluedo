@@ -1,5 +1,8 @@
 package Cluedo;
 
+/**
+ *
+ */
 public class Space {
     int amount;
     public Space(int amount){

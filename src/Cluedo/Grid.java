@@ -3,11 +3,19 @@ package Cluedo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Grid defines a grid for a Board
+ */
 public class Grid {
     List<List<Tile>> grid = new ArrayList<List<Tile>>();
     int rows;
     int columns;
 
+    /**
+     * Contructs and initializes a Grid
+     * @param rows the number of rows
+     * @param columns the number of columns
+     */
     public Grid(int rows, int columns) {
         this.rows = rows;
         this.columns = columns;
@@ -15,6 +23,9 @@ public class Grid {
 
     }
 
+    /**
+     * Build a grid
+     */
     private void makeGrid() {
         for (int x = 0; x < this.rows; x++) {
             List<Tile> row = new ArrayList<>();
@@ -25,24 +36,49 @@ public class Grid {
         }
     }
 
+    /**
+     * Returns a Grid object
+     * @return a grid object
+     */
     public List<List<Tile>> getGrid() {
         return this.grid;
     }
 
+    /**
+     * Prints a Grid object
+     */
     public void print() {
         for (List<Tile> row : this.grid) {
             System.out.println(row);
         }
     }
 
+    /**
+     * Changes a Tile
+     * @param row the row number of a tile
+     * @param column the column number of a tile
+     * @param tile a Tile
+     */
     public void changeTile(int row, int column, Tile tile) {
         this.grid.get(row).set(column, tile);
     }
 
+    /**
+     *
+     * @param row row number
+     * @param column column number
+     * @return a Tile on a Grid
+     */
     public Tile getTile(int row, int column) {
         return this.grid.get(row).get(column);
     }
 
+    /**
+     * Add a Room to a Grid
+     * @param room a Room object
+     * @param start_row starting row number
+     * @param start_column starting column number
+     */
     public void addRoom(Room room, int start_row, int start_column) {
         for (int x = start_row; x < start_row + room.size_x; x++) {
             for (int y = start_column; y < start_column + room.size_y; y++) {
@@ -81,8 +117,10 @@ public class Grid {
         this.addRoomDoors(room);
     }
 
-
-
+    /**
+     * Add doors to a Room
+     * @param room a Room
+     */
     public void addRoomDoors(Room room) {
         for (String door_loc : room.doors) {
             switch (door_loc) {

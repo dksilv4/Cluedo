@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Board represents a game board
+ */
 public class Board {
     String board_data;
     Grid grid;
     List<List<Object>> board_data_list;
 
+    /**
+     * Constructs and initializes a Board
+     */
     public Board() {
         this.board_data = new Data("board.txt").board;
         this.grid = new Grid(25, 25);
@@ -51,11 +57,18 @@ public class Board {
         this.grid.print();
     }
 
-
+    /**
+     * main method
+     * @param args
+     */
     public static void main(String[] args) {
         Board board = new Board();
     }
 
+    /**
+     * Lexes a Board
+     * @return a lexed board
+     */
     public List<List<Object>> Lexer() {
         List<List<Object>> board = new ArrayList<List<Object>>();
         Data data = new Data("data.json");
@@ -99,6 +112,9 @@ public class Board {
 
     }
 
+    /**
+     * Cleans the Board data
+     */
     public void cleanBoardData() {
         List<List<Object>> board_data = new ArrayList<>();
         for (List<Object> row : this.board_data_list) {
@@ -132,6 +148,9 @@ public class Board {
 
     }
 
+    /**
+     * Prints the list of Board data
+     */
     public void printBoardDataList() {
         for (int i = 1; i < this.board_data_list.size(); i += 3) {
             System.out.println(this.board_data_list.get(i));
@@ -145,6 +164,10 @@ public class Board {
 ////        }
 //    }
 
+    /**
+     * ???
+     * @param board
+     */
     public void getRoomDoors(List<List<Object>> board) {
         for (int i = 1; i < board.size(); i++) {
             List<Object> row = board.get(i);
