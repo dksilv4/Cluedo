@@ -5,5 +5,4 @@ public class Player {
     PlayerPiece playerPiece;
     public Player() {
     }
-
 }

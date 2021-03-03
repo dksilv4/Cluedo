@@ -1,4 +1,6 @@
 package Cluedo;
+import java.io.File;
+import java.util.*;
 
 public class PlayerPiece {
     /**
