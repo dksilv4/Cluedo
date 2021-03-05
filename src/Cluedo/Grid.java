@@ -20,7 +20,6 @@ public class Grid {
         this.rows = rows;
         this.columns = columns;
         this.makeGrid();
-
     }
 
     /**

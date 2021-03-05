@@ -22,9 +22,9 @@ public class Cluedo {
         }
         return playerPieces;
     }
-    public static void main(String[] args) {
-        Cluedo cluedo = new Cluedo();
-
-    }
+//    public static void main(String[] args) {
+//        Cluedo cluedo = new Cluedo();
+//
+//    }
 
 }

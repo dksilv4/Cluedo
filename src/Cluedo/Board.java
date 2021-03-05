@@ -61,9 +61,9 @@ public class Board {
      * main method
      * @param args
      */
-    public static void main(String[] args) {
-        Board board = new Board();
-    }
+//    public static void main(String[] args) {
+//        Board board = new Board();
+//    }
 
     /**
      * Lexes a Board
