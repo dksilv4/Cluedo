@@ -1,37 +1,46 @@
 package Cluedo;
 
-import javafx.scene.canvas.GraphicsContext;
+import javafx.beans.Observable;
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 
 public class Sprite {
-    private Image image;
-    private double positionX;
-    private double positionY;
-    private double width;
-    private double height;
+    private ImageView imView;
 
-    public Sprite() {
-        positionX = 0;
-        positionY = 0;
+    public Sprite(Image img, double initHeight, double initWidth,
+                  double initX, double initY) {
+        imView = new ImageView();
+        setImage(img);
+        setPosition(initX, initY);
+        setDims(initWidth, initHeight);
     }
 
     public void setImage(Image img) {
-        image = img;
-        width = img.getWidth();
-        height = img.getHeight();
+        imView.setImage(img);
+    }
+
+    public void setDims(double newWidth, double newHeight) {
+        imView.setFitHeight(newHeight);
+        imView.setFitWidth(newWidth);
     }
 
     public void setPosition(double x, double y) {
-        positionX = x;
-        positionY = y;
+        imView.setX(x);
+        imView.setY(y);
     }
 
-    public void render(GraphicsContext gc) {
-        gc.drawImage(image, positionX, positionY);
+    public void render(double x, double y) {
+        setPosition(x, y);
     }
 
     public void update(double newX, double newY) {
-        positionX = newX;
-        positionY = newY;
+
+    }
+
+    public ImageView getImView() {
+        return imView;
     }
 }

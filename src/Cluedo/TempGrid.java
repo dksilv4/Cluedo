@@ -68,7 +68,7 @@ public class TempGrid {
      * Main method of TempGrid class
      * @param args
      */
-    public static void main(String[] args) {
-        TempGrid g = new TempGrid();
-    }
+//    public static void main(String[] args) {
+//        TempGrid g = new TempGrid();
+//    }
 }
