@@ -48,8 +48,6 @@ public class TempGrid {
         room09.setSize(4, 5);
         room09.addDoor("L");
 
-
-
         this.grid = new Grid(25, 25);
         this.grid.addRoom(room01, 1, 1);
         this.grid.addRoom(room02, 1, 9);

@@ -1,45 +1,61 @@
 package Cluedo;
 
-import javafx.beans.Observable;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
 
+/**
+ * This class represents any entities which may be rendered in the game.
+ */
 public class Sprite {
-    private ImageView imView;
+    private final ImageView imView;
 
-    public Sprite(Image img, double initHeight, double initWidth,
-                  double initX, double initY) {
+    public Sprite(Image img, double initHeight, double initWidth, double initX,
+                  double initY) {
         imView = new ImageView();
+        imView.setSmooth(true);
+        imView.setCache(true);
         setImage(img);
-        setPosition(initX, initY);
+        imView.setX(initX);
+        imView.setY(initY);
         setDims(initWidth, initHeight);
     }
 
+    /**
+     * Sets the image of the Sprite.
+     *
+     * @param img Image to set to
+     */
     public void setImage(Image img) {
         imView.setImage(img);
     }
 
+    /**
+     * Sets the dimensions of the Sprite.
+     *
+     * @param newWidth  Sprite width
+     * @param newHeight Sprite height
+     */
     public void setDims(double newWidth, double newHeight) {
         imView.setFitHeight(newHeight);
         imView.setFitWidth(newWidth);
     }
 
-    public void setPosition(double x, double y) {
+    /**
+     * Renders the Sprite are the corresponding x and y-coordinates.
+     *
+     * @param x x-coordinate to render at
+     * @param y y-coordinate to renter at
+     */
+    public void render(double x, double y) {
         imView.setX(x);
         imView.setY(y);
     }
 
-    public void render(double x, double y) {
-        setPosition(x, y);
-    }
-
-    public void update(double newX, double newY) {
-
-    }
-
+    /**
+     * Getter for the Sprite's ImageView object.
+     *
+     * @return The Sprite's ImageView object
+     */
     public ImageView getImView() {
         return imView;
     }
