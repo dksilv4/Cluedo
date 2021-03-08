@@ -10,8 +10,9 @@ import org.json.*;
  * Contains data for the game
  */
 public class Data {
-    String board;
-    JSONObject jsonData;
+    public String board;
+    public JSONObject jsonData;
+    public String projectPath = "src/Cluedo/Data/";
 
     /**
      * Constructs Data by reading the input file
@@ -25,7 +26,7 @@ public class Data {
      * A method to read a file
      * @param file_name a file name string
      */
-    public void readFile(String file_name){
+    private void readFile(String file_name){
         if(file_name.substring(file_name.length() - 3, file_name.length()).equals("txt")){
             this.board = this.readTxt(file_name);
         }
@@ -52,7 +53,7 @@ public class Data {
      */
     private String readTxt(String file_name){
         try {
-            File file = new File("src/Cluedo/Data/"+file_name);
+            File file = new File(this.projectPath+file_name);
 //            System.out.println(file.getAbsolutePath());
             Scanner myReader = new Scanner(file);
             StringBuilder data = new StringBuilder();

@@ -51,6 +51,7 @@ public class Grid {
         for (List<Tile> row : this.grid) {
             System.out.println(row);
         }
+        System.out.println("\n");
     }
 
     /**

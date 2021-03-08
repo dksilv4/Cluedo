@@ -26,6 +26,12 @@ public class Room {
      * @return a string "Room:" + its name
      */
     }
+    public int getSizeX(){
+        return this.size_x;
+    }
+    public int getSizeY(){
+        return this.size_y;
+    }
     public String toString(){
 //        return "Room:"+this.name;
         return "\u001B[32m"+this.name.charAt(0)+"\u001B[0m";

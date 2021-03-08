@@ -6,7 +6,7 @@ public class PlayerPiece {
     /**
      * PlayerPiece represents a player's piece
      */
-    String name;
+    public String name;
 
     /**
      * Constructs a PlayerPiece with a name

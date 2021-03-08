@@ -23,38 +23,8 @@ public class Board {
         this.grid.print();
         this.board_data_list = this.Lexer();
         this.getRoomDoors(board_data_list);
-//        this.printBoardDataList();
         this.cleanBoardData();
-//        this.print();
-        List<Object> r = board_data_list.get(1);
-        System.out.println();
-        System.out.println(r);
-        Room a = (Room) r.get(0);
-        this.grid.addRoom(a, 1, 1);
-        Room b = (Room) r.get(2);
-        this.grid.addRoom(b, 1, 3+3+a.size_x);
-        Room c = (Room) r.get(4);
-        this.grid.addRoom(c, 1, 25-1-c.size_y);
-        this.grid.print();
-
-        System.out.println();
-        r = board_data_list.get(4);
-        System.out.println(r);
-
-        Room d = (Room) r.get(0);
-        this.grid.addRoom(d, 3+d.size_y, 1);
-        Room e = (Room) r.get(2);
-        this.grid.addRoom(e, 7+d.size_y, 3+1+d.size_y);
-        Room f = (Room) r.get(4);
-        this.grid.addRoom(f, 3+d.size_y, 3+3+d.size_y+2+e.size_y);
-        this.grid.print();
-        System.out.println();
-        r = board_data_list.get(7);
-        System.out.println(r);
-
-        Room g = (Room) r.get(1);
-        this.grid.addRoom(g, 7+d.size_y+f.size_y, 25-1-g.size_y);
-        this.grid.print();
+        this.placeRooms();
     }
 
     /**
@@ -63,6 +33,67 @@ public class Board {
      */
     public static void main(String[] args) {
         Board board = new Board();
+    }
+    public void placeRooms(){
+        System.out.println(this.board_data_list);
+        int y_size = 0;
+        for(int i=1;i<this.board_data_list.size();i+=3){
+            List<Object> rowList = this.board_data_list.get(i);
+            System.out.println(rowList);
+            List<Room> rooms = new ArrayList<Room>();
+            List<Space> spaces = new ArrayList<Space>();
+            for(int x=0;x<rowList.size();x++){
+                Object obj = rowList.get(x);
+                System.out.println(obj);
+                if (obj instanceof Room){
+                    rooms.add((Room) obj);
+                }
+                if(obj instanceof Space){
+                    Space space = (Space) obj;
+                    spaces.add(space);
+                }
+            }
+            System.out.println(rooms +" "+ " "+i);
+            int x_size = rooms.size();
+            int y = 0;
+            for(int x=0;x<rooms.size();x++){
+                Room room = rooms.get(x);
+                if(room.getSizeY() > y){
+                    y = room.getSizeY();
+                }
+
+                if(i == 1){
+                    if(x == 0){
+                        this.grid.addRoom(room, i, 1);
+                        this.grid.print();
+                    }
+                    else{
+                        this.grid.addRoom(room, i, x_size);
+                        this.grid.print();
+                    }
+                }
+                else{
+                    System.out.println("y_size:"+y_size);
+                    if(x == 0){
+                        this.grid.addRoom(room, y_size, 1);
+                        this.grid.print();
+                    }
+//                    else{
+//                        this.grid.addRoom(room, y_size, x_size);
+//                        this.grid.print();
+//                    }
+                }
+                x_size += room.getSizeX();
+                if(spaces.size()>x){
+                    x_size += spaces.get(x).amount;
+                }
+
+
+            }
+            y_size += y;
+
+
+        }
     }
 
     /**
@@ -141,9 +172,9 @@ public class Board {
             }
             board_data.add(new_row);
         }
-        for (int i = 1; i < board_data.size(); i += 3) {
-            System.out.println(board_data.get(i));
-        }
+//        for (int i = 1; i < board_data.size(); i += 3) {
+//            System.out.println(board_data.get(i));
+//        }
         this.board_data_list = board_data;
 
     }
