@@ -7,7 +7,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class PlayerPieceTest {
-    PlayerPiece playerPiece;
+    private PlayerPiece playerPiece;
     @Before
     public void setUp(){
         this.playerPiece = new PlayerPiece("PPT");

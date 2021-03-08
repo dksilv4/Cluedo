@@ -58,7 +58,7 @@ public class Room {
      * @param size_x size of x
      * @param size_y size of y
      */
-    public void setSize(int size_x, int size_y){
+    public void setSize(int size_y, int size_x){
         this.size_x = size_x;
         this.size_y = size_y;
         for(int x=0;x<size_x;x++){
