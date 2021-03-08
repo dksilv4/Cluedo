@@ -6,21 +6,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Cluedo {
-    List<PlayerPiece> playerPieces;
+    public List<PlayerPiece> playerPieces;
     public Cluedo(){
-        List<PlayerPiece> playerPieces = this.setPlayerPieces();
+        this.setPlayerPieces();
         System.out.println(playerPieces);
     }
-    private List<PlayerPiece> setPlayerPieces(){
+    private void setPlayerPieces(){
         List<PlayerPiece> playerPieces = new ArrayList<PlayerPiece>();
         Data data = new Data("data.json");
         JSONObject playerPiecesData = (JSONObject) data.jsonData.get("PlayerPieces");
-        System.out.println(playerPieces);
+//        System.out.println(playerPieces);
+//        System.out.println(playerPiecesData);
         for(int i=0;i<6;i++){
             String playerPieceName = String.valueOf(playerPiecesData.get(""+i+""));
-            this.playerPieces.add(new PlayerPiece(playerPieceName));
+//            System.out.println(playerPieceName);
+            playerPieces.add(new PlayerPiece(playerPieceName));
         }
-        return playerPieces;
+        this.playerPieces = playerPieces;
     }
     public List<PlayerPiece> getPlayerPieces() {
         return this.playerPieces;
@@ -28,6 +30,7 @@ public class Cluedo {
 
     public static void main(String[] args) {
         Cluedo cluedo = new Cluedo();
+//        System.out.println(cluedo.playerPieces);
 
     }
 

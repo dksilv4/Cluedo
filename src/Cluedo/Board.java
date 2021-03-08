@@ -87,7 +87,7 @@ public class Board {
                     size_x += 2;
                 }
                 size_x += room.getSizeY()+space;
-                
+
             }
 
         }
