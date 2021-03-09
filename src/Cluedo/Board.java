@@ -1,7 +1,6 @@
 package Cluedo;
 
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +18,8 @@ public class Board {
      */
     public Board() {
         this.board_data = new Data("board.txt").board;
-        this.grid = new Grid(25, 25);
+        this.grid = new Grid();
+        this.grid.makeGrid(28, 24);
         this.grid.print();
         this.board_data_list = this.Lexer();
         this.getRoomDoors(board_data_list);
@@ -47,11 +47,12 @@ public class Board {
         }
         return rooms;
     }
+
     public List<Space> getRowSpaces(List<Object> row) {
         List<Space> spaces = new ArrayList<Space>();
         for (int x = 0; x < row.size(); x++) {
             Object obj = row.get(x);
-            System.out.println(obj);
+//            System.out.println(obj);
             if (obj instanceof Space) {
                 spaces.add((Space) obj);
             }
@@ -64,33 +65,100 @@ public class Board {
         int y_size = 0;
         for (int i = 1; i < this.board_data_list.size(); i += 3) {
             List<Object> row = this.board_data_list.get(i);
-            System.out.println(row);
+//            System.out.println(row);
             List<Room> rooms = this.getRowRooms(row);
-            System.out.println("ROOMS:" + rooms);
+//            System.out.println("ROOMS:" + rooms);
             List<Space> spaces = this.getRowSpaces(row);
-            System.out.println("SPACES:"+spaces);
-            int size_x = 1;
-            int space =2;
+//            System.out.println("SPACES:" + spaces);
+            int size_x = 0;
+            int space = 0;
+            int size_y = 0;
             for (int x = 0; x < rooms.size(); x++) {
                 Room room = rooms.get(x);
-                System.out.println("Room: " + room);
-                System.out.println("RoomX:"+room.getSizeX() +"\nRoomY:"+room.getSizeY());
-                if(spaces.size() > x){
-                    space = spaces.get(x).amount;
-                    System.out.println("SPACE:"+space);
+//                System.out.println("Room: " + room);
+//                System.out.println("RoomX:" + room.getSizeX() + "\nRoomY:" + room.getSizeY());
+//                System.out.println(x);
+//                System.out.println(rooms.size());
+
+                if(room.name.equals("X")){
+                    System.out.println((this.grid.rows/2-room.getSizeY()/2)+" "+(this.grid.columns/2-room.getSizeX()/2));
+                    this.grid.addRoom(room, this.grid.rows/2-room.getSizeY()/2, this.grid.columns/2-room.getSizeX()/2);
+//                    this.grid.print();
+                    size_x += room.getSizeX()+3;
                 }
-                if(i ==1){
-                    this.grid.addRoom(room, 1, size_x);
-                    this.grid.print();
+                else{
+                    if (spaces.size() > x) {
+                        space += spaces.get(x).amount;
+//                        System.out.println("SPACE:" + space);
+                    }
+                    if(size_y < room.getSizeY()){
+                        size_y = room.getSizeY()+1;
+                    }
+                    if (i == 1) {
+
+                        if(x == rooms.size()-1){
+//                            System.out.println(x);
+                            this.grid.addRoom(room, 0, this.grid.columns-room.getSizeX()-1);
+//                            this.grid.print();
+                        }
+                        else{
+                            this.grid.addRoom(room, 0, size_x);
+//                            this.grid.print();
+                        }
+                        size_x += (space+ room.getSizeX());
+
+                    }
+                    if(i== 4){
+
+                        if(x == rooms.size()-1){
+//                            System.out.println(x);
+                            this.grid.addRoom(room,y_size, this.grid.columns-room.getSizeX()-1);
+//                            this.grid.print();
+                        }
+                        else {
+                            this.grid.addRoom(room, y_size, size_x);
+//                            this.grid.print();
+                        }
+                        size_x += (space+ room.getSizeX()+ 1);
+
+                    }
+                    if(i== 7){
+
+                        if(x == rooms.size()-1){
+//                            System.out.println(x);
+                            this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX()-1);
+//                            this.grid.print();
+                        }
+                        else {
+                            this.grid.addRoom(room, y_size, size_x);
+//                            this.grid.print();
+                        }
+                        size_x += (space+ room.getSizeX()+ 1);
+
+                    }
+                    if(i== 10){
+
+                        if(x == rooms.size()-1){
+//                            System.out.println(x);
+                            this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX()-1);
+//                            this.grid.print();
+                        }
+                        else {
+                            this.grid.addRoom(room, y_size, size_x);
+//                            this.grid.print();
+                        }
+                        size_x += (space+ room.getSizeX()+ 1);
+
+                    }
                 }
-                if(x == 0){
-                    size_x += 2;
-                }
-                size_x += room.getSizeY()+space;
+
+
 
             }
+            y_size += size_y;
 
         }
+        this.grid.print();
     }
 
     /**
@@ -109,8 +177,8 @@ public class Board {
                     JSONObject j = (JSONObject) ((JSONObject) ((JSONObject) data.jsonData.get("OriginalBoard")).get("Rooms")).get(obj.substring(1, obj.length()));
                     String name = (String) j.get("name");
                     List<String> size = Arrays.asList(((String) j.get("size")).split("x"));
-                    Integer x = Integer.parseInt(size.get(0)) - 2;
-                    Integer y = Integer.parseInt(size.get(1)) - 2;
+                    Integer x = Integer.parseInt(size.get(1)) ;
+                    Integer y = Integer.parseInt(size.get(0)) ;
                     Room newRoom = new Room(name);
 
                     newRoom.setSize(x, y);

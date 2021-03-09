@@ -67,6 +67,9 @@ public class Tile {
      * Returns the information of a Tile as a string
      * @return a string
      */
+    public void newType(String type){
+        this.type = type;
+    }
     public String toString(){
         switch (type){
             case "door":
@@ -75,8 +78,22 @@ public class Tile {
                 return belongsTo.toString();
             case "wall":
                 return "\u001B[34mw\u001B[0m";
+            case "border":
+                return "\u001B[33mb\u001B[0m";
             default:
                 return "x";
         }
     }
+//    public String toString(){
+//        switch (type){
+//            case "door":
+//                return "\u001B[31md\u001B[0m"+this.row+" "+this.column;
+//            case "room":
+//                return belongsTo.toString()+this.row+" "+this.column;
+//            case "wall":
+//                return "\u001B[34mw\u001B[0m"+this.row+" "+this.column;
+//            default:
+//                return "x";
+//        }
+//    }
 }

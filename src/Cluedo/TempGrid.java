@@ -50,7 +50,8 @@ public class TempGrid {
 
 
 
-        this.grid = new Grid(25, 25);
+        this.grid = new Grid();
+        this.grid.makeGrid(25, 25);
         this.grid.addRoom(room01, 1, 1);
         this.grid.addRoom(room02, 1, 9);
         this.grid.addRoom(room03, 1, 16);
