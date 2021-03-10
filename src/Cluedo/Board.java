@@ -79,7 +79,6 @@ public class Board {
 //                System.out.println("RoomX:" + room.getSizeX() + "\nRoomY:" + room.getSizeY());
 //                System.out.println(x);
 //                System.out.println(rooms.size());
-
                 if(room.name.equals("X")){
                     System.out.println((this.grid.rows/2-room.getSizeY()/2)+" "+(this.grid.columns/2-room.getSizeX()/2));
                     this.grid.addRoom(room, this.grid.rows/2-room.getSizeY()/2, this.grid.columns/2-room.getSizeX()/2);
@@ -123,7 +122,6 @@ public class Board {
 
                     }
                     if(i== 7){
-
                         if(x == rooms.size()-1){
 //                            System.out.println(x);
                             this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX()-1);
@@ -134,10 +132,8 @@ public class Board {
 //                            this.grid.print();
                         }
                         size_x += (space+ room.getSizeX()+ 1);
-
                     }
                     if(i== 10){
-
                         if(x == rooms.size()-1){
 //                            System.out.println(x);
                             this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX()-1);
@@ -148,15 +144,10 @@ public class Board {
 //                            this.grid.print();
                         }
                         size_x += (space+ room.getSizeX()+ 1);
-
                     }
                 }
-
-
-
             }
             y_size += size_y;
-
         }
         this.grid.print();
     }
