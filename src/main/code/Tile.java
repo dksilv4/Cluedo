@@ -1,4 +1,4 @@
-package main;
+package code;
 
 /**
  * Tile represents the tiles on a grid

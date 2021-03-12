@@ -1,4 +1,4 @@
-package main;
+package code;
 
 public class Player {
     String name;

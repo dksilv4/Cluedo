@@ -1,4 +1,4 @@
-package main;
+package code;
 
 /**
  * Exception thrown when the name of a room is invalid

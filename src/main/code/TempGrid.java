@@ -1,4 +1,4 @@
-package main;
+package code;
 
 /**
  * Represents the information of a Grid

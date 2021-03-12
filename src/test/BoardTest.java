@@ -1,4 +1,4 @@
-package CluedoTest;
+package test;
 
 public class BoardTest {
     public BoardTest(){
