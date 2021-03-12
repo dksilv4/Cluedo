@@ -11,7 +11,6 @@ import javafx.stage.Stage;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.nio.file.*;
 import java.util.*;
 
@@ -21,45 +20,15 @@ import java.util.*;
  */
 public class ClueGUI extends Application {
 
-    private static String currentDir = Paths.get("").toAbsolutePath().toString();
-    private static String imagesDir = Paths.get(currentDir,
-            "\\src\\main\\code\\resources\\images")
-            .toAbsolutePath().toString();
+    private static Image FLOOR_IMG;
+    private static Image ROOM_IMG;
+    private static Image WALL_IMG;
+    private static Image DOOR_IMG;
+    private static Image DEFAULT_IMG;
 
-    private static String DOOR_IM_PATH = Paths.get(imagesDir,  "door.png")
-            .toAbsolutePath().toString();
-    private static String FLOOR_IM_PATH = Paths.get(imagesDir,  "floor.png")
-            .toAbsolutePath().toString();
-    private static String ROOM_IM_PATH = Paths.get(imagesDir,  "room.png")
-            .toAbsolutePath().toString();
-    private static String WALL_IM_PATH = Paths.get(imagesDir,  "wall.png")
-            .toAbsolutePath().toString();
-    private static String DEFAULT_IM_PATH = Paths.get(imagesDir,  "debug.png")
-            .toAbsolutePath().toString();
-
-    private static InputStream doorIS;
-    private static InputStream floorIS;
-    private static InputStream roomIS;
-    private static InputStream wallIS;
-    private static InputStream defaultIS;
-
-    static {
-        try {
-            doorIS = new FileInputStream(DOOR_IM_PATH);
-            floorIS = new FileInputStream(FLOOR_IM_PATH);
-            roomIS = new FileInputStream(ROOM_IM_PATH);
-            wallIS = new FileInputStream(WALL_IM_PATH);
-            defaultIS = new FileInputStream(DEFAULT_IM_PATH);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+    public ClueGUI() throws FileNotFoundException {
+        initialiseImages();
     }
-
-    private static Image FLOOR_IMG = new Image(floorIS);
-    private static Image ROOM_IMG = new Image(roomIS);
-    private static Image WALL_IMG = new Image(wallIS);
-    private static Image DOOR_IMG = new Image(doorIS);
-    private static Image DEFAULT_IMG = new Image(defaultIS);
 
     public static void main(String[] args) {
         launch(args);
@@ -178,4 +147,33 @@ public class ClueGUI extends Application {
         s.render(x, y);
     }
 
+    private static void initialiseImages() throws FileNotFoundException {
+        String currentDir = Paths.get("").toAbsolutePath().toString();
+        String imagesDir = Paths.get(currentDir,
+                "\\src\\main\\code\\resources\\images")
+                .toAbsolutePath().toString();
+
+        String DOOR_IM_PATH = Paths.get(imagesDir,  "door.png")
+                .toAbsolutePath().toString();
+        String FLOOR_IM_PATH = Paths.get(imagesDir,  "floor.png")
+                .toAbsolutePath().toString();
+        String ROOM_IM_PATH = Paths.get(imagesDir,  "room.png")
+                .toAbsolutePath().toString();
+        String WALL_IM_PATH = Paths.get(imagesDir,  "wall.png")
+                .toAbsolutePath().toString();
+        String DEFAULT_IM_PATH = Paths.get(imagesDir,  "debug.png")
+                .toAbsolutePath().toString();
+
+        FileInputStream doorIS = new FileInputStream(DOOR_IM_PATH);
+        FileInputStream floorIS = new FileInputStream(FLOOR_IM_PATH);
+        FileInputStream roomIS = new FileInputStream(ROOM_IM_PATH);
+        FileInputStream wallIS = new FileInputStream(WALL_IM_PATH);
+        FileInputStream defaultIS = new FileInputStream(DEFAULT_IM_PATH);
+
+        FLOOR_IMG = new Image(floorIS);
+        ROOM_IMG = new Image(roomIS);
+        WALL_IMG = new Image(wallIS);
+        DOOR_IMG = new Image(doorIS);
+        DEFAULT_IMG = new Image(defaultIS);
+    }
 }
