@@ -1,4 +1,4 @@
-package Cluedo;
+package java;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;

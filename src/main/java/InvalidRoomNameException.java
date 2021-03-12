@@ -1,4 +1,4 @@
-package Cluedo;
+package main;
 
 /**
  * Exception thrown when the name of a room is invalid

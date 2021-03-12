@@ -1,4 +1,4 @@
-package Cluedo;
+package main;
 
 /**
  * Represents the information of a Grid

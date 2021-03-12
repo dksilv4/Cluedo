@@ -1,4 +1,4 @@
-package Cluedo;
+package main;
 
 import org.json.JSONObject;
 

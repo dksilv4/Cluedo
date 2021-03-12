@@ -1,4 +1,4 @@
-package Cluedo;
+package main;
 
 public class Player {
     String name;

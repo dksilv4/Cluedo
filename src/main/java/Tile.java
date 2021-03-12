@@ -1,4 +1,4 @@
-package Cluedo;
+package main;
 
 /**
  * Tile represents the tiles on a grid
