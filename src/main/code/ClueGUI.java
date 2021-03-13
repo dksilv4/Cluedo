@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class ClueGUI extends Application {
 
-    private static Image FLOOR_IMG;
+    private static Image PATH_TILE_IMG;
     private static Image ROOM_IMG;
     private static Image WALL_IMG;
     private static Image DOOR_IMG;
@@ -42,7 +42,8 @@ public class ClueGUI extends Application {
 
         // Set-up scene and generate sprites from tiles in game board.
         Pane gameBoardCanvas = initialiseGUI(theStage);
-        HashMap<Tile, Sprite> tileSprites = generateTileSprites(gameBoard, gameBoardCanvas);
+        HashMap<Tile, Sprite> tileSprites = generateTileSprites(gameBoard,
+                gameBoardCanvas);
 
         /* --- Main game loop. --- */
         new AnimationTimer() {
@@ -99,7 +100,8 @@ public class ClueGUI extends Application {
      * @param mainCanvas The node to which the GUI renders the game board
      * @return A hashmap which maps tiles to Sprites
      */
-    private HashMap<Tile, Sprite> generateTileSprites(Grid gameBoard, Pane mainCanvas) {
+    private HashMap<Tile, Sprite> generateTileSprites(Grid gameBoard,
+                                                      Pane mainCanvas) {
         HashMap<Tile, Sprite> tileSprites = new HashMap<>();
 
         // Iterate over all tiles and generate a Sprite for each one according
@@ -107,26 +109,24 @@ public class ClueGUI extends Application {
         for (List<Tile> row : gameBoard.grid) {
             for (Tile t : row) {
                 // Tiles are square by default.
-                double DEFAULT_TILE_SIZE = 30;
-                Sprite s = new Sprite(DEFAULT_IMG, DEFAULT_TILE_SIZE,
-                        DEFAULT_TILE_SIZE, t.row * DEFAULT_TILE_SIZE,
-                        t.column * DEFAULT_TILE_SIZE);
+                double defaultTileSize = 30;
+                Sprite s = new Sprite(DEFAULT_IMG, defaultTileSize,
+                        defaultTileSize, t.row * defaultTileSize,
+                        t.column * defaultTileSize);
 
                 // Set Sprite images based om their types.
                 switch (t.type) {
                     case "door":
                         s.setImage(DOOR_IMG);
                         break;
-                    case "room":
-                        s.setImage(ROOM_IMG);
-                        break;
-                    case "wall":
-                        s.setImage(WALL_IMG);
+                    case "space":
+                        s.setImage(PATH_TILE_IMG);
                         break;
                     default:
-                        s.setImage(FLOOR_IMG);
+                        s.setImage(DEFAULT_IMG);
                         break;
                 }
+
                 // Add the Sprite's ImageView to the rendering node and the
                 // Sprite to the Sprite collection.
                 mainCanvas.getChildren().add(s.getImView());
@@ -149,34 +149,38 @@ public class ClueGUI extends Application {
 
     /**
      * Obtains the current directory and from there obtains the images directory.
-     * @throws FileNotFoundException    If method fails to generate
-     *                                  FileInputStreams for images to load.
      *
+     * @throws FileNotFoundException If method fails to generate
+     *                               FileInputStreams for images to load.
      */
     private static void initialiseImages() throws FileNotFoundException {
+        // Get the current directory and find the images directory relative to
+        // the current directory.
         String currentDir = Paths.get("").toAbsolutePath().toString();
         String imagesDir = Paths.get(currentDir,
                 "\\src\\main\\resources\\images")
                 .toAbsolutePath().toString();
 
-        String DOOR_IM_PATH = Paths.get(imagesDir,  "door.png")
+        // Set image paths for all images.
+        String DOOR_IM_PATH = Paths.get(imagesDir, "door.png")
                 .toAbsolutePath().toString();
-        String FLOOR_IM_PATH = Paths.get(imagesDir,  "floor.png")
+        String FLOOR_IM_PATH = Paths.get(imagesDir, "floor.png")
                 .toAbsolutePath().toString();
-        String ROOM_IM_PATH = Paths.get(imagesDir,  "room.png")
+        String ROOM_IM_PATH = Paths.get(imagesDir, "room.png")
                 .toAbsolutePath().toString();
-        String WALL_IM_PATH = Paths.get(imagesDir,  "wall.png")
+        String WALL_IM_PATH = Paths.get(imagesDir, "wall.png")
                 .toAbsolutePath().toString();
-        String DEFAULT_IM_PATH = Paths.get(imagesDir,  "debug.png")
+        String DEFAULT_IM_PATH = Paths.get(imagesDir, "debug.png")
                 .toAbsolutePath().toString();
 
+        // Initialise images.
         FileInputStream doorIS = new FileInputStream(DOOR_IM_PATH);
         FileInputStream floorIS = new FileInputStream(FLOOR_IM_PATH);
         FileInputStream roomIS = new FileInputStream(ROOM_IM_PATH);
         FileInputStream wallIS = new FileInputStream(WALL_IM_PATH);
         FileInputStream defaultIS = new FileInputStream(DEFAULT_IM_PATH);
 
-        FLOOR_IMG = new Image(floorIS);
+        PATH_TILE_IMG = new Image(floorIS);
         ROOM_IMG = new Image(roomIS);
         WALL_IMG = new Image(wallIS);
         DOOR_IMG = new Image(doorIS);

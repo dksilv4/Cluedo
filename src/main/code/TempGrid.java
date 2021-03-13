@@ -58,7 +58,7 @@ public class TempGrid {
         this.grid.addRoom(room07, 18, 1);
         this.grid.addRoom(room08, 20, 10);
         this.grid.addRoom(room09, 20, 19);
-        this.grid.print();
+        //this.grid.print();
 
     }
 
