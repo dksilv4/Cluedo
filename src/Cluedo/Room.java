@@ -7,9 +7,9 @@ import java.util.List;
  * Room represents a room on a board
  */
 public class Room {
-    String name;
-    List<String> doors = new ArrayList<String>();
-    List<Tile> tiles  = new ArrayList<Tile>();
+    private String name;
+    private List<String> doors = new ArrayList<String>();
+    private List<Tile> tiles  = new ArrayList<Tile>();
     int size_x;
     int size_y;
 
@@ -21,17 +21,28 @@ public class Room {
         this.name = name;
         this.checkName();
 
-    /**
-     * ToString method for Room
-     * @return a string "Room:" + its name
-     */
+
+    }
+    public List<Tile> getTiles(){
+        return this.tiles;
+    }
+    public List<String> getDoors(){
+        return this.doors;
+    }
+    public String getName(){
+        return this.name;
     }
     public int getSizeX(){
         return this.size_x;
     }
+
     public int getSizeY(){
         return this.size_y;
     }
+    /**
+     * ToString method for Room
+     * @return a string "Room:" + its name
+     */
     public String toString(){
 //        return "Room:"+this.name;
         return "\u001B[32m"+this.name.charAt(0)+"\u001B[0m";

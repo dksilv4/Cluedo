@@ -1,17 +1,17 @@
 package Cluedo;
 
-public class Door extends Tile{
+public class Wall extends Tile{
     /**
      * Constructs a Tile
      *
      * @param row    the number of row
      * @param column the number of column
      */
-    public Door(int row, int column) {
-        super("door", row, column);
+    public Wall( int row, int column) {
+        super("wall" , row, column);
     }
 
     public String toString(){
-        return "\u001B[31md\u001B[0m";
+        return "\u001B[34mw\u001B[0m";
     }
 }

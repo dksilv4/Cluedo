@@ -16,11 +16,11 @@ public class DataTest {
     }
     @Test
     public void testTextFileRead(){
-        assertEquals("This is a test file to test the reading of Data Class.\n", this.dataTxt.board);
+        assertEquals("This is a test file to test the reading of Data Class.\n", this.dataTxt.getBoard());
     }
     @Test
     public void testJSONFileRead(){
-        System.out.println(this.dataJSON.jsonData);
-        assertEquals("{\"Test\":\"test\"}", this.dataJSON.jsonData.toString());
+        System.out.println(this.dataJSON.getJsonData());
+        assertEquals("{\"Test\":\"test\"}", this.dataJSON.getJsonData().toString());
     }
 }

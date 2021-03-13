@@ -17,11 +17,12 @@ public class Board {
      * Constructs and initializes a Board
      */
     public Board() {
-        this.board_data = new Data("board.txt").board;
+        this.board_data = new Data("board.txt").getBoard();
         this.grid = new Grid();
         this.grid.makeGrid(28, 24);
         this.grid.print();
         this.board_data_list = this.Lexer();
+        System.out.println(board_data_list);
         this.getRoomDoors(board_data_list);
         this.cleanBoardData();
         this.placeRooms();
@@ -79,7 +80,7 @@ public class Board {
 //                System.out.println("RoomX:" + room.getSizeX() + "\nRoomY:" + room.getSizeY());
 //                System.out.println(x);
 //                System.out.println(rooms.size());
-                if(room.name.equals("X")){
+                if(room.getName().equals("X")){
                     System.out.println((this.grid.rows/2-room.getSizeY()/2)+" "+(this.grid.columns/2-room.getSizeX()/2));
                     this.grid.addRoom(room, this.grid.rows/2-room.getSizeY()/2, this.grid.columns/2-room.getSizeX()/2);
 //                    this.grid.print();
@@ -97,7 +98,7 @@ public class Board {
 
                         if(x == rooms.size()-1){
 //                            System.out.println(x);
-                            this.grid.addRoom(room, 0, this.grid.columns-room.getSizeX()-1);
+                            this.grid.addRoom(room, 0, this.grid.columns-room.getSizeX());
 //                            this.grid.print();
                         }
                         else{
@@ -111,7 +112,7 @@ public class Board {
 
                         if(x == rooms.size()-1){
 //                            System.out.println(x);
-                            this.grid.addRoom(room,y_size, this.grid.columns-room.getSizeX()-1);
+                            this.grid.addRoom(room,y_size, this.grid.columns-room.getSizeX());
 //                            this.grid.print();
                         }
                         else {
@@ -124,7 +125,7 @@ public class Board {
                     if(i== 7){
                         if(x == rooms.size()-1){
 //                            System.out.println(x);
-                            this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX()-1);
+                            this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX());
 //                            this.grid.print();
                         }
                         else {
@@ -136,7 +137,7 @@ public class Board {
                     if(i== 10){
                         if(x == rooms.size()-1){
 //                            System.out.println(x);
-                            this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX()-1);
+                            this.grid.addRoom(room, y_size, this.grid.columns-room.getSizeX());
 //                            this.grid.print();
                         }
                         else {
@@ -165,7 +166,7 @@ public class Board {
             List<Object> col_list = new ArrayList<Object>();
             for (String obj : d) {
                 if (String.valueOf(obj.charAt(0)).equals("R")) {
-                    JSONObject j = (JSONObject) ((JSONObject) ((JSONObject) data.jsonData.get("OriginalBoard")).get("Rooms")).get(obj.substring(1, obj.length()));
+                    JSONObject j = (JSONObject) ((JSONObject) ((JSONObject) data.getJsonData().get("OriginalBoard")).get("Rooms")).get(obj.substring(1, obj.length()));
                     String name = (String) j.get("name");
                     List<String> size = Arrays.asList(((String) j.get("size")).split("x"));
                     Integer x = Integer.parseInt(size.get(1)) ;
@@ -179,15 +180,15 @@ public class Board {
                     try {
                         if (String.valueOf(obj.charAt(1)).equals("d")) {
                             List<Door> doors = new ArrayList<Door>();
-                            doors.add(new Door());
-                            doors.add(new Door());
+                            doors.add(new Door( 0, 0));
+                            doors.add(new Door(0, 0));
                             col_list.add(doors);
                         } else {
-                            col_list.add(new Door());
+                            col_list.add(new Door(0, 0));
 
                         }
                     } catch (StringIndexOutOfBoundsException e) {
-                        col_list.add(new Door());
+                        col_list.add(new Door( 0, 0));
                     }
                 }
                 if (String.valueOf(obj.charAt(0)).equals("x")) {
@@ -253,7 +254,6 @@ public class Board {
 //    }
 
     /**
-     * ???
      *
      * @param board
      */
@@ -267,11 +267,11 @@ public class Board {
                         Object above_obj = board.get(i - 1).get(x);
 //                        System.out.println(above_obj);
                         if (above_obj instanceof Door) {
-                            ((Room) obj).doors.add("T");
+                            ((Room) obj).addDoor("T");
                         } else if (above_obj instanceof ArrayList) {
                             if (((ArrayList) above_obj).get(0) instanceof Door) {
-                                ((Room) obj).doors.add("T");
-                                ((Room) obj).doors.add("T");
+                                ((Room) obj).addDoor("T");
+                                ((Room) obj).addDoor("T");
                             }
                         }
                     }
@@ -280,30 +280,28 @@ public class Board {
 //                        System.out.println(x);
                         Object below_obj = board.get(i + 1).get(x);
                         if (below_obj instanceof Door) {
-                            ((Room) obj).doors.add("B");
+                            ((Room) obj).addDoor("B");
                         } else if (below_obj instanceof ArrayList) {
                             if (((ArrayList) below_obj).get(0) instanceof Door) {
-                                ((Room) obj).doors.add("B");
-                                ((Room) obj).doors.add("B");
+                                ((Room) obj).addDoor("B");
+                                ((Room) obj).addDoor("B");
                             }
                         }
                     }
                     if (x != 0) {
                         Object prev_obj = row.get(x - 1);
                         if (prev_obj instanceof Door) {
-                            ((Room) obj).doors.add("L");
+                            ((Room) obj).addDoor("L");
                         }
                     }
                     if (x != row.size() - 1) {
                         Object next_obj = row.get(x + 1);
                         if (next_obj instanceof Door) {
-                            ((Room) obj).doors.add("R");
+                            ((Room) obj).addDoor("R");
                         }
                     }
                 }
             }
         }
     }
-
-
 }

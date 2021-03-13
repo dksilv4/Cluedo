@@ -1,8 +1,6 @@
 package CluedoTest;
 
-import Cluedo.Grid;
-import Cluedo.Room;
-import Cluedo.Tile;
+import Cluedo.*;
 import com.sun.org.apache.xpath.internal.axes.AxesWalker;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,11 +19,41 @@ public class GridTest {
     }
     @Test
     public void testMakeGrid(){
-        System.out.println(this.grid.grid);
-        assertEquals(10, this.grid.grid.size());
+        System.out.println(this.grid.getGrid());
+        assertEquals(10, this.grid.getGrid().size());
         for(int i=0;i<10;i++){
-            assertEquals(10, this.grid.grid.get(i).size());
+            assertEquals(10, this.grid.getGrid().get(i).size());
         }
+    }
+    @Test
+    public void testDeleteGrid(){
+        this.grid.deleteGrid();
+        assertEquals(new ArrayList<List<Tile>>(), this.grid.getGrid());
+    }
+
+    @Test
+    public void testAddWallTile(){
+        assertEquals(true, this.grid.getTile(1, 1) instanceof Tile);
+        assertEquals(false, this.grid.getTile(1, 1) instanceof Wall);
+        this.grid.addWallTile(1,1);
+        assertEquals(true, this.grid.getTile(1, 1) instanceof Tile);
+        assertEquals(true, this.grid.getTile(1, 1) instanceof Wall);
+    }
+
+    @Test
+    public void testAddDoorTile(){
+        assertEquals(true, this.grid.getTile(1, 1) instanceof Tile);
+        assertEquals(false, this.grid.getTile(1, 1) instanceof Door);
+        this.grid.addDoorTile(1,1);
+        assertEquals(true, this.grid.getTile(1, 1) instanceof Tile);
+        assertEquals(true, this.grid.getTile(1, 1) instanceof Door);
+    }
+    @Test
+    public void testGetTile(){
+        this.grid.addDoorTile(1, 1);
+        assertEquals("door", this.grid.getTile(1, 1).getType());
+        this.grid.addWallTile(1, 1);
+        assertEquals("wall", this.grid.getTile(1, 1).getType());
     }
     @Test
     public void testGetGrid(){
@@ -33,14 +61,14 @@ public class GridTest {
         for(int i=0;i<10;i++){
             assertEquals(10, this.grid.getGrid().get(i).size());
         }
-        assertEquals(this.grid.grid, this.grid.getGrid());
+        assertEquals(this.grid.getGrid(), this.grid.getGrid());
     }
-    @Test
-    public void testChangeAndGetTile(){
-        Tile tile = new Tile("space", 1, 1);
-        this.grid.changeTile(1, 1, tile);
-        assertEquals(this.grid.getTile(1, 1), tile);
-    }
+//    @Test
+//    public void testChangeAndGetTile(){
+//        Tile tile = new Tile("space", 1, 1);
+//        this.grid.changeTile(1, 1, tile);
+//        assertEquals(this.grid.getTile(1, 1), tile);
+//    }
 
     @Test
     public void testAddRoom(){

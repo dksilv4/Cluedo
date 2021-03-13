@@ -15,4 +15,7 @@ public class Space {
     public void setAmount(int amount) {
         this.amount = amount;
     }
+    public int getAmount(){
+        return this.amount;
+    }
 }

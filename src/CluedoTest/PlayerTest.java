@@ -10,14 +10,20 @@ import static org.junit.Assert.assertEquals;
 public class PlayerTest {
     Player player;
     PlayerPiece playerPiece;
+
     @Before
     public void setUp(){
         this.playerPiece = new PlayerPiece("PlayerPieceTest");
         this.player = new Player("Diogo", this.playerPiece);
     }
+
     @Test
-    public void testCreation(){
-        assertEquals("Diogo", this.player.name);
-        assertEquals("PlayerPieceTest", this.player.playerPiece.name);
+    public void testGetName(){
+        assertEquals("Diogo", this.player.getName());
+    }
+
+    @Test
+    public void testGetPlayerPiece(){
+        assertEquals(this.playerPiece, this.player.getPlayerPiece());
     }
 }

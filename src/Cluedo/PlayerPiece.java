@@ -6,7 +6,7 @@ public class PlayerPiece {
     /**
      * PlayerPiece represents a player's piece
      */
-    public String name;
+    private String name;
 
     /**
      * Constructs a PlayerPiece with a name
@@ -22,6 +22,10 @@ public class PlayerPiece {
      */
     public String toString(){
         return "PlayerPiece: "+this.name;
+    }
+
+    public String getName(){
+        return this.name;
     }
 
 }

@@ -7,17 +7,20 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class PlayerPieceTest {
-    private PlayerPiece playerPiece;
+    private PlayerPiece playerPiece = new PlayerPiece("ii");
+
     @Before
     public void setUp(){
-        this.playerPiece = new PlayerPiece("PPT");
+
     }
+
     @Test
-    public void testCreation(){
-        assertEquals("PPT", this.playerPiece.name);
+    public void testGetName(){
+        assertEquals("ii", this.playerPiece.getName());
     }
+
     @Test
     public void testToString(){
-        assertEquals("PlayerPiece: PPT", this.playerPiece.toString());
+        assertEquals("PlayerPiece: ii", this.playerPiece.toString());
     }
 }

@@ -14,12 +14,9 @@ public class Cluedo {
     private void setPlayerPieces(){
         List<PlayerPiece> playerPieces = new ArrayList<PlayerPiece>();
         Data data = new Data("data.json");
-        JSONObject playerPiecesData = (JSONObject) data.jsonData.get("PlayerPieces");
-//        System.out.println(playerPieces);
-//        System.out.println(playerPiecesData);
+        JSONObject playerPiecesData = (JSONObject) data.getJsonData().get("PlayerPieces");
         for(int i=0;i<6;i++){
             String playerPieceName = String.valueOf(playerPiecesData.get(""+i+""));
-//            System.out.println(playerPieceName);
             playerPieces.add(new PlayerPiece(playerPieceName));
         }
         this.playerPieces = playerPieces;
