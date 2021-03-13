@@ -85,4 +85,5 @@ public class Room {
             throw new InvalidRoomNameException(this.name, "length of name has to be 12 or lower.");
         }
     }
+
 }

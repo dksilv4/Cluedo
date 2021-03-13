@@ -104,7 +104,6 @@ public class Grid {
                 room.addTile(this.getTile(x, y));
             }
         }
-//        this.print();
         this.addRoomDoors(room, start_row, start_column);
     }
 
