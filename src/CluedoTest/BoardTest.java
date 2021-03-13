@@ -1,9 +1,6 @@
 package CluedoTest;
 
-import Cluedo.Board;
-import Cluedo.Door;
-import Cluedo.Room;
-import Cluedo.Space;
+import Cluedo.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -245,15 +242,10 @@ public class BoardTest {
         //[d, 1 spaces, 1 spaces, [d, d], 1 spaces, 1 spaces, 1 spaces, d]
         List<Object> row = this.lexedBoard.get(9);
         for (int x = 0; x < row.size(); x++) {
-            if (x == 0 || x == 7) {
+            if (x == 0 ||x == 3 || x == 7) {
                 Door door = (Door) row.get(x);
                 assertEquals(true, door instanceof Door);
-            } else if (x == 3) {
-                List<Door> doors = (List<Door>) row.get(x);
-                for (Door door : doors) {
-                    assertEquals(true, door instanceof Door);
-                }
-            } else {
+            }  else {
                 Space space = (Space) row.get(x);
                 assertEquals(1, space.getAmount());
                 assertEquals(true, space instanceof Space);
@@ -307,13 +299,221 @@ public class BoardTest {
     }
 
     @Test
-    public void testPlaceRooms() {
-
+    public void testPlaceRoomKitchen() {
+        List<Room> rooms = this.board.getRooms();
+        Room kitchen = rooms.get(0);
+        int tile=0;
+        for(int x=0;x<kitchen.getSizeX();x++){
+            for(int y=0;y<kitchen.getSizeY();y++){
+                Tile testTile = kitchen.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
     }
 
     @Test
-    public void testGetRoomDoors() {
+    public void testPlaceRoomBallRoom() {
+        List<Room> rooms = this.board.getRooms();
+        Room ballRoom = rooms.get(1);
+        Room kitchen = rooms.get(0);
+        int newY = kitchen.getSizeX()+2;
+        int tile=0;
+        for(int x=0;x<ballRoom.getSizeY();x++){
+            for(int y=newY;y<ballRoom.getSizeX()+newY;y++){
+                Tile testTile = ballRoom.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
 
+    @Test
+    public void testPlaceRoomConservatory() {
+        List<Room> rooms = this.board.getRooms();
+        Room conservatory = rooms.get(2);
+        Room kitchen = rooms.get(0);
+        Room ballRoom = rooms.get(1);
+        int newY = kitchen.getSizeX()+2 + ballRoom.getSizeX()+2;
+        int newX = 0;
+        int tile=0;
+        for(int x=newX;x<conservatory.getSizeY()+newX;x++){
+            for(int y=newY;y<conservatory.getSizeX()+newY;y++){
+                Tile testTile = conservatory.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomDiningRoom() {
+        List<Room> rooms = this.board.getRooms();
+        Room diningRoom = rooms.get(3);
+        Room conservatory = rooms.get(2);
+        Room kitchen = rooms.get(0);
+        Room ballRoom = rooms.get(1);
+        int newX = kitchen.getSizeY()+1;
+        int newY = 0;
+        int tile=0;
+        for(int x=newX;x<diningRoom.getSizeY()+newX;x++){
+            for(int y=newY;y<diningRoom.getSizeX()+newY;y++){
+                Tile testTile = diningRoom.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomBilliard() {
+        List<Room> rooms = this.board.getRooms();
+        Room billiard = rooms.get(5);
+        Room kitchen = rooms.get(0);
+        int newX = kitchen.getSizeY() + 1;
+        int newY = this.board.getGrid().getColumns() - billiard.getSizeX();
+        int tile=0;
+        for(int x=newX;x<billiard.getSizeY()+newX;x++){
+            for(int y=newY;y<billiard.getSizeX()+newY;y++){
+                Tile testTile = billiard.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomX() {
+        List<Room> rooms = this.board.getRooms();
+        Room X = rooms.get(4);
+        int newX = this.board.getGrid().getRows()/2 - X.getSizeY()/2;
+        int newY = this.board.getGrid().getColumns()/2 - X.getSizeX()/2;
+        int tile=0;
+        for(int x=newX;x<X.getSizeY()+newX;x++){
+            for(int y=newY;y<X.getSizeX()+newY;y++){
+                Tile testTile = X.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomLibrary() {
+        List<Room> rooms = this.board.getRooms();
+        Room library = rooms.get(6);
+        Room kitchen = rooms.get(0);
+        Room diningRoom = rooms.get(3);
+        int newX = kitchen.getSizeY() + 1 + diningRoom.getSizeY()+1;
+        int newY = this.board.getGrid().getColumns() - library.getSizeX();
+        int tile=0;
+        for(int x=newX;x<library.getSizeY()+newX;x++){
+            for(int y=newY;y<library.getSizeX()+newY;y++){
+                Tile testTile = library.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomLounge() {
+        List<Room> rooms = this.board.getRooms();
+        Room lounge = rooms.get(7);
+        Room library = rooms.get(6);
+        Room kitchen = rooms.get(0);
+        Room diningRoom = rooms.get(3);
+        int newX = kitchen.getSizeY() + 1 + diningRoom.getSizeY()+1 +library.getSizeY()+1;
+        int newY = 0;
+        int tile=0;
+        for(int x=newX;x<lounge.getSizeY()+newX;x++){
+            for(int y=newY;y<lounge.getSizeX()+newY;y++){
+                Tile testTile = lounge.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomHall() {
+        List<Room> rooms = this.board.getRooms();
+        Room hall = rooms.get(8);
+        Room library = rooms.get(4);
+        Room kitchen = rooms.get(0);
+        Room diningRoom = rooms.get(3);
+        Room lounge = rooms.get(7);
+        int newX = kitchen.getSizeY() + diningRoom.getSizeY() +library.getSizeY()+1;
+        int newY = lounge.getSizeX() +3;
+        int tile=0;
+        for(int x=newX;x<hall.getSizeY()+newX;x++){
+            for(int y=newY;y<hall.getSizeX()+newY;y++){
+                Tile testTile = hall.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
+    }
+
+    @Test
+    public void testPlaceRoomStudy() {
+        List<Room> rooms = this.board.getRooms();
+        Room study = rooms.get(8);
+        Room hall = rooms.get(8);
+        Room library = rooms.get(4);
+        Room kitchen = rooms.get(0);
+        Room diningRoom = rooms.get(3);
+        Room lounge = rooms.get(7);
+        int newX = kitchen.getSizeY() + diningRoom.getSizeY() +library.getSizeY()+1;
+        int newY = this.board.getGrid().getColumns()/2 - study.getSizeX()/2;
+        int tile=0;
+        for(int x=newX;x<study.getSizeY()+newX;x++){
+            for(int y=newY;y<study.getSizeX()+newY;y++){
+                Tile testTile = study.getTiles().get(tile);
+                System.out.println(testTile);
+                System.out.println(testTile.getRow()+" "+testTile.getColumn());
+                System.out.println(x+" "+y);
+                tile++;
+                assertEquals(x, testTile.getRow());
+                assertEquals(y, testTile.getColumn());
+            }
+        }
     }
 
     @Test
@@ -322,13 +522,12 @@ public class BoardTest {
         // 1, 3,4,6,7, 9,12
         for (int x = 0; x < this.board.getBoardDataList().size(); x++) {
             List<Object> row = this.board.getBoardDataList().get(x);
-            if(x==0){
+            if (x == 0) {
                 assertEquals(1, row.size());
                 Space space = (Space) row.get(0);
                 assertEquals(8, space.getAmount());
                 assertEquals(true, space instanceof Space);
-            }
-            else if(x==1){
+            } else if (x == 1) {
                 assertEquals(5, row.size());
                 Room kitchen = (Room) row.get(0);
                 assertEquals(true, kitchen instanceof Room);
@@ -336,77 +535,236 @@ public class BoardTest {
                 assertEquals(6, kitchen.getSizeX());
                 assertEquals(6, kitchen.getSizeY());
 
-                Space space = (Space) row.get(1);
-                assertEquals(2, space.getAmount());
-                assertEquals(true, space instanceof Space);
-
-                Room ballroom = (Room) row.get(2);
-                assertEquals(true, kitchen instanceof Room);
-                assertEquals("BallRoom", kitchen.getName());
-                assertEquals(8, kitchen.getSizeX());
-                assertEquals(6, kitchen.getSizeY());
-
-                Space spaceB = (Space) row.get(3);
-                assertEquals(2, spaceB.getAmount());
-                assertEquals(true, spaceB instanceof Space);
-
-            }
-            else if(x==2){
-                assertEquals(1, row.size());
+            } else if (x == 2) {
                 assertEquals(1, row.size());
                 Space space = (Space) row.get(0);
                 assertEquals(6, space.getAmount());
                 assertEquals(true, space instanceof Space);
 
-            }
-            else if(x==3){
+            } else if (x == 3) {
+                assertEquals(1, row.size());
+                Space space = (Space) row.get(0);
+                assertEquals(8, space.getAmount());
+                assertEquals(true, space instanceof Space);
+            } else if (x == 4) {
+                assertEquals(5, row.size());
+
+                Room d = (Room) row.get(0);
+                assertEquals(true, d instanceof Room);
+                assertEquals("Dining Room", d.getName());
+                assertEquals(8, d.getSizeX());
+                assertEquals(7, d.getSizeY());
+
+                Space space = (Space) row.get(1);
+                assertEquals(1, space.getAmount());
+                assertEquals(true, space instanceof Space);
+
+                Room X = (Room) row.get(2);
+                assertEquals(true, X instanceof Room);
+                assertEquals("X", X.getName());
+                assertEquals(5, X.getSizeX());
+                assertEquals(7, X.getSizeY());
+
+                Space spaceB = (Space) row.get(3);
+                assertEquals(2, spaceB.getAmount());
+                assertEquals(true, space instanceof Space);
+
+                Room billiard = (Room) row.get(4);
+                assertEquals(true, billiard instanceof Room);
+                assertEquals("Billiard", billiard.getName());
+                assertEquals(6, billiard.getSizeX());
+                assertEquals(5, billiard.getSizeY());
+            } else if (x == 5) {
+                assertEquals(1, row.size());
+                Space space = (Space) row.get(0);
+                assertEquals(6, space.getAmount());
+                assertEquals(true, space instanceof Space);
+            } else if (x == 6) {
+                assertEquals(1, row.size());
+                Space space = (Space) row.get(0);
+                assertEquals(7, space.getAmount());
+                assertEquals(true, space instanceof Space);
+            } else if (x == 7) {
+                assertEquals(2, row.size());
+                Space space = (Space) row.get(0);
+                assertEquals(6, space.getAmount());
+                assertEquals(true, space instanceof Space);
+
+                Room Library = (Room) row.get(1);
+                assertEquals(true, Library instanceof Room);
+                assertEquals("Library", Library.getName());
+                assertEquals(6, Library.getSizeX());
+                assertEquals(5, Library.getSizeY());
+
+            } else if (x == 8) {
+                assertEquals(1, row.size());
+                assertEquals(1, row.size());
+                Space space = (Space) row.get(0);
+                assertEquals(8, space.getAmount());
+                assertEquals(true, space instanceof Space);
+            } else if (x == 9) {
+                assertEquals(1, row.size());
+                Space space = (Space) row.get(0);
+                assertEquals(5, space.getAmount());
+                assertEquals(true, space instanceof Space);
+            } else if (x == 10) {
+                assertEquals(5, row.size());
+
+                Room lounge = (Room) row.get(0);
+                assertEquals(true, lounge instanceof Room);
+                assertEquals("Lounge", lounge.getName());
+                assertEquals(7, lounge.getSizeX());
+                assertEquals(6, lounge.getSizeY());
+
+                Space space = (Space) row.get(1);
+                assertEquals(2, space.getAmount());
+                assertEquals(true, space instanceof Space);
+
+                Room hall = (Room) row.get(2);
+                assertEquals(true, hall instanceof Room);
+                assertEquals("Hall", hall.getName());
+                assertEquals(5, hall.getSizeX());
+                assertEquals(7, hall.getSizeY());
+
+                space = (Space) row.get(3);
+                assertEquals(2, space.getAmount());
+                assertEquals(true, space instanceof Space);
+
+                Room study = (Room) row.get(4);
+                assertEquals(true, study instanceof Room);
+                assertEquals("Study", study.getName());
+                assertEquals(7, study.getSizeX());
+                assertEquals(4, study.getSizeY());
+            } else if (x == 11) {
                 assertEquals(1, row.size());
                 assertEquals(1, row.size());
                 Space space = (Space) row.get(0);
                 assertEquals(8, space.getAmount());
                 assertEquals(true, space instanceof Space);
             }
-            else if(x==4){
-                assertEquals(5, row.size());
-
-            }
-            else if(x==5){
-                assertEquals(1, row.size());
-                assertEquals(1, row.size());
-                Space space = (Space) row.get(0);
-                assertEquals(6, space.getAmount());
-                assertEquals(true, space instanceof Space);
-            }
-            else if(x==6){
-                assertEquals(1, row.size());
-                assertEquals(1, row.size());
-                Space space = (Space) row.get(0);
-                assertEquals(7, space.getAmount());
-                assertEquals(true, space instanceof Space);
-            }
-            else if(x==7){
-                assertEquals(2, row.size());
-            }
-            else if(x==8){
-                assertEquals(1, row.size());
-            }
-            else if(x==9){
-                assertEquals(3, row.size());
-            }
-            else if(x==10){
-                assertEquals(5, row.size());
-            }
-            else if(x==11){
-                assertEquals(1, row.size());
-            }
-
-
         }
-
     }
 
     @Test
-    public void testGetRooms() {
-        this.board.getRooms();
+    public void testGetRoomsAndGetRoomDoors() {
+        List<Room> room = this.board.getRooms();
+        for (int i = 0; i < room.size(); i++) {
+            if (i == 0) {
+                Room kitchen = (Room) room.get(0);
+                assertEquals(true, kitchen instanceof Room);
+                assertEquals("Kitchen", kitchen.getName());
+                assertEquals(6, kitchen.getSizeX());
+                assertEquals(6, kitchen.getSizeY());
+                List<String> doors = kitchen.getDoors();
+                assertEquals(1, doors.size());
+                assertEquals("B", doors.get(0));
+            }
+            if (i == 1) {
+                Room ballroom = (Room) room.get(1);
+                assertEquals(true, ballroom instanceof Room);
+                assertEquals("Ball Room", ballroom.getName());
+                assertEquals(8, ballroom.getSizeX());
+                assertEquals(6, ballroom.getSizeY());
+                List<String> doors = ballroom.getDoors();
+                assertEquals(3, doors.size());
+                assertEquals("B", doors.get(0));
+                assertEquals("L", doors.get(1));
+                assertEquals("R", doors.get(2));
+
+
+            }
+            if (i == 2) {
+                Room conservatory = (Room) room.get(2);
+                assertEquals(true, conservatory instanceof Room);
+                assertEquals("Conservatory", conservatory.getName());
+                assertEquals(6, conservatory.getSizeX());
+                assertEquals(5, conservatory.getSizeY());
+                List<String> doors = conservatory.getDoors();
+                assertEquals(1, doors.size());
+                assertEquals("L", doors.get(0));
+            }
+            if (i == 3) {
+                Room diningRoom = (Room) room.get(3);
+                assertEquals(true, diningRoom instanceof Room);
+                assertEquals("Dining Room", diningRoom.getName());
+                assertEquals(8, diningRoom.getSizeX());
+                assertEquals(7, diningRoom.getSizeY());
+
+                List<String> doors = diningRoom.getDoors();
+                assertEquals(2, doors.size());
+                assertEquals("B", doors.get(0));
+                assertEquals("R", doors.get(1));
+            }
+            if (i == 4) {
+                Room X = (Room) room.get(4);
+                assertEquals(true, X instanceof Room);
+                assertEquals("X", X.getName());
+                assertEquals(5, X.getSizeX());
+                assertEquals(7, X.getSizeY());
+
+                List<String> doors = X.getDoors();
+                assertEquals(0, doors.size());
+            }
+            if (i == 5) {
+                Room billiard = (Room) room.get(5);
+                assertEquals(true, billiard instanceof Room);
+                assertEquals("Billiard", billiard.getName());
+                assertEquals(6, billiard.getSizeX());
+                assertEquals(5, billiard.getSizeY());
+
+                List<String> doors = billiard.getDoors();
+                assertEquals(2, doors.size());
+                assertEquals("B", doors.get(0));
+                assertEquals("L", doors.get(1));
+
+            }
+            if (i == 6) {
+                Room library = (Room) room.get(6);
+                assertEquals(true, library instanceof Room);
+                assertEquals("Library", library.getName());
+                assertEquals(6, library.getSizeX());
+                assertEquals(5, library.getSizeY());
+
+                List<String> doors = library.getDoors();
+                assertEquals(2, doors.size());
+                assertEquals("T", doors.get(0));
+                assertEquals("L", doors.get(1));
+            }
+            if (i == 7) {
+                Room lounge = (Room) room.get(7);
+                assertEquals(true, lounge instanceof Room);
+                assertEquals("Lounge", lounge.getName());
+                assertEquals(7, lounge.getSizeX());
+                assertEquals(6, lounge.getSizeY());
+
+                List<String> doors = lounge.getDoors();
+                assertEquals(1, doors.size());
+                assertEquals("T", doors.get(0));
+            }
+
+            if (i == 8) {
+                Room hall = (Room) room.get(8);
+                assertEquals(true, hall instanceof Room);
+                assertEquals("Hall", hall.getName());
+                assertEquals(5, hall.getSizeX());
+                assertEquals(7, hall.getSizeY());
+
+                List<String> doors = hall.getDoors();
+                assertEquals(2, doors.size());
+                assertEquals("T", doors.get(0));
+                assertEquals("R", doors.get(1));
+            }
+            if (i == 9) {
+                Room study = (Room) room.get(9);
+                assertEquals(true, study instanceof Room);
+                assertEquals("Study", study.getName());
+                assertEquals(7, study.getSizeX());
+                assertEquals(4, study.getSizeY());
+
+                List<String> doors = study.getDoors();
+                assertEquals(1, doors.size());
+                assertEquals("T", doors.get(0));
+            }
+        }
     }
 }

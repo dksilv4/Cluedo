@@ -8,14 +8,20 @@ import java.util.List;
  */
 public class Grid {
     private List<List<Tile>> grid = new ArrayList<List<Tile>>();
-    int rows;
-    int columns;
+    private int rows;
+    private int columns;
 
     /**
      * Constructs and initializes a Grid
      */
     public Grid() {
 
+    }
+    public int getRows(){
+        return this.rows;
+    }
+    public int getColumns(){
+        return this.columns;
     }
 
     /**

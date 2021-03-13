@@ -42,6 +42,10 @@ public class Board {
         Board board = new Board();
     }
 
+    public Grid getGrid(){
+        return this.grid;
+    }
+
     public List<Room> getRowRooms(List<Object> row) {
         List<Room> rooms = new ArrayList<Room>();
         for (int x = 0; x < row.size(); x++) {
@@ -54,6 +58,9 @@ public class Board {
         return rooms;
     }
 
+    /**
+     * @return a list of all rooms in the baord.
+     */
     public List<Room> getRooms() {
         System.out.println("GET ROOMS");
         List<Room> rooms = new ArrayList<Room>();
@@ -101,8 +108,8 @@ public class Board {
 //                System.out.println(x);
 //                System.out.println(rooms.size());
                 if (room.getName().equals("X")) {
-                    System.out.println((this.grid.rows / 2 - room.getSizeY() / 2) + " " + (this.grid.columns / 2 - room.getSizeX() / 2));
-                    this.grid.addRoom(room, this.grid.rows / 2 - room.getSizeY() / 2, this.grid.columns / 2 - room.getSizeX() / 2);
+                    System.out.println((this.grid.getRows() / 2 - room.getSizeY() / 2) + " " + (this.grid.getColumns() / 2 - room.getSizeX() / 2));
+                    this.grid.addRoom(room, this.grid.getRows() / 2 - room.getSizeY() / 2, this.grid.getColumns() / 2 - room.getSizeX() / 2);
 //                    this.grid.print();
                     size_x += room.getSizeX() + 3;
                 } else {
@@ -117,7 +124,7 @@ public class Board {
 
                         if (x == rooms.size() - 1) {
 //                            System.out.println(x);
-                            this.grid.addRoom(room, 0, this.grid.columns - room.getSizeX());
+                            this.grid.addRoom(room, 0, this.grid.getColumns() - room.getSizeX());
 //                            this.grid.print();
                         } else {
                             this.grid.addRoom(room, 0, size_x);
@@ -130,7 +137,7 @@ public class Board {
 
                         if (x == rooms.size() - 1) {
 //                            System.out.println(x);
-                            this.grid.addRoom(room, y_size, this.grid.columns - room.getSizeX());
+                            this.grid.addRoom(room, y_size, this.grid.getColumns() - room.getSizeX());
 //                            this.grid.print();
                         } else {
                             this.grid.addRoom(room, y_size, size_x);
@@ -142,7 +149,7 @@ public class Board {
                     if (i == 7) {
                         if (x == rooms.size() - 1) {
 //                            System.out.println(x);
-                            this.grid.addRoom(room, y_size, this.grid.columns - room.getSizeX());
+                            this.grid.addRoom(room, y_size, this.grid.getColumns() - room.getSizeX());
 //                            this.grid.print();
                         } else {
                             this.grid.addRoom(room, y_size, size_x);
@@ -153,7 +160,7 @@ public class Board {
                     if (i == 10) {
                         if (x == rooms.size() - 1) {
 //                            System.out.println(x);
-                            this.grid.addRoom(room, y_size, this.grid.columns - room.getSizeX());
+                            this.grid.addRoom(room, y_size, this.grid.getColumns() - room.getSizeX());
 //                            this.grid.print();
                         } else {
                             this.grid.addRoom(room, y_size, size_x);
@@ -275,7 +282,7 @@ public class Board {
     /**
      * @param board
      */
-    public void getRoomDoors(List<List<Object>> board) {
+    public void getRoomDoors(List<List<Object>> board){
         for (int i = 1; i < board.size(); i++) {
             List<Object> row = board.get(i);
             for (int x = 0; x < row.size(); x++) {
@@ -292,7 +299,7 @@ public class Board {
                             }
                         }
                     }
-                    if (i != board.size() - 1 && x != row.size() - 1) {
+                    if (i != board.size() - 1 && x != row.size() ) {
                         Object below_obj = board.get(i + 1).get(x);
                         if (below_obj instanceof Door) {
                             ((Room) obj).addDoor("B");
