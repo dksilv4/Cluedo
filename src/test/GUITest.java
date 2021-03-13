@@ -12,12 +12,12 @@ import java.nio.file.Paths;
 public class GUITest {
 
     @Test
-    public void testImagesFilePathExists() throws FileNotFoundException {
+    public void testInitialisingImages() throws FileNotFoundException {
         String currentDir = Paths.get("").toAbsolutePath().toString();
         Assert.assertTrue(currentDir.endsWith("Cluedo"));
 
         String imagesDir = Paths.get(currentDir,
-                "\\src\\main\\code\\resources\\images")
+                "\\src\\main\\resources\\images")
                 .toAbsolutePath().toString();
 
         String DOOR_IM_PATH = Paths.get(imagesDir,  "door.png")

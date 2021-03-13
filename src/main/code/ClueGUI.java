@@ -147,10 +147,16 @@ public class ClueGUI extends Application {
         s.render(x, y);
     }
 
+    /**
+     * Obtains the current directory and from there obtains the images directory.
+     * @throws FileNotFoundException    If method fails to generate
+     *                                  FileInputStreams for images to load.
+     *
+     */
     private static void initialiseImages() throws FileNotFoundException {
         String currentDir = Paths.get("").toAbsolutePath().toString();
         String imagesDir = Paths.get(currentDir,
-                "\\src\\main\\code\\resources\\images")
+                "\\src\\main\\resources\\images")
                 .toAbsolutePath().toString();
 
         String DOOR_IM_PATH = Paths.get(imagesDir,  "door.png")
