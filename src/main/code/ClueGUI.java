@@ -9,10 +9,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * This class acts as the View and Controller of the Clue! game's MVC structure,
@@ -37,12 +39,11 @@ public class ClueGUI extends Application {
     @Override
     public void start(Stage theStage) {
         Board gameBoard = new Board();
-        Grid tileGrid = gameBoard.grid;
-
+        Grid boardTiles = gameBoard.getGrid();
 
         // Set-up scene and generate sprites from tiles in game board.
         Pane gameBoardCanvas = initialiseGUI(theStage);
-        HashMap<Tile, Sprite> tileSprites = generateTileSprites(tileGrid,
+        HashMap<Tile, Sprite> tileSprites = generateTileSprites(boardTiles,
                 gameBoardCanvas);
 
         /* --- Main game loop. --- */
@@ -50,19 +51,20 @@ public class ClueGUI extends Application {
             public void handle(long currentTime) {
 
                 // Render tiles.
-                double tileHeight = gameBoardCanvas.getHeight() * 0.04;
-                double tileWidth = gameBoardCanvas.getWidth() * 0.04;
-                for (List<Tile> row : tileGrid.grid) {
+                double tileHeight = gameBoardCanvas.getHeight() * 0.03575;
+                double tileWidth = gameBoardCanvas.getWidth() * 0.04175;
+                for (List<Tile> row : boardTiles.getGrid()) {
                     for (Tile t : row) {
                         // Tiles' sizes are relative to their container's size.
                         tileSprites.get(t).setDims(tileWidth, tileHeight);
 
                         // Render tiles.
-                        double x = t.column * tileWidth;
-                        double y = t.row * tileHeight;
+                        double x = t.getColumn() * tileWidth;
+                        double y = t.getRow() * tileHeight;
                         renderSprite(tileSprites.get(t), x, y);
                     }
                 }
+
             }
         }.start();
 
@@ -85,6 +87,10 @@ public class ClueGUI extends Application {
         root.setCenter(gameBoardCanvas);
         BorderPane.setAlignment(gameBoardCanvas, Pos.CENTER);
 
+        theStage.setHeight(512);
+        theStage.setWidth(512);
+        theStage.setX(0);
+        theStage.setY(0);
         theStage.sizeToScene();
         theStage.setTitle("Clue!");
         theStage.setScene(theScene);
@@ -96,31 +102,37 @@ public class ClueGUI extends Application {
      * Iterates over tiles in the game board and generates a corresponding
      * Sprite to represent each one in the GUI.
      *
-     * @param gameBoard  The Model from which the GUI is rendered
-     * @param mainCanvas The node to which the GUI renders the game board
+     * @param boardTiles        The Model from which the GUI is rendered
+     * @param gameBoardCanvas   The node to which the GUI renders the game board
      * @return A hashmap which maps tiles to Sprites
      */
-    private HashMap<Tile, Sprite> generateTileSprites(Grid gameBoard,
-                                                      Pane mainCanvas) {
+    private HashMap<Tile, Sprite> generateTileSprites(Grid boardTiles,
+                                                      Pane gameBoardCanvas) {
         HashMap<Tile, Sprite> tileSprites = new HashMap<>();
 
         // Iterate over all tiles and generate a Sprite for each one according
         // to the tile's type.
-        for (List<Tile> row : gameBoard.grid) {
+        for (List<Tile> row : boardTiles.getGrid()) {
             for (Tile t : row) {
                 // Tiles are square by default.
                 double defaultTileSize = 30;
                 Sprite s = new Sprite(DEFAULT_IMG, defaultTileSize,
-                        defaultTileSize, t.row * defaultTileSize,
-                        t.column * defaultTileSize);
+                        defaultTileSize, t.getColumn() * defaultTileSize,
+                        t.getRow() * defaultTileSize);
 
                 // Set Sprite images based om their types.
-                switch (t.type) {
+                switch (t.getType()) {
                     case "door":
                         s.setImage(DOOR_IMG);
                         break;
                     case "space":
                         s.setImage(PATH_TILE_IMG);
+                        break;
+                    case "room":
+                        s.setImage(ROOM_IMG);
+                        break;
+                    case "wall":
+                        s.setImage(WALL_IMG);
                         break;
                     default:
                         s.setImage(DEFAULT_IMG);
@@ -129,7 +141,7 @@ public class ClueGUI extends Application {
 
                 // Add the Sprite's ImageView to the rendering node and the
                 // Sprite to the Sprite collection.
-                mainCanvas.getChildren().add(s.getImView());
+                gameBoardCanvas.getChildren().add(s.getImView());
                 tileSprites.put(t, s);
             }
         }

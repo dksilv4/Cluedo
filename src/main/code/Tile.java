@@ -5,11 +5,11 @@ package code;
  */
 public class Tile {
 
-    String type;
-    Room belongsTo;
-    int row;
-    int column;
-    boolean isOccupied;
+    private String type;
+    private Room belongsTo;
+    private int row;
+    private int column;
+    private boolean isOccupied;
 
     /**
      * Constructs a Tile
@@ -48,6 +48,21 @@ public class Tile {
     }
 
     /**
+     * Returns the row of a Tile
+     * @return a type string
+     */
+    public int getRow(){
+        return this.row;
+    }
+
+    /**
+     * Returns the column of a Tile
+     * @return a type string
+     */
+    public int getColumn(){
+        return this.column;
+    }
+    /**
      * Sets which Room a Tile belongs to
      * @param room a Room object
      */
@@ -59,7 +74,10 @@ public class Tile {
      * Checks if a Player can move to a Tile
      * @return boolean
      */
-    public boolean available(){
+
+    public Room getBelongsTo() { return this.belongsTo; }
+
+    public boolean isAvailable(){
         return !this.isOccupied() && !this.getType().equals("wall");
     }
 
@@ -67,16 +85,27 @@ public class Tile {
      * Returns the information of a Tile as a string
      * @return a string
      */
+    public void setType(String type){
+        this.type = type;
+    }
     public String toString(){
         switch (type){
-            case "door":
-                return "\u001B[31md\u001B[0m";
             case "room":
                 return belongsTo.toString();
-            case "wall":
-                return "\u001B[34mw\u001B[0m";
             default:
                 return "x";
         }
     }
+//    public String toString(){
+//        switch (type){
+//            case "door":
+//                return "\u001B[31md\u001B[0m"+this.row+" "+this.column;
+//            case "room":
+//                return belongsTo.toString()+this.row+" "+this.column;
+//            case "wall":
+//                return "\u001B[34mw\u001B[0m"+this.row+" "+this.column;
+//            default:
+//                return "x";
+//        }
+//    }
 }
