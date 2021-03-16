@@ -13,36 +13,50 @@ public class GUITest {
 
     @Test
     public void testInitialisingImages() throws FileNotFoundException {
+        // Get the current directory and make sure it is the Cluedo project.
         String currentDir = Paths.get("").toAbsolutePath().toString();
         Assert.assertTrue(currentDir.endsWith("Cluedo"));
 
-        String imagesDir = Paths.get(currentDir,
-                "\\src\\main\\resources\\images")
-                .toAbsolutePath().toString();
-
-        String DOOR_IM_PATH = Paths.get(imagesDir,  "door.png")
-                .toAbsolutePath().toString();
-        String FLOOR_IM_PATH = Paths.get(imagesDir,  "floor.png")
-                .toAbsolutePath().toString();
-        String ROOM_IM_PATH = Paths.get(imagesDir,  "room.png")
-                .toAbsolutePath().toString();
-        String WALL_IM_PATH = Paths.get(imagesDir,  "wall.png")
-                .toAbsolutePath().toString();
-        String DEBUG_IM_PATH = Paths.get(imagesDir,  "debug.png")
-                .toAbsolutePath().toString();
-
+        // Get the path to images and make sure it is a valid path.
+        Path imgsDirPath = Paths.get(currentDir,
+                "\\src\\main\\resources\\images");
+        String imagesDir = imgsDirPath.toAbsolutePath().toString();
+        Assert.assertTrue(Files.exists(imgsDirPath));
         Assert.assertTrue(imagesDir.endsWith("images"));
-        Assert.assertTrue(DOOR_IM_PATH.endsWith("door.png"));
-        Assert.assertTrue(FLOOR_IM_PATH.endsWith("floor.png"));
-        Assert.assertTrue(ROOM_IM_PATH.endsWith("room.png"));
-        Assert.assertTrue(WALL_IM_PATH.endsWith("wall.png"));
-        Assert.assertTrue(DEBUG_IM_PATH.endsWith("debug.png"));
 
-        InputStream doorIS = new FileInputStream(DOOR_IM_PATH);
-        InputStream floorIS = new FileInputStream(FLOOR_IM_PATH);
-        InputStream roomIS = new FileInputStream(ROOM_IM_PATH);
-        InputStream wallIS = new FileInputStream(WALL_IM_PATH);
-        InputStream debugIS = new FileInputStream(DEBUG_IM_PATH);
+
+        // Get the paths to all images and make sure they are valid paths.
+        Path doorImgPathObj = Paths.get(imagesDir,  "door.png");
+        String doorImgPath = doorImgPathObj.toAbsolutePath().toString();
+        Assert.assertTrue(Files.exists(doorImgPathObj));
+        Assert.assertTrue(doorImgPath.endsWith("door.png"));
+
+        Path floorImgPathObj = Paths.get(imagesDir,  "floor.png");
+        String floorImgPath = floorImgPathObj.toAbsolutePath().toString();
+        Assert.assertTrue(Files.exists(floorImgPathObj));
+        Assert.assertTrue(floorImgPath.endsWith("floor.png"));
+
+        Path roomImgPathObj = Paths.get(imagesDir,  "room.png");
+        String roomImgPath = roomImgPathObj.toAbsolutePath().toString();
+        Assert.assertTrue(Files.exists(roomImgPathObj));
+        Assert.assertTrue(roomImgPath.endsWith("room.png"));
+
+        Path wallImgPathObj = Paths.get(imagesDir,  "wall.png");
+        String wallImgPath = wallImgPathObj.toAbsolutePath().toString();
+        Assert.assertTrue(Files.exists(wallImgPathObj));
+        Assert.assertTrue(wallImgPath.endsWith("wall.png"));
+
+        Path debugImgPathObj = Paths.get(imagesDir,  "debug.png");
+        String debugImgPath = debugImgPathObj.toAbsolutePath().toString();
+        Assert.assertTrue(Files.exists(debugImgPathObj));
+        Assert.assertTrue(debugImgPath.endsWith("debug.png"));
+
+
+        InputStream doorIS = new FileInputStream(doorImgPath);
+        InputStream floorIS = new FileInputStream(floorImgPath);
+        InputStream roomIS = new FileInputStream(roomImgPath);
+        InputStream wallIS = new FileInputStream(wallImgPath);
+        InputStream debugIS = new FileInputStream(debugImgPath);
 
         Image doorImg = new Image(doorIS);
         Image floorImg = new Image(floorIS);

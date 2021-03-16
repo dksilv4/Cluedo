@@ -162,23 +162,23 @@ public class ClueGUI extends Application {
                 .toAbsolutePath().toString();
 
         // Set image paths for all images.
-        String DOOR_IM_PATH = Paths.get(imagesDir, "door.png")
+        String doorImgPath = Paths.get(imagesDir, "door.png")
                 .toAbsolutePath().toString();
-        String FLOOR_IM_PATH = Paths.get(imagesDir, "floor.png")
+        String floorImgPath = Paths.get(imagesDir, "floor.png")
                 .toAbsolutePath().toString();
-        String ROOM_IM_PATH = Paths.get(imagesDir, "room.png")
+        String roomImgPath = Paths.get(imagesDir, "room.png")
                 .toAbsolutePath().toString();
-        String WALL_IM_PATH = Paths.get(imagesDir, "wall.png")
+        String wallImgPath = Paths.get(imagesDir, "wall.png")
                 .toAbsolutePath().toString();
-        String DEFAULT_IM_PATH = Paths.get(imagesDir, "debug.png")
+        String defaultImgPath = Paths.get(imagesDir, "debug.png")
                 .toAbsolutePath().toString();
 
         // Initialise images.
-        FileInputStream doorIS = new FileInputStream(DOOR_IM_PATH);
-        FileInputStream floorIS = new FileInputStream(FLOOR_IM_PATH);
-        FileInputStream roomIS = new FileInputStream(ROOM_IM_PATH);
-        FileInputStream wallIS = new FileInputStream(WALL_IM_PATH);
-        FileInputStream defaultIS = new FileInputStream(DEFAULT_IM_PATH);
+        FileInputStream doorIS = new FileInputStream(doorImgPath);
+        FileInputStream floorIS = new FileInputStream(floorImgPath);
+        FileInputStream roomIS = new FileInputStream(roomImgPath);
+        FileInputStream wallIS = new FileInputStream(wallImgPath);
+        FileInputStream defaultIS = new FileInputStream(defaultImgPath);
 
         PATH_TILE_IMG = new Image(floorIS);
         ROOM_IMG = new Image(roomIS);
