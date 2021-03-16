@@ -1,0 +1,63 @@
+{
+  "PlayerPieces": {
+    "0": "Col Mustard",
+    "1": "Prof Plum",
+    "2": "Rev Green",
+    "3": "Mrs Peacock",
+    "4": "Miss Scarlett",
+    "5": "Mrs White"
+  },
+  "Weapons": {
+    "0": "Dagger",
+    "1": "Candlestick" ,
+    "2": "Revolver",
+    "3": "Rope",
+    "4": "Lead Piping",
+    "5": "Spanner"
+  },
+  "OriginalBoard": {
+    "Rooms": {
+      "X": {
+        "name": "X",
+        "size": "5x7"
+      },
+      "Study": {
+        "name": "Study",
+        "size": "7x4"
+      },
+      "Lounge":{
+        "name": "Lounge",
+        "size": "7x6"
+      },
+      "Hall":{
+        "name": "Hall",
+        "size": "5x7"
+      },
+      "Library": {
+        "name": "Library",
+        "size": "6x5"
+      },
+      "BilliardRoom": {
+        "name": "Billiard",
+        "size": "6x5"
+      },
+      "BallRoom": {
+        "name": "Ball Room",
+        "size": "8x6"
+      },
+      "Kitchen": {
+        "name": "Kitchen",
+        "size": "6x6"
+      },
+      "DiningRoom":{
+        "name": "Dining Room",
+        "size": "8x7"
+      },
+      "Conservatory": {
+        "name": "Conservatory",
+        "size": "6x5"
+      }
+    }
+  }
+
+}

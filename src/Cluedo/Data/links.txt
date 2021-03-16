@@ -1,0 +1,7 @@
+Java Doc:
+ - https://blog.joda.org/2012/11/javadoc-coding-standards.html
+ JSON Data Handling:
+ - https://stleary.github.io/JSON-java/org/json/JSONObject.html
+ JUNIT intro:
+ - https://web.csulb.edu/~pnguyen/cecs277/lecnotes/unit%20testing.pdf
+
