@@ -36,13 +36,13 @@ public class ClueGUI extends Application {
 
     @Override
     public void start(Stage theStage) {
-        // @ToDo: Swap this to use board and grid once its done.
-        TempGrid boardWrapper = new TempGrid();
-        Grid gameBoard = boardWrapper.grid;
+        Board gameBoard = new Board();
+        Grid tileGrid = gameBoard.grid;
+
 
         // Set-up scene and generate sprites from tiles in game board.
         Pane gameBoardCanvas = initialiseGUI(theStage);
-        HashMap<Tile, Sprite> tileSprites = generateTileSprites(gameBoard,
+        HashMap<Tile, Sprite> tileSprites = generateTileSprites(tileGrid,
                 gameBoardCanvas);
 
         /* --- Main game loop. --- */
@@ -52,7 +52,7 @@ public class ClueGUI extends Application {
                 // Render tiles.
                 double tileHeight = gameBoardCanvas.getHeight() * 0.04;
                 double tileWidth = gameBoardCanvas.getWidth() * 0.04;
-                for (List<Tile> row : gameBoard.grid) {
+                for (List<Tile> row : tileGrid.grid) {
                     for (Tile t : row) {
                         // Tiles' sizes are relative to their container's size.
                         tileSprites.get(t).setDims(tileWidth, tileHeight);
