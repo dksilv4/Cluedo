@@ -1,18 +1,22 @@
 package code;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Player {
-    private String name;
-    private PlayerPiece playerPiece;
-    public Player(String name, PlayerPiece playerPiece) {
+    private final String name;
+    private final List<Card> cards = new ArrayList<Card>();
+    public Player(String name) {
         this.name = name;
-        this.playerPiece = playerPiece;
     }
 
     public String getName(){
         return this.name;
     }
-
-    public PlayerPiece getPlayerPiece(){
-        return this.playerPiece;
+    public void addCard(Card card){
+        this.cards.add(card);
+    }
+    public List<Card> getCards(){
+        return this.cards;
     }
 }

@@ -7,9 +7,9 @@ import java.util.List;
  * Room represents a room on a board
  */
 public class Room {
-    private String name;
-    private List<String> doors = new ArrayList<String>();
-    private List<Tile> tiles  = new ArrayList<Tile>();
+    private final String name;
+    private final List<String> doors = new ArrayList<String>();
+    private final List<Tile> tiles  = new ArrayList<Tile>();
     int size_x;
     int size_y;
 

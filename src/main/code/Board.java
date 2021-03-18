@@ -6,13 +6,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import code.PlayerPiece;
+
 /**
  * Board represents a game board
  */
 public class Board {
-    private String board_data;
-    private Grid grid;
+    private final String board_data;
+    private final Grid grid;
     private List<List<Object>> board_data_list;
+    private List<Room> rooms;
 
     /**
      * Constructs and initializes a Board
@@ -27,9 +30,33 @@ public class Board {
         this.getRoomDoors(board_data_list);
         this.cleanBoardData();
         this.placeRooms();
+        this.rooms = this.getRooms();
+
+
+
     }
 
-    public List<List<Object>> getBoardDataList(){
+    public List<Tile> getSpawns(){
+        Room room = this.getRoom("X");
+        return room.getTiles();
+    }
+
+    public Room getRoom(String roomName) {
+        for (Room room : this.rooms) {
+            if (room.getName().equals(roomName)) {
+                return room;
+            }
+        }
+        throw new RoomNotFoundException(roomName);
+    }
+
+
+    /**
+     * Returns board_data_list of the object
+     *
+     * @return List<List < Object>> board_data_list
+     */
+    public List<List<Object>> getBoardDataList() {
         return this.board_data_list;
     }
 
@@ -42,10 +69,21 @@ public class Board {
         Board board = new Board();
     }
 
-    public Grid getGrid(){
+    /**
+     * Returns grid of the object
+     *
+     * @return Grid object
+     */
+    public Grid getGrid() {
         return this.grid;
     }
 
+    /**
+     * Returns rooms in a row
+     *
+     * @param row
+     * @return List<Room>
+     */
     public List<Room> getRowRooms(List<Object> row) {
         List<Room> rooms = new ArrayList<Room>();
         for (int x = 0; x < row.size(); x++) {
@@ -59,7 +97,7 @@ public class Board {
     }
 
     /**
-     * @return a list of all rooms in the baord.
+     * @return a list of all rooms in the board.
      */
     public List<Room> getRooms() {
         System.out.println("GET ROOMS");
@@ -76,6 +114,16 @@ public class Board {
         return rooms;
     }
 
+    public void setRooms(List<Room> rooms){
+        this.rooms = rooms;
+    }
+
+    /**
+     * Returns spaces in a row
+     *
+     * @param row
+     * @return List<Space>
+     */
     public List<Space> getRowSpaces(List<Object> row) {
         List<Space> spaces = new ArrayList<Space>();
         for (int x = 0; x < row.size(); x++) {
@@ -88,6 +136,9 @@ public class Board {
         return spaces;
     }
 
+    /**
+     * Place rooms on a board
+     */
     public void placeRooms() {
         System.out.println(this.board_data_list);
         int y_size = 0;
@@ -175,6 +226,12 @@ public class Board {
         this.grid.print();
     }
 
+    public void placePlayerPieces(List<PlayerPiece> playerPieces) {
+        for (PlayerPiece playerPiece : playerPieces) {
+
+        }
+    }
+
     /**
      * Lexes a Board
      *
@@ -188,7 +245,7 @@ public class Board {
             List<Object> col_list = new ArrayList<Object>();
             for (String obj : d) {
                 if (String.valueOf(obj.charAt(0)).equals("R")) {
-                    JSONObject j = (JSONObject) ((JSONObject) ((JSONObject) data.getJsonData().get("OriginalBoard")).get("Rooms")).get(obj.substring(1, obj.length()));
+                    JSONObject j = (JSONObject) ((JSONObject) ((JSONObject) data.getJsonData().get("OriginalBoard")).get("Rooms")).get(obj.substring(1));
                     String name = (String) j.get("name");
                     List<String> size = Arrays.asList(((String) j.get("size")).split("x"));
                     int x = Integer.parseInt(size.get(1));
@@ -233,7 +290,7 @@ public class Board {
         for (List<Object> row : this.board_data_list) {
             List<Object> new_row = new ArrayList<Object>();
             for (Object obj : row) {
-                if (!(obj instanceof Door)&& !(obj instanceof List)) {
+                if (!(obj instanceof Door) && !(obj instanceof List)) {
                     if (obj instanceof Space) {
                         if (new_row.size() > 0) {
                             Object lastAdded = new_row.get(new_row.size() - 1);
@@ -282,7 +339,7 @@ public class Board {
     /**
      * @param board
      */
-    public void getRoomDoors(List<List<Object>> board){
+    public void getRoomDoors(List<List<Object>> board) {
         for (int i = 1; i < board.size(); i++) {
             List<Object> row = board.get(i);
             for (int x = 0; x < row.size(); x++) {
@@ -299,7 +356,7 @@ public class Board {
                             }
                         }
                     }
-                    if (i != board.size() - 1 && x != row.size() ) {
+                    if (i != board.size() - 1 && x != row.size()) {
                         Object below_obj = board.get(i + 1).get(x);
                         if (below_obj instanceof Door) {
                             ((Room) obj).addDoor("B");

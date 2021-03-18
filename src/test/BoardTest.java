@@ -1,5 +1,3 @@
-
-
 import code.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +11,7 @@ public class BoardTest {
     List<Object> row = new ArrayList<Object>();
     Board board = new Board();
     List<List<Object>> lexedBoard = this.board.Lexer();
+    List<Room> rooms = new ArrayList<Room>();
 
 
     @Before
@@ -30,7 +29,23 @@ public class BoardTest {
         row.add(roomB);
         row.add(spaceA);
         row.add(spaceB);
+        this.rooms.add(room);
+        this.rooms.add(roomB);
 
+    }
+
+    @Test
+    public void testGetRoom(){
+        this.board.setRooms(this.rooms);
+        assertEquals(this.rooms.get(0), this.board.getRoom("Hayden"));
+        assertEquals(this.rooms.get(1), this.board.getRoom("Diogo"));
+    }
+
+    @Test (expected = RoomNotFoundException.class)
+    public void testNoRoomError(){
+        this.board.setRooms(this.rooms);
+        assertEquals(this.rooms.get(0), this.board.getRoom("Haden"));
+        assertEquals(this.rooms.get(1), this.board.getRoom("Dogo"));
     }
 
     @Test

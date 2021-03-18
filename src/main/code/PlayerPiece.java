@@ -1,29 +1,20 @@
 package code;
 
-public class PlayerPiece {
-    /**
-     * PlayerPiece represents a player's piece
-     */
-    private String name;
+public class PlayerPiece extends Piece{
 
     /**
-     * Constructs a PlayerPiece with a name
-     * @param name a name string
+     *
      */
+    private Tile location;
     public PlayerPiece(String name){
-        this.name = name;
+        super(name);
     }
 
-    /**
-     * Returns a name of a PlayerPiece as a string
-     * @return "PlayerPiece: " + name
-     */
-    public String toString(){
-        return "PlayerPiece: "+this.name;
+    public Tile getLocation() {
+        return location;
     }
 
-    public String getName(){
-        return this.name;
+    public void setLocation(Tile location) {
+        this.location = location;
     }
-
 }

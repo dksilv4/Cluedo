@@ -49,7 +49,7 @@ public class RoomTest {
 
     @Test
     public void testToString() {
-    assertEquals("\u001B[32m" + this.room.getName().charAt(0) + "\u001B[0m", this.room.toString());
+        assertEquals("\u001B[32m" + this.room.getName().charAt(0) + "\u001B[0m", this.room.toString());
     }
 
     @Test
