@@ -1,6 +1,6 @@
-package CluedoTest;
 
-import Cluedo.Door;
+
+import code.Door;
 import org.junit.Before;
 import org.junit.Test;
 

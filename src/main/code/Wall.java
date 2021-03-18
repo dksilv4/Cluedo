@@ -1,4 +1,4 @@
-package Cluedo;
+package code;
 
 public class Wall extends Tile{
     /**

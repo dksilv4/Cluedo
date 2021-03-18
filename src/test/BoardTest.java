@@ -1,6 +1,6 @@
 
 
-import Cluedo.*;
+import code.*;
 import org.junit.Before;
 import org.junit.Test;
 

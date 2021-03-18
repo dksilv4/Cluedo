@@ -1,4 +1,4 @@
-package Cluedo;
+package code;
 
 public class Border extends Tile{
     /**

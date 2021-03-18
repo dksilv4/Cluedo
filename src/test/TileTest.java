@@ -1,7 +1,7 @@
-package CluedoTest;
 
-import Cluedo.Tile;
-import Cluedo.Room;
+
+import code.Tile;
+import code.Room;
 import org.junit.Before;
 import org.junit.Test;
 

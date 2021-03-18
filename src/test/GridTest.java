@@ -1,6 +1,6 @@
-package CluedoTest;
 
-import Cluedo.*;
+
+import code.*;
 import com.sun.org.apache.xpath.internal.axes.AxesWalker;
 import org.junit.Before;
 import org.junit.Test;

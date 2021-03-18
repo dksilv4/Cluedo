@@ -1,9 +1,9 @@
-package CluedoTest;
 
-import Cluedo.Door;
-import Cluedo.InvalidRoomNameException;
-import Cluedo.Room;
-import Cluedo.Tile;
+
+import code.Door;
+import code.InvalidRoomNameException;
+import code.Room;
+import code.Tile;
 import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;

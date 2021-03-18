@@ -1,7 +1,7 @@
-package CluedoTest;
 
-import Cluedo.Player;
-import Cluedo.PlayerPiece;
+
+import code.Player;
+import code.PlayerPiece;
 import org.junit.Before;
 import org.junit.Test;
 
