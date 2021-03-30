@@ -1,10 +1,19 @@
 {
-  "PlayerPieces": {
-    "0": "Col Mustard",
+  "Turns": {
+    "0": "Miss Scarlett",
+    "1": "",
+    "2": "",
+    "3": "",
+    "4": "",
+    "5": ""
+  },
+
+  "Suspects": {
+    "0": "Miss Scarlett",
     "1": "Prof Plum",
     "2": "Rev Green",
     "3": "Mrs Peacock",
-    "4": "Miss Scarlett",
+    "4": "Col Mustard",
     "5": "Mrs White"
   },
   "Weapons": {

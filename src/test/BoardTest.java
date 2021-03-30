@@ -35,6 +35,23 @@ public class BoardTest {
     }
 
     @Test
+    public void testGetSpawns(){
+        this.board.placeRooms();
+        assertEquals(this.board.getRoom("X").getTiles(), this.board.getSpawns());
+    }
+
+    @Test
+    public void testGetBoardDataList(){
+
+    }
+
+    @Test
+    public void testGetGrid(){
+        assertEquals(28, this.board.getGrid().getRows());
+        assertEquals(24, this.board.getGrid().getColumns());
+    }
+
+    @Test
     public void testGetRoom(){
         this.board.setRooms(this.rooms);
         assertEquals(this.rooms.get(0), this.board.getRoom("Hayden"));

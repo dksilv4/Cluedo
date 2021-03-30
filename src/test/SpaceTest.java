@@ -1,6 +1,6 @@
-package CluedoTest;
 
-import Cluedo.Space;
+
+import code.Space;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
