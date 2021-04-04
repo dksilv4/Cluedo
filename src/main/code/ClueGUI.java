@@ -21,6 +21,11 @@ import java.util.List;
  */
 public class ClueGUI extends Application {
 
+    private double DEFAULT_TILE_SIZE = 30;
+
+    private static String CURR_DIR = Paths.get("").toAbsolutePath()
+            .toString();
+
     private static Image PATH_TILE_IMG;
     private static Image ROOM_IMG;
     private static Image WALL_IMG;
@@ -28,7 +33,7 @@ public class ClueGUI extends Application {
     private static Image DEFAULT_IMG;
 
     public ClueGUI() throws FileNotFoundException {
-        initialiseImages();
+        initTileImgs();
     }
 
     public static void main(String[] args) {
@@ -36,32 +41,44 @@ public class ClueGUI extends Application {
     }
 
     @Override
-    public void start(Stage theStage) {
-        Cluedo model = new Cluedo();
-        Board gameBoard = model.getBoard();
+    public void start(Stage theStage) throws FileNotFoundException {
+        Cluedo gameModel = new Cluedo();
+        Board gameBoard = gameModel.getBoard();
         Grid boardTiles = gameBoard.getGrid();
 
-        // Set-up scene and generate sprites from tiles in game board.
+        // Set-up scene and generate sprites.
         Pane gameBoardCanvas = initialiseGUI(theStage);
         HashMap<Tile, Sprite> tileSprites = generateTileSprites(boardTiles,
                 gameBoardCanvas);
+        HashMap<PlayerPiece, Sprite> playerPieceSprites =
+                generatePlayerPieceSprites(gameModel.getPlayerPieces(),
+                        gameBoardCanvas);
+
+        for(PlayerPiece p : gameModel.getPlayerPieces()) {
+            System.out.println(p.getLocation().getColumn() + ", " + p.getLocation().getRow());
+        }
 
         /* --- Main game loop. --- */
         new AnimationTimer() {
             public void handle(long currentTime) {
-
-                // Render tiles.
+                // Set tile size to be relative to container size, magic number
+                // scaling, not nice but works.
                 double tileHeight = gameBoardCanvas.getHeight() * 0.03575;
                 double tileWidth = gameBoardCanvas.getWidth() * 0.04175;
+
+                // Render tiles.
                 for (List<Tile> row : boardTiles.getGrid()) {
                     for (Tile t : row) {
-                        // Tiles' sizes are relative to their container's size.
                         tileSprites.get(t).setDims(tileWidth, tileHeight);
-
-                        // Render tiles.
                         double x = t.getColumn() * tileWidth;
                         double y = t.getRow() * tileHeight;
                         renderSprite(tileSprites.get(t), x, y);
+
+                        // Render Player Pieces.
+                        if (t.isOccupied()) {
+                            playerPieceSprites.get(t.getOccupier()).setDims(tileWidth, tileHeight);
+                            renderSprite(playerPieceSprites.get(t.getOccupier()), x, y);
+                        }
                     }
                 }
 
@@ -115,10 +132,9 @@ public class ClueGUI extends Application {
         for (List<Tile> row : boardTiles.getGrid()) {
             for (Tile t : row) {
                 // Tiles are square by default.
-                double defaultTileSize = 30;
-                Sprite s = new Sprite(DEFAULT_IMG, defaultTileSize,
-                        defaultTileSize, t.getColumn() * defaultTileSize,
-                        t.getRow() * defaultTileSize);
+                Sprite s = new Sprite(DEFAULT_IMG, DEFAULT_TILE_SIZE,
+                        DEFAULT_TILE_SIZE, t.getColumn() * DEFAULT_TILE_SIZE,
+                        t.getRow() * DEFAULT_TILE_SIZE);
 
                 // Set Sprite images based om their types.
                 switch (t.getType()) {
@@ -148,6 +164,7 @@ public class ClueGUI extends Application {
         return tileSprites;
     }
 
+
     /**
      * Renders a given Sprite on the GUI.
      *
@@ -165,11 +182,9 @@ public class ClueGUI extends Application {
      * @throws FileNotFoundException If method fails to generate
      *                               FileInputStreams for images to load.
      */
-    private static void initialiseImages() throws FileNotFoundException {
-        // Get the current directory and find the images directory relative to
-        // the current directory.
-        String currentDir = Paths.get("").toAbsolutePath().toString();
-        String imagesDir = Paths.get(currentDir,
+    private static void initTileImgs() throws FileNotFoundException {
+        // Find the images directory relative to the current directory.
+        String imagesDir = Paths.get(CURR_DIR,
                 "\\src\\main\\resources\\images")
                 .toAbsolutePath().toString();
 
@@ -197,5 +212,48 @@ public class ClueGUI extends Application {
         WALL_IMG = new Image(wallIS);
         DOOR_IMG = new Image(doorIS);
         DEFAULT_IMG = new Image(defaultIS);
+    }
+
+    private HashMap<String, Image> initPlayerPieceImgs(List<PlayerPiece> playerPieceList)
+            throws FileNotFoundException {
+        HashMap<String, Image> playerPieceImages = new HashMap<>();
+
+        // Find the images directory relative to the current directory.
+        String imagesDir = Paths.get(CURR_DIR,
+                "\\src\\main\\resources\\images")
+                .toAbsolutePath().toString();
+
+        // Retrieve images for each Player Piece taking part in the game.
+        for (PlayerPiece p : playerPieceList) {
+            String playerPieceName = p.getName().replaceAll("\\s+","");
+            String imFileName = "playerPiece_" + playerPieceName + ".png";
+
+            // Get image for current Player Piece and store in hashmap.
+            String playerPieceImgPath = Paths.get(imagesDir, imFileName)
+                    .toAbsolutePath().toString();
+            FileInputStream playerPieceIS = new FileInputStream(playerPieceImgPath);
+            Image playerPieceImg = new Image(playerPieceIS);
+
+            playerPieceImages.put(p.getName(), playerPieceImg);
+        }
+
+        return playerPieceImages;
+    }
+
+    private HashMap<PlayerPiece, Sprite> generatePlayerPieceSprites(List<PlayerPiece> playerPieces, Pane gameBoardCanvas) throws FileNotFoundException {
+        HashMap<String, Image> playerPieceImages = initPlayerPieceImgs(playerPieces);
+        HashMap<PlayerPiece, Sprite> playerPieceSprites = new HashMap<>();
+
+        for (PlayerPiece pp : playerPieces) {
+            Sprite s = new Sprite(playerPieceImages.get(pp.getName()),
+                    DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE,
+                    pp.getLocation().getColumn() * DEFAULT_TILE_SIZE,
+                    pp.getLocation().getRow() * DEFAULT_TILE_SIZE);
+
+            gameBoardCanvas.getChildren().add(s.getImView());
+            playerPieceSprites.put(pp, s);
+        }
+
+        return playerPieceSprites;
     }
 }
