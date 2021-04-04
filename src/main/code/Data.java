@@ -87,8 +87,8 @@ public class Data {
      *
      * @param args
      */
-    public static void main(String[] args) {
-        Data data = new Data("data.json");
-    }
+//    public static void main(String[] args) {
+//        Data data = new Data("data.json");
+//    }
 
 }

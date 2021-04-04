@@ -43,6 +43,10 @@ public class Cluedo {
         return this.playerPieces;
     }
 
+    public Board getBoard() {
+        return this.board;
+    }
+
     /**
      * Assign the player pieces to the players.
      * Takes in playerHash which is a hashmap that contains all the players and the number they got from rolling the dice.
@@ -315,9 +319,9 @@ public class Cluedo {
         this.roomCards = roomCards;
     }
 
-    public static void main(String[] args) {
-        Cluedo cluedo = new Cluedo();
-    }
+//    public static void main(String[] args) {
+//        Cluedo cluedo = new Cluedo();
+//    }
 
     /**
      * @return weaponPieces

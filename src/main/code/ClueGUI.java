@@ -9,7 +9,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.*;
@@ -38,7 +37,8 @@ public class ClueGUI extends Application {
 
     @Override
     public void start(Stage theStage) {
-        Board gameBoard = new Board();
+        Cluedo model = new Cluedo();
+        Board gameBoard = model.getBoard();
         Grid boardTiles = gameBoard.getGrid();
 
         // Set-up scene and generate sprites from tiles in game board.
