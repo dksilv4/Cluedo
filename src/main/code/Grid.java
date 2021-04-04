@@ -101,13 +101,18 @@ public class Grid {
             for (int y = start_column; y < total_y; y++) {
                 if ((x == start_row || y == start_column || x == total_x - 1 || y == total_y - 1) && !room.getName().equals("X")) {
                     this.addWallTile(x, y);
+                    room.addTile(this.getTile(x,y));
                 }
                 else{
                     Tile tile = this.getTile(x, y);
                     tile.setBelongsTo(room);
                     tile.setType("room");
                 }
-                room.addTile(this.getTile(x, y));
+//                if(room.getName().equals("X")){
+//                    System.out.println("{XXXXXXXXXXXXXX");
+//                    System.out.println(x+y);
+//                }
+//                room.addTile(this.getTile(x, y));
             }
         }
         this.addRoomDoors(room, start_row, start_column);

@@ -9,7 +9,7 @@ public class Tile {
     private Room belongsTo;
     private int row;
     private int column;
-    private boolean isOccupied;
+    private PlayerPiece occupier= null;
 
     /**
      * Constructs a Tile
@@ -22,21 +22,25 @@ public class Tile {
         this.row = row;
         this.column = column;
     }
+    public void setOccupier(PlayerPiece occupier){
+        this.occupier = occupier;
 
+    }
+
+    public PlayerPiece getOccupier(){
+        return this.occupier;
+    }
     /**
      * Checks if a Tile is occupied
      * @return boolean
      */
     public boolean isOccupied() {
-        return isOccupied;
-    }
-
-    /**
-     * Sets whether a Tile is occupied or not
-     * @param isOccupied boolean
-     */
-    public void setOccupied(boolean isOccupied) {
-        this.isOccupied = isOccupied;
+        if(this.occupier != null){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     /**
@@ -68,6 +72,8 @@ public class Tile {
      */
     public void setBelongsTo(Room room){
         this.belongsTo = room;
+        room.addTile(this);
+        System.out.println(room.getTiles());
     }
 
     /**
@@ -89,11 +95,16 @@ public class Tile {
         this.type = type;
     }
     public String toString(){
-        switch (type){
-            case "room":
-                return belongsTo.toString();
-            default:
-                return "x";
+        if(this.isOccupied()){
+            return this.occupier.toString();
+        }
+        else{
+            switch (type){
+                case "room":
+                    return belongsTo.toString();
+                default:
+                    return "x";
+            }
         }
     }
 //    public String toString(){

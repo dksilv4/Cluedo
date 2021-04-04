@@ -2,7 +2,7 @@ package code;
 
 public class Border extends Tile{
     /**
-     * Constructs a Tile
+     * Constructs a Tile that represents a border, players cannot interact with this tile.
      *
      * @param row    the number of row
      * @param column the number of column
