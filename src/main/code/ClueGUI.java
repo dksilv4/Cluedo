@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
@@ -22,19 +23,8 @@ import java.util.List;
 public class ClueGUI extends Application {
 
     private double DEFAULT_TILE_SIZE = 30;
-
     private static String CURR_DIR = Paths.get("").toAbsolutePath()
             .toString();
-
-    private static Image PATH_TILE_IMG;
-    private static Image ROOM_IMG;
-    private static Image WALL_IMG;
-    private static Image DOOR_IMG;
-    private static Image DEFAULT_IMG;
-
-    public ClueGUI() throws FileNotFoundException {
-        initTileImgs();
-    }
 
     public static void main(String[] args) {
         launch(args);
@@ -54,10 +44,6 @@ public class ClueGUI extends Application {
                 generatePlayerPieceSprites(gameModel.getPlayerPieces(),
                         gameBoardCanvas);
 
-        for(PlayerPiece p : gameModel.getPlayerPieces()) {
-            System.out.println(p.getLocation().getColumn() + ", " + p.getLocation().getRow());
-        }
-
         /* --- Main game loop. --- */
         new AnimationTimer() {
             public void handle(long currentTime) {
@@ -76,12 +62,13 @@ public class ClueGUI extends Application {
 
                         // Render Player Pieces.
                         if (t.isOccupied()) {
-                            playerPieceSprites.get(t.getOccupier()).setDims(tileWidth, tileHeight);
-                            renderSprite(playerPieceSprites.get(t.getOccupier()), x, y);
+                            playerPieceSprites.get(t.getOccupier())
+                                    .setDims(tileWidth, tileHeight);
+                            renderSprite(playerPieceSprites
+                                    .get(t.getOccupier()), x, y);
                         }
                     }
                 }
-
             }
         }.start();
 
@@ -99,6 +86,7 @@ public class ClueGUI extends Application {
         // later hold turn relevant stuff, dice, detective cards etc.)
         BorderPane root = new BorderPane();
         Scene theScene = new Scene(root); // Outer container (below stage).
+
         Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
 
         root.setCenter(gameBoardCanvas);
@@ -119,12 +107,14 @@ public class ClueGUI extends Application {
      * Iterates over tiles in the game board and generates a corresponding
      * Sprite to represent each one in the GUI.
      *
-     * @param boardTiles        The Model from which the GUI is rendered
-     * @param gameBoardCanvas   The node to which the GUI renders the game board
+     * @param boardTiles      The Model from which the GUI is rendered
+     * @param gameBoardCanvas The node to which the GUI renders the game board
      * @return A hashmap which maps tiles to Sprites
      */
     private HashMap<Tile, Sprite> generateTileSprites(Grid boardTiles,
-                                                      Pane gameBoardCanvas) {
+                                                      Pane gameBoardCanvas)
+            throws FileNotFoundException {
+        HashMap<String, Image> tileImages = initTileImgs();
         HashMap<Tile, Sprite> tileSprites = new HashMap<>();
 
         // Iterate over all tiles and generate a Sprite for each one according
@@ -132,28 +122,10 @@ public class ClueGUI extends Application {
         for (List<Tile> row : boardTiles.getGrid()) {
             for (Tile t : row) {
                 // Tiles are square by default.
-                Sprite s = new Sprite(DEFAULT_IMG, DEFAULT_TILE_SIZE,
-                        DEFAULT_TILE_SIZE, t.getColumn() * DEFAULT_TILE_SIZE,
+                Sprite s = new Sprite(tileImages.get(t.getType()),
+                        DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE,
+                        t.getColumn() * DEFAULT_TILE_SIZE,
                         t.getRow() * DEFAULT_TILE_SIZE);
-
-                // Set Sprite images based om their types.
-                switch (t.getType()) {
-                    case "door":
-                        s.setImage(DOOR_IMG);
-                        break;
-                    case "space":
-                        s.setImage(PATH_TILE_IMG);
-                        break;
-                    case "room":
-                        s.setImage(ROOM_IMG);
-                        break;
-                    case "wall":
-                        s.setImage(WALL_IMG);
-                        break;
-                    default:
-                        s.setImage(DEFAULT_IMG);
-                        break;
-                }
 
                 // Add the Sprite's ImageView to the rendering node and the
                 // Sprite to the Sprite collection.
@@ -182,36 +154,26 @@ public class ClueGUI extends Application {
      * @throws FileNotFoundException If method fails to generate
      *                               FileInputStreams for images to load.
      */
-    private static void initTileImgs() throws FileNotFoundException {
+    private HashMap<String, Image> initTileImgs() throws FileNotFoundException {
+        List<String> tileTypeNames =
+                new ArrayList<>(Arrays.asList("door", "space", "room", "wall"));
+        HashMap<String, Image> tileImages = new HashMap<>();
+
         // Find the images directory relative to the current directory.
         String imagesDir = Paths.get(CURR_DIR,
                 "\\src\\main\\resources\\images")
                 .toAbsolutePath().toString();
 
-        // Set image paths for all images.
-        String doorImgPath = Paths.get(imagesDir, "door.png")
-                .toAbsolutePath().toString();
-        String floorImgPath = Paths.get(imagesDir, "floor.png")
-                .toAbsolutePath().toString();
-        String roomImgPath = Paths.get(imagesDir, "room.png")
-                .toAbsolutePath().toString();
-        String wallImgPath = Paths.get(imagesDir, "wall.png")
-                .toAbsolutePath().toString();
-        String defaultImgPath = Paths.get(imagesDir, "debug.png")
-                .toAbsolutePath().toString();
+        // Retrieve all images and store them in hashmap, keyed by their type.
+        for (String tType : tileTypeNames) {
+            String tileImgPath = Paths.get(imagesDir, tType + ".png")
+                    .toAbsolutePath().toString();
+            FileInputStream imgIS = new FileInputStream(tileImgPath);
+            Image tileImg = new Image(imgIS);
+            tileImages.put(tType, tileImg);
+        }
 
-        // Initialise images.
-        FileInputStream doorIS = new FileInputStream(doorImgPath);
-        FileInputStream floorIS = new FileInputStream(floorImgPath);
-        FileInputStream roomIS = new FileInputStream(roomImgPath);
-        FileInputStream wallIS = new FileInputStream(wallImgPath);
-        FileInputStream defaultIS = new FileInputStream(defaultImgPath);
-
-        PATH_TILE_IMG = new Image(floorIS);
-        ROOM_IMG = new Image(roomIS);
-        WALL_IMG = new Image(wallIS);
-        DOOR_IMG = new Image(doorIS);
-        DEFAULT_IMG = new Image(defaultIS);
+        return tileImages;
     }
 
     private HashMap<String, Image> initPlayerPieceImgs(List<PlayerPiece> playerPieceList)
@@ -225,7 +187,7 @@ public class ClueGUI extends Application {
 
         // Retrieve images for each Player Piece taking part in the game.
         for (PlayerPiece p : playerPieceList) {
-            String playerPieceName = p.getName().replaceAll("\\s+","");
+            String playerPieceName = p.getName().replaceAll("\\s+", "");
             String imFileName = "playerPiece_" + playerPieceName + ".png";
 
             // Get image for current Player Piece and store in hashmap.
