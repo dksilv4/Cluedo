@@ -4,8 +4,10 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -87,8 +89,15 @@ public class ClueGUI extends Application {
         Scene theScene = new Scene(root);
 
         Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
+        HBox turnIndicatorContainer = new HBox();
+
+        // Test
+        Button test1 = new Button("test left");
+        Button test2 = new Button("test right");
+        turnIndicatorContainer.getChildren().addAll(test1, test2);
 
         root.setCenter(gameBoardCanvas);
+        root.setTop(turnIndicatorContainer);
         BorderPane.setAlignment(gameBoardCanvas, Pos.CENTER);
 
         theStage.setHeight(512);
@@ -116,8 +125,7 @@ public class ClueGUI extends Application {
         HashMap<String, Image> tileImages = initTileImgs();
         HashMap<Tile, Sprite> tileSprites = new HashMap<>();
 
-        // Iterate over all tiles and generate a Sprite for each one according
-        // to the tile's type.
+        // Iterate over all tiles and generate a Sprite for each one.
         for (List<Tile> row : boardTiles.getGrid()) {
             for (Tile t : row) {
                 // Tiles are square by default.
@@ -126,8 +134,6 @@ public class ClueGUI extends Application {
                         t.getColumn() * DEFAULT_TILE_SIZE,
                         t.getRow() * DEFAULT_TILE_SIZE);
 
-                // Add the Sprite's ImageView to the rendering node and the
-                // Sprite to the Sprite collection.
                 gameBoardCanvas.getChildren().add(s.getImView());
                 tileSprites.put(t, s);
             }
@@ -163,7 +169,8 @@ public class ClueGUI extends Application {
         return tileImages;
     }
 
-    private HashMap<String, Image> initPlayerPieceImgs(List<PlayerPiece> playerPieceList)
+    private HashMap<String, Image> initPlayerPieceImgs(
+            List<PlayerPiece> playerPieceList)
             throws FileNotFoundException {
         HashMap<String, Image> playerPieceImages = new HashMap<>();
 
@@ -189,10 +196,13 @@ public class ClueGUI extends Application {
         return playerPieceImages;
     }
 
-    private HashMap<PlayerPiece, Sprite> generatePlayerPieceSprites(List<PlayerPiece> playerPieces, Pane gameBoardCanvas) throws FileNotFoundException {
+    private HashMap<PlayerPiece, Sprite> generatePlayerPieceSprites(
+            List<PlayerPiece> playerPieces, Pane gameBoardCanvas)
+            throws FileNotFoundException {
         HashMap<String, Image> playerPieceImages = initPlayerPieceImgs(playerPieces);
         HashMap<PlayerPiece, Sprite> playerPieceSprites = new HashMap<>();
 
+        // Iterate over player pieces and generate sprite for each one.
         for (PlayerPiece pp : playerPieces) {
             Sprite s = new Sprite(playerPieceImages.get(pp.getName()),
                     DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE,
