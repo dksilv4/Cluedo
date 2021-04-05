@@ -58,14 +58,13 @@ public class ClueGUI extends Application {
                         tileSprites.get(t).setDims(tileWidth, tileHeight);
                         double x = t.getColumn() * tileWidth;
                         double y = t.getRow() * tileHeight;
-                        renderSprite(tileSprites.get(t), x, y);
+                        tileSprites.get(t).render(x, y);
 
                         // Render Player Pieces.
                         if (t.isOccupied()) {
                             playerPieceSprites.get(t.getOccupier())
                                     .setDims(tileWidth, tileHeight);
-                            renderSprite(playerPieceSprites
-                                    .get(t.getOccupier()), x, y);
+                            tileSprites.get(t).render(x, y);
                         }
                     }
                 }
@@ -85,7 +84,7 @@ public class ClueGUI extends Application {
         // Main container for GUI (currently only holds board canvas but will
         // later hold turn relevant stuff, dice, detective cards etc.)
         BorderPane root = new BorderPane();
-        Scene theScene = new Scene(root); // Outer container (below stage).
+        Scene theScene = new Scene(root);
 
         Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
 
@@ -134,18 +133,6 @@ public class ClueGUI extends Application {
             }
         }
         return tileSprites;
-    }
-
-
-    /**
-     * Renders a given Sprite on the GUI.
-     *
-     * @param s Sprite to render
-     * @param x x-coordinate to render the Sprite at
-     * @param y y-coordinate to render the Sprite at
-     */
-    private void renderSprite(Sprite s, double x, double y) {
-        s.render(x, y);
     }
 
     /**
