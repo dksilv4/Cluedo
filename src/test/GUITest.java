@@ -19,13 +19,17 @@ public class GUITest {
 
     private List<String> tileTypeNames;
     private Cluedo gameModel;
-    List<PlayerPiece> playerPieceList;
+    private List<PlayerPiece> playerPieceList;
 
     @Before
     public void before() {
         tileTypeNames =
                 new ArrayList<>(Arrays.asList("door", "space", "room", "wall"));
         gameModel = new Cluedo();
+        gameModel.setUpPlayers();
+        gameModel.setUpCards();
+        gameModel.setSpawns();
+        gameModel.getPlayerTurnOrder();
         playerPieceList = gameModel.getPlayerPieces();
     }
 

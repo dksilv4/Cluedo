@@ -1,19 +1,20 @@
 package code;
 
-import com.sun.prism.paint.Color;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import java.awt.event.ActionEvent;
+import java.beans.EventHandler;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.*;
@@ -30,6 +31,7 @@ public class ClueGUI extends Application {
     private static String CURR_DIR = Paths.get("").toAbsolutePath()
             .toString();
     private BorderPane root;
+    private final String BCKGND_CLR = "#FEF9E7";
 
     public static void main(String[] args) {
         launch(args);
@@ -55,10 +57,6 @@ public class ClueGUI extends Application {
                 generatePlayersCardPanels(gameModel.getPlayers());
         HashMap<PlayerPiece, VBox> playerPieceDSlipPanels =
                 generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces());
-
-        Player p = gameModel.getPlayers().get(0);
-        root.setLeft(playerCardPanels.get(p));
-        root.setRight(playerPieceDSlipPanels.get(p.getPiece()));
 
         /* --- Main game loop. --- */
         new AnimationTimer() {
@@ -86,8 +84,15 @@ public class ClueGUI extends Application {
                     playerPieceSprites.get(pp).render(x, y);
                 }
 
-                // Render current player's detective slip.
+                Player currPlayer = gameModel.getPlayers().get(0);
+                // Render current player piece's detective slip.
+                root.setRight(playerPieceDSlipPanels.get(currPlayer.getPiece()));
 
+                // Render current player's cards.
+                root.setLeft(playerCardPanels.get(currPlayer));
+
+                // Update turn.
+                updateTurnIndicator(currPlayer);
             }
         }.start();
 
@@ -113,8 +118,8 @@ public class ClueGUI extends Application {
         root.setTop(turnIndicator);
         BorderPane.setAlignment(gameBoardCanvas, Pos.CENTER);
 
-        theStage.setHeight(512);
-        theStage.setWidth(512);
+        theStage.setHeight(576);
+        theStage.setWidth(720);
         theStage.setX(0);
         theStage.setY(0);
         theStage.sizeToScene();
@@ -143,8 +148,20 @@ public class ClueGUI extends Application {
                 .addAll(displayText, currentPlayersTurn);
         turnIndicator.setAlignment(Pos.CENTER);
         turnIndicator.setPadding(new Insets(10, 10, 10, 10));
+        turnIndicator.setStyle("-fx-background-color: " + BCKGND_CLR);
 
         return turnIndicator;
+    }
+
+    /**
+     * Updates the turn indicator to display the given player as being the
+     * current turn.
+     * @param currentPlayer
+     */
+    private void updateTurnIndicator(Player currentPlayer) {
+        HBox turnIndicator = (HBox) root.getTop();
+        ((Text)turnIndicator.getChildren().get(1))
+                .setText(currentPlayer.getPiece().getName());
     }
 
     /**
@@ -171,6 +188,7 @@ public class ClueGUI extends Application {
     private VBox generateDetectiveSlipPanel(PlayerPiece pp) {
         VBox dSlipPanel = new VBox();
         dSlipPanel.setPadding(new Insets(10, 10, 10, 10));
+        dSlipPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
 
         // Display who's detective slip this is.
         Text dSlipOwner = new Text(pp.getName() + "'s Detective Slip");
@@ -181,17 +199,24 @@ public class ClueGUI extends Application {
         DetectiveSlip dSlip = pp.getSlip();
         Iterator it = dSlip.getCards().entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry card = (Map.Entry) it.next();
+            Map.Entry dSlipEntry = (Map.Entry) it.next();
 
-            String cardName = ((Card) card.getKey()).getName();
-            String marked = card.getValue().toString();
+            Card card = (Card) dSlipEntry.getKey();
+            boolean marked = (Boolean) dSlipEntry.getValue();
 
             Pane spacer = new Pane(); // Enables full justification of nodes.
 
             HBox cardContainer = new HBox();
+            cardContainer.setSpacing(10);
             HBox.setHgrow(spacer, Priority.ALWAYS);
-            cardContainer.getChildren().addAll(new Text(cardName), spacer,
-                    new Text(marked));
+            CheckBox cardMarker = new CheckBox();
+            cardMarker.setOnMouseClicked(event -> {
+                dSlip.markSlip(card, true);
+                /* @ToDo: Make GUI update on click.*/
+            });
+
+            cardContainer.getChildren().addAll(new Text(card.getName()), spacer,
+                    new Text(Boolean.toString(marked)), cardMarker);
 
             dSlipPanel.getChildren().add(cardContainer);
 
@@ -242,6 +267,7 @@ public class ClueGUI extends Application {
     private VBox generateCardPanel(Player player) {
         VBox cardPanel = new VBox();
         cardPanel.setPadding(new Insets(10, 10, 10, 10));
+        cardPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
 
         // Display who's cards these are.
         Text cardsOwner = new Text(player.getName() + "'s Cards");
