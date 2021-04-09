@@ -1,5 +1,6 @@
 package code;
 
+import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -58,5 +59,13 @@ public class Sprite {
      */
     public ImageView getImView() {
         return imView;
+    }
+
+    @Override
+    public String toString() {
+        return "Sprite:"
+                + "\n  Pos {" + imView.getX() + ", " + imView.getY() + "}"
+                + "\n  Dims {" + imView.getFitHeight() + ", "
+                    + imView.getFitWidth() + "}";
     }
 }
