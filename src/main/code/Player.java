@@ -23,11 +23,17 @@ public class Player {
     }
     public void setPiece(PlayerPiece piece){
         this.piece = piece;
+        piece.setBelongsTo(this);
     }
     public PlayerPiece getPiece(){
         return this.piece;
     }
     public String toString(){
         return this.getName();
+    }
+    public void fillSlip(){
+        for(Card card: this.cards){
+            piece.getSlip().markSlip(card, true);
+        }
     }
 }

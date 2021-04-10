@@ -17,6 +17,10 @@ public class Board {
     private List<List<Object>> board_data_list;
     private List<Room> rooms;
 
+    public static void main(String[] args) {
+        Board board = new Board();
+    }
+
     /**
      * Constructs and initializes a Board
      */
@@ -30,7 +34,21 @@ public class Board {
         this.cleanBoardData();
         this.placeRooms();
         this.rooms = this.getRooms();
+        this.renderSecretPassages();
 
+
+    }
+
+    public void renderSecretPassages(){
+        // kitchen, conservatory, lounge, study
+        Room kitchen =this.getRoom("Kitchen");
+        kitchen.setSecretPassage(kitchen.getTiles().get((kitchen.getSizeX()*2-2)));
+        Room conservatory = this.getRoom("Conservatory");
+        conservatory.setSecretPassage(conservatory.getTiles().get((conservatory.getSizeX()*conservatory.getSizeY())-(conservatory.getSizeX()+2)));
+        Room lounge = this.getRoom("Lounge");
+        lounge.setSecretPassage(lounge.getTiles().get(lounge.getSizeX()+1));
+        Room study = this.getRoom("Study");
+        study.setSecretPassage(study.getTiles().get((study.getSizeX()*study.getSizeY())-(study.getSizeX()+2)));
 
     }
 

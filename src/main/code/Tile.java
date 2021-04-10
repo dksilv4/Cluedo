@@ -22,9 +22,13 @@ public class Tile {
         this.row = row;
         this.column = column;
     }
+
     public void setOccupier(PlayerPiece occupier){
         this.occupier = occupier;
+    }
 
+    public void removeOccupier(){
+        this.occupier = null;
     }
 
     public PlayerPiece getOccupier(){
@@ -41,6 +45,13 @@ public class Tile {
         else{
             return false;
         }
+    }
+
+    public boolean available() {
+        if(!this.getType().equals("wall") && !this.isOccupied()){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -100,10 +111,12 @@ public class Tile {
         }
         else{
             switch (type){
+                case "passage":
+                    return "\u001b[36mP\u001B[0m";
                 case "room":
                     return belongsTo.toString();
                 default:
-                    return "x";
+                    return "\u001b[30mx\u001B[0m";
             }
         }
     }

@@ -19,17 +19,17 @@ public class EnvelopeTest {
 
     @Test
     public void testGetRoom(){
-        assertEquals("Gotham", this.envelope.getRoom().getName());
+        assertEquals("c", this.envelope.getRoom().getName());
     }
 
     @Test
     public void testGetWeapon(){
-        assertEquals("Batman", this.envelope.getWeapon().getName());
+        assertEquals("b", this.envelope.getWeapon().getName());
     }
 
     @Test
     public void testGetSuspect(){
-        assertEquals("Diogo", this.envelope.getSuspect().getName());
+        assertEquals("a", this.envelope.getSuspect().getName());
     }
 
     @Test

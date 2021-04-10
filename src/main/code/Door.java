@@ -12,6 +12,9 @@ public class Door extends Tile{
     }
 
     public String toString(){
+        if(this.getOccupier()!=null){
+            return this.getOccupier().toString();
+        }
         return "\u001B[31md\u001B[0m";
     }
 }
