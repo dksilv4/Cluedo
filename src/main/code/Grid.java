@@ -63,6 +63,7 @@ public class Grid {
             System.out.println(row);
         }
         System.out.println("\n");
+
     }
 
     /**

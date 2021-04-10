@@ -10,6 +10,9 @@ public class Room {
     private final String name;
     private final List<String> doors = new ArrayList<String>();
     private final List<Tile> tiles  = new ArrayList<Tile>();
+    private WeaponPiece weaponPiece = null;
+    private boolean hasSecretPassage = false;
+    private Tile secretPassage;
     int size_x;
     int size_y;
 
@@ -20,8 +23,13 @@ public class Room {
     public Room(String name){
         this.name = name;
         this.checkName();
+    }
 
-
+    public void setWeaponPiece(WeaponPiece weaponPiece){
+        this.weaponPiece = weaponPiece;
+    }
+    public WeaponPiece getWeaponPiece(){
+        return this.weaponPiece;
     }
     public List<Tile> getTiles(){
         return this.tiles;
@@ -35,6 +43,12 @@ public class Room {
     public int getSizeX(){
         return this.size_x;
     }
+    public void setSecretPassage(Tile passage){
+        this.secretPassage = passage;
+        passage.setType("passage");
+        this.setHasSecretPassage(true);
+    }
+    public Tile getSecretPassage() { return this.secretPassage; }
 
     public int getSizeY(){
         return this.size_y;
@@ -86,4 +100,11 @@ public class Room {
         }
     }
 
+    public boolean isHasSecretPassage() {
+        return hasSecretPassage;
+    }
+
+    public void setHasSecretPassage(boolean hasSecretPassage) {
+        this.hasSecretPassage = hasSecretPassage;
+    }
 }
