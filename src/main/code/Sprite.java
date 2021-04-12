@@ -30,6 +30,23 @@ public class Sprite {
         imView.setImage(img);
     }
 
+    public void assignClickAction(Action action, Cluedo model, Tile t) {
+        switch (action) {
+            case Move:
+                imView.setOnMouseClicked(event -> {
+                    model.movePlayerPiece(t);
+                });
+                break;
+            case UsePassage:
+                imView.setOnMouseClicked(event -> {
+                    // @ToDo
+                });
+                break;
+            default:
+
+        }
+    }
+
     /**
      * Sets the dimensions of the Sprite.
      *

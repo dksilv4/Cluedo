@@ -1,5 +1,7 @@
 package code;
 
+import javafx.util.Pair;
+import org.hamcrest.core.Is;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -15,6 +17,10 @@ public class Cluedo {
     private final Board board = new Board();
     private Scanner sc = new Scanner(System.in);
     private Envelope envelope;
+    private Player currentPlayersTurn;
+    private List<Player> playerOrder;
+    private int turnIndicator; // This will iterate through playerOrder to indicate who's turn it is.
+    private int currentPlayersSteps;
 
     /**
      * Initializes Cluedo and loads all the necessary data to run the game
@@ -24,15 +30,67 @@ public class Cluedo {
             this.setUpPlayers();
             this.setUpCards();
             this.setSpawns();
-            this.getPlayerTurnOrder();
+            getPlayerTurnOrder();
+            playerOrder = this.getPlayerTurnOrder(players);
             this.fillDetectiveSlips();
             this.allocateWeapons();
+
+            turnIndicator = 0;
+            currentPlayersTurn = playerOrder.get(turnIndicator);
 
             //this.turn();
 //            for(Room room: this.board.getRooms()){
 //                System.out.println(room.getWeaponPiece());
 //            }
         }
+    }
+
+    // Moves the current player's player piece.
+    public void movePlayerPiece(Tile newTile) {
+        // Check if the target tile is a position that can be moved to.
+        PlayerPiece pp = currentPlayersTurn.getPiece();
+        int tileRow = pp.getLocation().getRow();
+        int tileCol = pp.getLocation().getColumn();
+        List<Pair<Integer, Integer>> neighbours = new ArrayList<>();
+
+        // Generate immediately adjacent tiles.
+        for (int row = tileRow - 1; row <= tileRow + 1; row++) {
+            if (row == tileRow || row > board.getGrid().getRows() ||
+            row < 0) {
+                continue;
+            }
+            neighbours.add(new Pair<>(row, tileCol));
+        }
+        for (int col = tileCol - 1; col <= tileCol + 1; col++) {
+            if (col == tileCol || col > board.getGrid().getColumns() ||
+                    col < 0) {
+                continue;
+            }
+            neighbours.add(new Pair<>(tileRow, col));
+        }
+
+        boolean canMove = neighbours.contains(new Pair<>(newTile.getRow(),
+                newTile.getColumn()));
+
+        if(canMove && currentPlayersSteps > 0) {
+            currentPlayersTurn.getPiece().getLocation().removeOccupier();
+            currentPlayersTurn.getPiece().setLocation(newTile);
+            currentPlayersSteps--;
+        }
+
+        if (currentPlayersSteps <= 0) {
+            incrementTurn();
+        }
+    }
+
+    public int getStepsLeft() {
+        return currentPlayersSteps;
+    }
+
+    private void incrementTurn() {
+        turnIndicator = (turnIndicator + 1) % playerOrder.size();
+        currentPlayersTurn = playerOrder.get(turnIndicator);
+        currentPlayersSteps = rollDice();
     }
 
     /**
@@ -42,7 +100,7 @@ public class Cluedo {
         boolean running = true;
         while (running) {
             for (PlayerPiece playerPiece : this.playerPieces) {
-                if(!playerPiece.isKicked()){
+                if (!playerPiece.isKicked()) {
                     playerPiece.setPlaying(true);
                     this.board.getGrid().print();
 
@@ -72,8 +130,7 @@ public class Cluedo {
                                 useSecretPassage(playerPiece.getLocation().getBelongsTo(), playerPiece);
                                 steps--;
                             }
-                        }
-                        else if (direction.equals("s")) {
+                        } else if (direction.equals("s")) {
                             steps = 0;
                             playerPiece.setPlaying(false);
                         }
@@ -96,7 +153,8 @@ public class Cluedo {
             running = false;
         }
     }
-    private RoomCard findRoomCard(String search){
+
+    private RoomCard findRoomCard(String search) {
         for (RoomCard card : this.getRoomCards()) {
             if (card.getName().toLowerCase().equals(search.toLowerCase())) {
                 return card;
@@ -104,57 +162,60 @@ public class Cluedo {
         }
         return null;
     }
-    public WeaponCard findWeaponCard(String search){
-        for (WeaponCard card : this.getWeaponCards()){
-            if (card.getName().toLowerCase().equals(search.toLowerCase())){
+
+    public WeaponCard findWeaponCard(String search) {
+        for (WeaponCard card : this.getWeaponCards()) {
+            if (card.getName().toLowerCase().equals(search.toLowerCase())) {
                 return card;
             }
         }
         return null;
     }
-    public SuspectCard findSuspectCard(String search){
-        for (SuspectCard card : this.getSuspectCards()){
-            if (card.getName().toLowerCase().equals(search.toLowerCase())){
+
+    public SuspectCard findSuspectCard(String search) {
+        for (SuspectCard card : this.getSuspectCards()) {
+            if (card.getName().toLowerCase().equals(search.toLowerCase())) {
                 return card;
             }
         }
         return null;
     }
-    public CardChoice getCardChoices(PlayerPiece playerPiece){
+
+    public CardChoice getCardChoices(PlayerPiece playerPiece) {
         System.out.println("Please select one of the following Rooms (Type in room name):");
         System.out.println(this.getRoomCards());
         boolean validCard = false;
         RoomCard roomCard = this.findRoomCard(sc.nextLine());
-        if(roomCard == null){
-            while(!validCard){
+        if (roomCard == null) {
+            while (!validCard) {
                 System.out.println("Invalid input! Please select one of the following Rooms (Type in room name):");
                 System.out.println(this.getRoomCards());
                 roomCard = this.findRoomCard(sc.nextLine());
-                if(roomCard!=null){
+                if (roomCard != null) {
                     validCard = true;
                 }
             }
         }
         validCard = false;
         WeaponCard weaponCard = this.findWeaponCard(sc.nextLine());
-        if(weaponCard == null){
-            while(!validCard){
+        if (weaponCard == null) {
+            while (!validCard) {
                 System.out.println("Invalid input! Please select one of the following weapons (Type in room name):");
                 System.out.println(this.getRoomCards());
                 weaponCard = this.findWeaponCard(sc.nextLine());
-                if(weaponCard!=null){
+                if (weaponCard != null) {
                     validCard = true;
                 }
             }
         }
         validCard = false;
         SuspectCard suspectCard = this.findSuspectCard(sc.nextLine());
-        if(suspectCard == null){
-            while(!validCard){
+        if (suspectCard == null) {
+            while (!validCard) {
                 System.out.println("Invalid input! Please select one of the following suspect (Type in room name):");
                 System.out.println(this.getRoomCards());
                 suspectCard = this.findSuspectCard(sc.nextLine());
-                if(suspectCard!=null){
+                if (suspectCard != null) {
                     validCard = true;
                 }
             }
@@ -162,8 +223,8 @@ public class Cluedo {
         return new CardChoice(playerPiece, roomCard, weaponCard, suspectCard);
 
 
-
     }
+
     public void verifySuggestion(CardChoice cardChoices) {
         RoomCard room = cardChoices.getRoom();
         WeaponCard weapon = cardChoices.getWeapon();
@@ -178,7 +239,7 @@ public class Cluedo {
                 Player player = piece.getBelongsTo();
                 List<Card> playerCards = player.getCards();
                 for (Card card : playerCards) {
-                    if (card instanceof RoomCard && card.equals(room)|| card instanceof WeaponCard && card.equals(weapon)||card instanceof SuspectCard && card.equals(suspect)) {
+                    if (card instanceof RoomCard && card.equals(room) || card instanceof WeaponCard && card.equals(weapon) || card instanceof SuspectCard && card.equals(suspect)) {
                         foundCards.add(card);
                     }
                 }
@@ -197,8 +258,8 @@ public class Cluedo {
         }
     }
 
-    public boolean makeAccusation(CardChoice cardChoice){
-        return (cardChoice.getRoom().equals(this.envelope.getRoom()) && cardChoice.getWeapon().equals(this.envelope.getWeapon())&& cardChoice.getSuspect().equals(this.envelope.getSuspect()));
+    public boolean makeAccusation(CardChoice cardChoice) {
+        return (cardChoice.getRoom().equals(this.envelope.getRoom()) && cardChoice.getWeapon().equals(this.envelope.getWeapon()) && cardChoice.getSuspect().equals(this.envelope.getSuspect()));
     }
 
     public void useSecretPassage(Room room, PlayerPiece playerPiece) {
@@ -338,6 +399,30 @@ public class Cluedo {
         this.assignPlayerPieces(turn);
     }
 
+    private List<Player> getPlayerTurnOrder(List<Player> players) {
+        Map<Integer, Player> playersDieRolls = new TreeMap<>(Collections.reverseOrder());
+        List<Player> turnOrder = new ArrayList<>();
+
+        for (Player p : players) {
+            int roll = rollDice();
+            playersDieRolls.put(roll, p);
+        }
+
+        for (Map.Entry<Integer, Player> entry : playersDieRolls.entrySet()) {
+            turnOrder.add(entry.getValue());
+        }
+
+        // Bit dodgey but repetedly gets the order until all players are added,
+        // this is to prevent when players roll the same number treeMap will ignore.
+        if (turnOrder.size() != players.size()) {
+            return getPlayerTurnOrder(players);
+        }
+
+        currentPlayersSteps = rollDice();
+
+        return turnOrder;
+    }
+
     /**
      * @return an integer that represents a roll of two die by the player
      */
@@ -410,6 +495,10 @@ public class Cluedo {
         }
     }
 
+    public Player getCurrentPlayersTurn() {
+        return this.currentPlayersTurn;
+    }
+
     /**
      * Function to run all the necessary functions to setUp the cards in the game in a specific order.
      */
@@ -430,7 +519,7 @@ public class Cluedo {
      * Makes the Murder Envelope and removes the cards put into the envelope from their individual lists.
      */
     public void setEnvelope() {
-       this.envelope = new Envelope(this.roomCards.get(0), this.weaponCards.get(0), this.suspectCards.get(0));
+        this.envelope = new Envelope(this.roomCards.get(0), this.weaponCards.get(0), this.suspectCards.get(0));
         this.roomCards.remove(0);
         this.weaponCards.remove(0);
         this.suspectCards.remove(0);

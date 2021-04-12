@@ -24,6 +24,10 @@ public class Grid {
         return this.columns;
     }
 
+    public Tile getTileAtPos(int row, int col) {
+        return grid.get(row).get(col);
+    }
+
     /**
      * Build a grid
      *

@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.Image;
@@ -13,9 +14,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import javax.rmi.CORBA.Tie;
-import java.awt.event.ActionEvent;
-import java.beans.EventHandler;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.*;
@@ -47,7 +45,7 @@ public class ClueGUI extends Application {
         // Set-up scene and generate sprites.
         Pane gameBoardCanvas = initialiseGUI(theStage);
         HashMap<Tile, Sprite> tileSprites = generateTileSprites(boardTiles,
-                gameBoardCanvas);
+                gameBoardCanvas, gameModel);
         HashMap<PlayerPiece, Sprite> playerPieceSprites =
                 generatePlayerPieceSprites(gameModel.getPlayerPieces(),
                         gameBoardCanvas);
@@ -60,8 +58,6 @@ public class ClueGUI extends Application {
                 generatePlayersCardPanels(gameModel.getPlayers());
         HashMap<PlayerPiece, VBox> playerPieceDSlipPanels =
                 generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces());
-
-        Random rand = new Random();
 
         /* --- Main game loop. --- */
         new AnimationTimer() {
@@ -81,13 +77,15 @@ public class ClueGUI extends Application {
                     }
                 }
 
-                // Render weapon pieces at the first available tile found in each room.
+                // Search the tiles of each room that has a weapon piece in it
+                // and choose the first available tile to render the weapon
+                // pieces at.
                 for (Room r : gameBoard.getRooms()) {
                     if (r.getWeaponPiece() != null) {
                         List<Tile> potentialWeapPlaces = new ArrayList<>();
                         for (Tile t : r.getTiles()) {
                             if (!t.isOccupied() && t != r.getSecretPassage() &&
-                            t.getType() != "wall") {
+                                    t.getType() != "wall") {
                                 potentialWeapPlaces.add(t);
                             }
                         }
@@ -108,7 +106,7 @@ public class ClueGUI extends Application {
                     playerPieceSprites.get(pp).render(x, y);
                 }
 
-                Player currPlayer = gameModel.getPlayers().get(0);
+                Player currPlayer = gameModel.getCurrentPlayersTurn();
                 // Render current player piece's detective slip.
                 root.setRight(playerPieceDSlipPanels.get(currPlayer.getPiece()));
 
@@ -116,7 +114,7 @@ public class ClueGUI extends Application {
                 root.setLeft(playerCardPanels.get(currPlayer));
 
                 // Update turn.
-                updateTurnIndicator(currPlayer);
+                updateTurnIndicator(currPlayer, gameModel);
             }
         }.start();
 
@@ -137,13 +135,13 @@ public class ClueGUI extends Application {
 
         Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
         HBox turnIndicator = initTurnIndicator();
+        VBox actionContainer = generateActionsPane();
 
         root.setCenter(gameBoardCanvas);
         root.setTop(turnIndicator);
+        root.setBottom(actionContainer);
         BorderPane.setAlignment(gameBoardCanvas, Pos.CENTER);
 
-        theStage.setHeight(576);
-        theStage.setWidth(720);
         theStage.setX(0);
         theStage.setY(0);
         theStage.sizeToScene();
@@ -165,8 +163,7 @@ public class ClueGUI extends Application {
         displayText.setFont(new Font(20));
 
         Text currentPlayersTurn = new Text("PLAYER_NAME");
-        currentPlayersTurn.setFont(new Font(20));
-        currentPlayersTurn.setStyle("-fx-fill: blue");
+        currentPlayersTurn.setFont(new Font(22));
 
         turnIndicator.getChildren()
                 .addAll(displayText, currentPlayersTurn);
@@ -180,19 +177,22 @@ public class ClueGUI extends Application {
     /**
      * Updates the turn indicator to display the given player as being the
      * current turn.
+     *
      * @param currentPlayer
      */
-    private void updateTurnIndicator(Player currentPlayer) {
+    private void updateTurnIndicator(Player currentPlayer, Cluedo model) {
         HBox turnIndicator = (HBox) root.getTop();
-        ((Text)turnIndicator.getChildren().get(1))
-                .setText(currentPlayer.getPiece().getName());
+        ((Text) turnIndicator.getChildren().get(1))
+                .setText(currentPlayer.getPiece().getName() +
+                        " (Steps Left: " + model.getStepsLeft() + ")");
     }
 
     /**
      * Generates containers which display detective slip contents for all
      * player pieces.
-     * @param playerPieces  Player pieces to generate containers for.
-     * @return              Collection of detective slip containers.
+     *
+     * @param playerPieces Player pieces to generate containers for.
+     * @return Collection of detective slip containers.
      */
     private HashMap<PlayerPiece, VBox> generateCharactersDetectiveSlipPanels(
             List<PlayerPiece> playerPieces) {
@@ -206,8 +206,9 @@ public class ClueGUI extends Application {
     /**
      * Creates and returns a container which displays the contents of the
      * given player piece's detective slip.
-     * @param pp    Player piece to generate container for.
-     * @return      Container representing detective slip.
+     *
+     * @param pp Player piece to generate a detective slip for.
+     * @return Container representing detective slip.
      */
     private VBox generateDetectiveSlipPanel(PlayerPiece pp) {
         VBox dSlipPanel = new VBox();
@@ -233,14 +234,24 @@ public class ClueGUI extends Application {
             HBox cardContainer = new HBox();
             cardContainer.setSpacing(10);
             HBox.setHgrow(spacer, Priority.ALWAYS);
-            CheckBox cardMarker = new CheckBox();
-            cardMarker.setOnMouseClicked(event -> {
-                dSlip.markSlip(card, true);
-                /* @ToDo: Make GUI update on click.*/
-            });
 
             cardContainer.getChildren().addAll(new Text(card.getName()), spacer,
-                    new Text(Boolean.toString(marked)), cardMarker);
+                    new Text(Boolean.toString(marked)));
+
+            // Don't add a checkbox for cards held by player.
+            if (pp.getBelongsTo() != null
+                    && !pp.getBelongsTo().getCards().contains(card)) {
+                CheckBox cardMarker = new CheckBox();
+                cardMarker.setOnMouseClicked(event -> {
+                    dSlip.markSlip(card, true);
+                    System.out.printf("Marked:  %s \n", card.getName());
+                    cardMarker.setDisable(true);
+                });
+
+                cardContainer.getChildren().add(cardMarker);
+            } else {
+                cardContainer.getChildren().add(new Pane());
+            }
 
             dSlipPanel.getChildren().add(cardContainer);
 
@@ -259,7 +270,7 @@ public class ClueGUI extends Application {
      * @return A hashmap which maps tiles to Sprites
      */
     private HashMap<Tile, Sprite> generateTileSprites(Grid boardTiles,
-                                                      Pane gameBoardCanvas)
+                              Pane gameBoardCanvas, Cluedo model)
             throws FileNotFoundException {
         HashMap<String, Image> tileImages = initTileImgs();
         HashMap<Tile, Sprite> tileSprites = new HashMap<>();
@@ -274,10 +285,24 @@ public class ClueGUI extends Application {
                         t.getRow() * DEFAULT_TILE_SIZE);
 
                 gameBoardCanvas.getChildren().add(s.getImView());
+                if (!t.getType().equals("wall") && !t.getType().equals("passage")) {
+                    s.assignClickAction(Action.Move, model, t);
+                }
+                if (t.getType().equals("passage")) {
+                    s.assignClickAction(Action.UsePassage, model, t);
+                }
                 tileSprites.put(t, s);
             }
         }
         return tileSprites;
+    }
+
+    private VBox generateActionsPane() {
+        VBox actionContainer = new VBox();
+
+        actionContainer.getChildren().add(new Button("Make Accusation"));
+
+        return actionContainer;
     }
 
     private HashMap<Player, VBox> generatePlayersCardPanels(List<Player> players) {
@@ -410,7 +435,7 @@ public class ClueGUI extends Application {
                 weapPieceImages.put(r.getWeaponPiece().getName(), weapPieceImg);
 
                 Sprite s = new Sprite(weapPieceImages.get(r.getWeaponPiece().getName()),
-                        DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE,0,0);
+                        DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE, 0, 0);
 
                 gameBoardCanvas.getChildren().add(s.getImView());
                 weapPieceSprites.put(r.getWeaponPiece().getName(), s);
