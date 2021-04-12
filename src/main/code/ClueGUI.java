@@ -13,6 +13,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+import javax.rmi.CORBA.Tie;
 import java.awt.event.ActionEvent;
 import java.beans.EventHandler;
 import java.io.FileInputStream;
@@ -50,6 +51,8 @@ public class ClueGUI extends Application {
         HashMap<PlayerPiece, Sprite> playerPieceSprites =
                 generatePlayerPieceSprites(gameModel.getPlayerPieces(),
                         gameBoardCanvas);
+        HashMap<String, Sprite> weapPieceSprites = generateWeaponPieceSprites(gameBoard.getRooms(),
+                gameBoardCanvas);
 
         // Generate panels to display players cards and player piece's
         // detective slips.
@@ -58,13 +61,8 @@ public class ClueGUI extends Application {
         HashMap<PlayerPiece, VBox> playerPieceDSlipPanels =
                 generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces());
 
-        HashSet<String> types = new HashSet<>();
-        for (List<Tile> row : boardTiles.getGrid()) {
-            for (Tile t : row) {
-                types.add(t.getType());
-            }
-        }
-        System.out.println(types);
+        Random rand = new Random();
+
         /* --- Main game loop. --- */
         new AnimationTimer() {
             public void handle(long currentTime) {
@@ -73,13 +71,32 @@ public class ClueGUI extends Application {
                 double tileHeight = gameBoardCanvas.getHeight() * 0.03575;
                 double tileWidth = gameBoardCanvas.getWidth() * 0.04175;
 
-                // Render tiles.
+                // Render tiles and weapon pieces.
                 for (List<Tile> row : boardTiles.getGrid()) {
                     for (Tile t : row) {
                         tileSprites.get(t).setDims(tileWidth, tileHeight);
                         double x = t.getColumn() * tileWidth;
                         double y = t.getRow() * tileHeight;
                         tileSprites.get(t).render(x, y);
+                    }
+                }
+
+                // Render weapon pieces at the first available tile found in each room.
+                for (Room r : gameBoard.getRooms()) {
+                    if (r.getWeaponPiece() != null) {
+                        List<Tile> potentialWeapPlaces = new ArrayList<>();
+                        for (Tile t : r.getTiles()) {
+                            if (!t.isOccupied() && t != r.getSecretPassage() &&
+                            t.getType() != "wall") {
+                                potentialWeapPlaces.add(t);
+                            }
+                        }
+                        Tile chosenTile = potentialWeapPlaces.get(0);
+                        weapPieceSprites.get(r.getWeaponPiece().getName()).
+                                setDims(tileWidth, tileHeight);
+                        double x = chosenTile.getColumn() * tileWidth;
+                        double y = chosenTile.getRow() * tileHeight;
+                        weapPieceSprites.get(r.getWeaponPiece().getName()).render(x, y);
                     }
                 }
 
@@ -365,4 +382,42 @@ public class ClueGUI extends Application {
 
         return playerPieceSprites;
     }
+
+    private HashMap<String, Sprite> generateWeaponPieceSprites(
+            List<Room> rooms, Pane gameBoardCanvas)
+            throws FileNotFoundException {
+        HashMap<String, Image> weapPieceImages = new HashMap<>();
+        HashMap<String, Sprite> weapPieceSprites = new HashMap<>();
+
+        // Find the images directory relative to the current directory.
+        String imagesDir = Paths.get(CURR_DIR,
+                "\\src\\main\\resources\\images")
+                .toAbsolutePath().toString();
+
+        // Retrieve images for each Weapon Piece.
+        for (Room r : rooms) {
+            if (r.getWeaponPiece() != null) {
+                String weapName = r.getWeaponPiece().getName()
+                        .replaceAll("\\s+", "");
+                String imFileName = "weapon_" + weapName + ".png";
+
+                // Get image for current Player Piece and store in hashmap.
+                String playerPieceImgPath = Paths.get(imagesDir, imFileName)
+                        .toAbsolutePath().toString();
+                FileInputStream weapPieceIS = new FileInputStream(playerPieceImgPath);
+                Image weapPieceImg = new Image(weapPieceIS);
+
+                weapPieceImages.put(r.getWeaponPiece().getName(), weapPieceImg);
+
+                Sprite s = new Sprite(weapPieceImages.get(r.getWeaponPiece().getName()),
+                        DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE,0,0);
+
+                gameBoardCanvas.getChildren().add(s.getImView());
+                weapPieceSprites.put(r.getWeaponPiece().getName(), s);
+            }
+        }
+
+        return weapPieceSprites;
+    }
+
 }
