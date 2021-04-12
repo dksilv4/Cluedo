@@ -58,6 +58,13 @@ public class ClueGUI extends Application {
         HashMap<PlayerPiece, VBox> playerPieceDSlipPanels =
                 generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces());
 
+        HashSet<String> types = new HashSet<>();
+        for (List<Tile> row : boardTiles.getGrid()) {
+            for (Tile t : row) {
+                types.add(t.getType());
+            }
+        }
+        System.out.println(types);
         /* --- Main game loop. --- */
         new AnimationTimer() {
             public void handle(long currentTime) {
@@ -291,7 +298,8 @@ public class ClueGUI extends Application {
      */
     private HashMap<String, Image> initTileImgs() throws FileNotFoundException {
         List<String> tileTypeNames =
-                new ArrayList<>(Arrays.asList("door", "space", "room", "wall"));
+                new ArrayList<>(Arrays.asList("door", "space", "room",
+                        "wall", "passage"));
         HashMap<String, Image> tileImages = new HashMap<>();
 
         // Find the images directory relative to the current directory.

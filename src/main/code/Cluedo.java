@@ -28,7 +28,7 @@ public class Cluedo {
             this.fillDetectiveSlips();
             this.allocateWeapons();
 
-            this.turn();
+            //this.turn();
 //            for(Room room: this.board.getRooms()){
 //                System.out.println(room.getWeaponPiece());
 //            }
@@ -578,9 +578,9 @@ public class Cluedo {
         this.roomCards = roomCards;
     }
 
-    public static void main(String[] args) {
-        Cluedo cluedo = new Cluedo();
-    }
+//    public static void main(String[] args) {
+//        Cluedo cluedo = new Cluedo();
+//    }
 
     /**
      * @return weaponPieces
