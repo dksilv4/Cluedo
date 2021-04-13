@@ -1,7 +1,6 @@
 package code;
 
 import javafx.util.Pair;
-import org.hamcrest.core.Is;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -18,9 +17,11 @@ public class Cluedo {
     private Scanner sc = new Scanner(System.in);
     private Envelope envelope;
     private Player currentPlayersTurn;
-    private List<Player> playerOrder;
+    private List<Pair<Player, Integer>> playerOrder;
     private int turnIndicator; // This will iterate through playerOrder to indicate who's turn it is.
     private int currentPlayersSteps;
+    private GameState state;
+    private static Random rand = new Random();
 
     /**
      * Initializes Cluedo and loads all the necessary data to run the game
@@ -30,19 +31,18 @@ public class Cluedo {
             this.setUpPlayers();
             this.setUpCards();
             this.setSpawns();
-            getPlayerTurnOrder();
-            playerOrder = this.getPlayerTurnOrder(players);
-            this.fillDetectiveSlips();
-            this.allocateWeapons();
 
+            playerOrder = new ArrayList<>();
             turnIndicator = 0;
-            currentPlayersTurn = playerOrder.get(turnIndicator);
+            // Choose a random player to roll the dice first.
+            currentPlayersTurn = players.get(rand.nextInt(players.size()));
+            state = GameState.AssigningPlayerPieces;
 
-            //this.turn();
-//            for(Room room: this.board.getRooms()){
-//                System.out.println(room.getWeaponPiece());
-//            }
         }
+    }
+
+    public GameState state() {
+        return this.state;
     }
 
     // Moves the current player's player piece.
@@ -70,16 +70,17 @@ public class Cluedo {
         }
 
         boolean canMove = neighbours.contains(new Pair<>(newTile.getRow(),
-                newTile.getColumn()));
+                newTile.getColumn())) && (currentPlayersSteps > 0)
+                && state == GameState.InPlay;
 
-        if(canMove && currentPlayersSteps > 0) {
+        if(canMove) {
             currentPlayersTurn.getPiece().getLocation().removeOccupier();
             currentPlayersTurn.getPiece().setLocation(newTile);
             currentPlayersSteps--;
         }
 
         if (currentPlayersSteps <= 0) {
-            incrementTurn();
+            endTurn();
         }
     }
 
@@ -87,10 +88,41 @@ public class Cluedo {
         return currentPlayersSteps;
     }
 
-    private void incrementTurn() {
+    private void endTurn() {
         turnIndicator = (turnIndicator + 1) % playerOrder.size();
-        currentPlayersTurn = playerOrder.get(turnIndicator);
-        currentPlayersSteps = rollDice();
+        currentPlayersTurn = playerOrder.get(turnIndicator).getKey();
+    }
+
+    public void rollDice(GameState currentState, List<Pair<Player, Integer>> playerOrder) {
+        switch (currentState) {
+            case AssigningPlayerPieces:
+                int roll = rollDice();
+                System.out.println(currentPlayersTurn.getName() + " rolled " + roll);
+                playerOrder.add(new Pair<>(currentPlayersTurn, roll));
+
+                int nextPlayersIndex = (players.indexOf(currentPlayersTurn) + 1) % players.size();
+                currentPlayersTurn = players.get(nextPlayersIndex);
+
+                if (playerOrder.size() == players.size()) {
+                    this.assignPlayerPieces(playerOrder);
+                    this.fillDetectiveSlips();
+                    this.allocateWeapons();
+                    currentPlayersTurn = playerOrder.get(0).getKey();
+                    currentPlayersSteps = rollDice();
+                    state = GameState.InPlay;
+                    System.out.println("All player pieces assigned.");
+                }
+                break;
+            case InPlay:
+                currentPlayersSteps = rollDice();
+                break;
+            default:
+
+        }
+    }
+
+    public List<Pair<Player, Integer>> getPlayOrder() {
+        return this.playerOrder;
     }
 
     /**
@@ -360,6 +392,14 @@ public class Cluedo {
         return this.board;
     }
 
+    private void assignPlayerPieces(List<Pair<Player, Integer>> playerOrder) {
+        Collections.sort(playerOrder, Comparator.comparing(p -> -p.getValue()));
+
+        for (int i = 0; i < playerOrder.size(); i++) {
+            playerOrder.get(i).getKey().setPiece(this.playerPieces.get(i));
+        }
+    }
+
     /**
      * Assign the player pieces to the players.
      * Takes in playerHash which is a hashmap that contains all the players and the number they got from rolling the dice.
@@ -386,6 +426,7 @@ public class Cluedo {
             }
         }
     }
+
 
     /**
      * Rolls the dice for all the players and adds it to a HashMap and runs the assignPlayerPieces function giving the hashmap as a parameter.
