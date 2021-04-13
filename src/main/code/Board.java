@@ -17,9 +17,9 @@ public class Board {
     private List<List<Object>> board_data_list;
     private List<Room> rooms;
 
-    public static void main(String[] args) {
-        Board board = new Board();
-    }
+//    public static void main(String[] args) {
+//        Board board = new Board();
+//    }
 
     /**
      * Constructs and initializes a Board
