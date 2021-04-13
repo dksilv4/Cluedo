@@ -8,13 +8,11 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -46,7 +44,7 @@ public class ClueGUI extends Application {
         Grid boardTiles = gameBoard.getGrid();
 
         // Set-up scene and generate sprites.
-        Pane gameBoardCanvas = initialiseGUI(theStage, gameModel);
+        Pane gameBoardCanvas = initGUI(theStage, gameModel);
         final HashMap<Tile, Sprite>[] tileSprites = new HashMap[]{generateTileSprites(boardTiles,
                 gameBoardCanvas, gameModel)};
         final HashMap<PlayerPiece, Sprite>[] playerPieceSprites = new HashMap[]{new HashMap<>()};
@@ -67,19 +65,18 @@ public class ClueGUI extends Application {
                 Player currPlayer = gameModel.getCurrentPlayersTurn();
                 if (gameModel.state() == GameState.InPlay) {
 
+                    Pane board = (Pane) root.getCenter();
                     if (gameModel.getStepsLeft() <= 0) {
-                        Pane board = (Pane) root.getCenter();
                         for (Node n : board.getChildren())  {
                             n.setDisable(true);
                         }
-                        VBox actionContainer = (VBox) root.getBottom();
+                        HBox actionContainer = (HBox) root.getBottom();
                         actionContainer.getChildren().get(1).setDisable(false);
                     } else {
-                        Pane board = (Pane) root.getCenter();
                         for (Node n : board.getChildren())  {
                             n.setDisable(false);
                         }
-                        VBox actionContainer = (VBox) root.getBottom();
+                        HBox actionContainer = (HBox) root.getBottom();
                         actionContainer.getChildren().get(1).setDisable(true);
                     }
 
@@ -169,7 +166,7 @@ public class ClueGUI extends Application {
      * @param theStage The stage which contains all nodes
      * @return The node that the game board renders to
      */
-    private Pane initialiseGUI(Stage theStage, Cluedo model) {
+    private Pane initGUI(Stage theStage, Cluedo model) {
         // Main container for GUI (currently only holds board canvas but will
         // later hold turn relevant stuff, dice, detective cards etc.)
         root = new BorderPane();
@@ -177,7 +174,10 @@ public class ClueGUI extends Application {
 
         Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
         HBox turnIndicator = initTurnIndicator();
-        VBox actionContainer = generateActionsPane(model);
+        HBox actionContainer = initActionsPane(model);
+
+        gameBoardCanvas.setPrefHeight(700);
+        gameBoardCanvas.setPrefWidth(850);
 
         root.setCenter(gameBoardCanvas);
         root.setTop(turnIndicator);
@@ -369,19 +369,21 @@ public class ClueGUI extends Application {
         return tileSprites;
     }
 
-    private VBox generateActionsPane(Cluedo model) {
-        VBox actionContainer = new VBox();
+    private HBox initActionsPane(Cluedo model) {
+        HBox actionContainer = new HBox();
         Button rollDice = new Button("Roll Dice");
-
-        actionContainer.getChildren().add(new Button("Make Accusation"));
-        actionContainer.getChildren().add(rollDice);
+        Button makeAccusation = new Button("Make Accusation");
+        makeAccusation.setDisable(true);
 
         rollDice.setOnMouseClicked(event -> {
             model.rollDice(model.state(), model.getPlayOrder());
         });
 
-        actionContainer.setAlignment(Pos.CENTER);
         actionContainer.setPadding(new Insets(10, 10, 10, 10));
+        actionContainer.setAlignment(Pos.CENTER);
+        actionContainer.setStyle("-fx-background-color: " + BCKGND_CLR);
+
+        actionContainer.getChildren().addAll(makeAccusation, rollDice);
 
         return actionContainer;
     }
