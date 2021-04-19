@@ -142,6 +142,7 @@ public class Cluedo {
         boolean running = true;
         while (running) {
             this.turnNo++;
+            sc.nextLine();
             for (PlayerPiece playerPiece : this.playerPieces) {
                 if (!running) {
                     break;
@@ -588,12 +589,12 @@ public class Cluedo {
      * Temporary function to setUp players
      */
     public void setUpPlayers() {
-//        this.players.add(new AI("Diogo"));
-//        this.players.add(new AI("Hayden"));
-//        this.players.add(new AI("Gogo"));
-        this.players.add(new Human("Diogo"));
-        this.players.add(new Human("Hayden"));
-        this.players.add(new Human("Gogo"));
+        this.players.add(new AI("Diogo"));
+        this.players.add(new AI("Hayden"));
+        this.players.add(new AI("Gogo"));
+//        this.players.add(new Human("Diogo"));
+//        this.players.add(new Human("Hayden"));
+//        this.players.add(new Human("Gogo"));
     }
 
     /**
