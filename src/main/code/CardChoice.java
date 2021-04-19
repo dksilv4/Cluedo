@@ -1,5 +1,8 @@
 package code;
 
+/**
+ * CardChoice represents the set of cards that a player chooses
+ */
 public class CardChoice {
 
     private RoomCard room;
