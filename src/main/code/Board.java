@@ -39,16 +39,17 @@ public class Board {
 
     }
 
-    public void renderSecretPassages() {
+    public void renderSecretPassages(){
         // kitchen, conservatory, lounge, study
-        Room kitchen = this.getRoom("Kitchen");
-        kitchen.setSecretPassage(kitchen.getTiles().get((kitchen.getSizeX() * 2 - 2)));
+        Room kitchen =this.getRoom("Kitchen");
+        kitchen.setSecretPassage(kitchen.getTiles().get((kitchen.getSizeX()*2-2)));
         Room conservatory = this.getRoom("Conservatory");
-        conservatory.setSecretPassage(conservatory.getTiles().get((conservatory.getSizeX() * conservatory.getSizeY()) - (conservatory.getSizeX() + 2)));
+        conservatory.setSecretPassage(conservatory.getTiles().get((conservatory.getSizeX()*conservatory.getSizeY())-(conservatory.getSizeX()+2)));
         Room lounge = this.getRoom("Lounge");
-        lounge.setSecretPassage(lounge.getTiles().get(lounge.getSizeX() + 1));
+        lounge.setSecretPassage(lounge.getTiles().get(lounge.getSizeX()+1));
         Room study = this.getRoom("Study");
-        study.setSecretPassage(study.getTiles().get((study.getSizeX() * study.getSizeY()) - (study.getSizeX() + 2)));
+        study.setSecretPassage(study.getTiles().get((study.getSizeX()*study.getSizeY())-(study.getSizeX()+2)));
+
     }
 
     /**
@@ -157,6 +158,7 @@ public class Board {
      * Current limitation of this method is that it's limited to 4 rows of rooms ( this can be unlimited just need to add more if statements checking the variable i).
      */
     public void placeRooms() {
+        System.out.println(this.board_data_list);
         int y_size = 0; //Used to allow the function to know if the room should be being in a different row depending if it needs to be below another previously added room.
         for (int i = 1; i < this.board_data_list.size(); i += 3) { // for each item inside the board data list
             List<Object> row = this.board_data_list.get(i); //Get a row

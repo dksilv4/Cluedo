@@ -27,8 +27,4 @@ public class Envelope {
     public String toString() {
         return String.format("The murder was committed by %s with %s in %s!!!",this.suspectCard.getName(), this.weaponCard.getName(), this.roomCard.getName());
     }
-
-    public boolean has(Card card){
-        return this.roomCard.equals(card) || this.weaponCard.equals(card) || this.suspectCard.equals(card);
-    }
 }
