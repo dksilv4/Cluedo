@@ -5,7 +5,7 @@ public class PlayerPiece extends Piece{
     /**
      *
      */
-    private Tile location;
+    private Tile location = null;
     private DetectiveSlip slip;
     private Player belongsTo = null;
     private boolean playing = false;
@@ -20,7 +20,6 @@ public class PlayerPiece extends Piece{
 
     public void setSlip(DetectiveSlip slip){
         this.slip = slip;
-
     }
 
     public Tile getLocation() {
@@ -28,6 +27,10 @@ public class PlayerPiece extends Piece{
     }
 
     public void setLocation(Tile location) {
+        if(this.location!=null){
+            this.location.removeOccupier();
+
+        }
         this.location = location;
         location.setOccupier(this);
     }
@@ -48,6 +51,10 @@ public class PlayerPiece extends Piece{
 
     public Player getBelongsTo() {
         return belongsTo;
+    }
+
+    public boolean ableToPlay(){
+        return !this.isKicked() && this.belongsTo != null;
     }
 
     public void setBelongsTo(Player belongsTo) {

@@ -66,6 +66,7 @@ public class Tile {
      * Returns the row of a Tile
      * @return a type string
      */
+
     public int getRow(){
         return this.row;
     }
