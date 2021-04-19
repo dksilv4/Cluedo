@@ -47,13 +47,6 @@ public class Tile {
         }
     }
 
-    public boolean available() {
-        if(!this.getType().equals("wall") && !this.isOccupied()){
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Returns the type of a Tile
      * @return a type string

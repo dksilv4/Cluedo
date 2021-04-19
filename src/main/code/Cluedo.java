@@ -3,6 +3,7 @@ package code;
 import org.json.JSONObject;
 
 import java.util.*;
+import javafx.util.Pair;
 
 public class Cluedo {
     private List<SuspectCard> suspectCards;
@@ -14,7 +15,12 @@ public class Cluedo {
     private List<Player> players = new ArrayList<Player>();
     private final Board board = new Board();
     private Scanner sc = new Scanner(System.in);
+    private List<Pair<Player, Integer>> playerOrder = new ArrayList<>();
     private Envelope envelope;
+    private Player currentPlayersTurn;
+    private int currentPlayersSteps;
+    private int turnIndicator = 0; // This will iterate through playerOrder to indicate who's turn it is.
+    private GameState state;
     int turnNo = 0;
 
     /**
@@ -31,7 +37,103 @@ public class Cluedo {
             this.turn();
         }
     }
+    public GameState state() {
+        return this.state;
+    }
+    public Player getCurrentPlayersTurn() {
+        return this.currentPlayersTurn;
+    }
+    public int getStepsLeft() {
+        return currentPlayersSteps;
+    }
+    public List<Pair<Player, Integer>> getPlayOrder() {
+        return this.playerOrder;
+    }
+    private void assignPlayerPiecesB(List<Pair<Player, Integer>> playerOrder) {
+        playerOrder.sort(Comparator.comparing(p -> -p.getValue()));
 
+        for (int i = 0; i < playerOrder.size(); i++) {
+            playerOrder.get(i).getKey().setPiece(this.playerPieces.get(i));
+        }
+    }
+    public void rollDiceB(GameState currentState, List<Pair<Player, Integer>> playerOrder) {
+        switch (currentState) {
+            case AssigningPlayerPieces:
+                int roll = rollDice();
+                System.out.println(currentPlayersTurn.getName() + " rolled " + roll);
+                playerOrder.add(new Pair<>(currentPlayersTurn, roll));
+
+                int nextPlayersIndex = (players.indexOf(currentPlayersTurn) + 1) % players.size();
+                currentPlayersTurn = players.get(nextPlayersIndex);
+
+                if (playerOrder.size() == players.size()) {
+                    this.assignPlayerPiecesB(playerOrder);
+                    this.fillDetectiveSlips();
+                    this.allocateWeapons();
+                    currentPlayersTurn = playerOrder.get(0).getKey();
+                    currentPlayersSteps = rollDice();
+                    state = GameState.InPlay;
+                    System.out.println("All player pieces assigned.");
+                }
+                break;
+            case InPlay:
+                currentPlayersSteps = rollDice();
+                break;
+            default:
+
+        }
+    }
+
+    // Moves the current player's player piece.
+    public void movePlayerPiece(Tile newTile) {
+        // Check if the target tile is a position that can be moved to.
+        PlayerPiece pp = currentPlayersTurn.getPiece();
+        int tileRow = pp.getLocation().getRow();
+        int tileCol = pp.getLocation().getColumn();
+        List<Pair<Integer, Integer>> neighbours = new ArrayList<>();
+
+        // Generate immediately adjacent tiles.
+        for (int row = tileRow - 1; row <= tileRow + 1; row++) {
+            if (row == tileRow || row > board.getGrid().getRows() ||
+                    row < 0) {
+                continue;
+            }
+            neighbours.add(new Pair<>(row, tileCol));
+        }
+        for (int col = tileCol - 1; col <= tileCol + 1; col++) {
+            if (col == tileCol || col > board.getGrid().getColumns() ||
+                    col < 0) {
+                continue;
+            }
+            neighbours.add(new Pair<>(tileRow, col));
+        }
+
+        boolean canMove = neighbours.contains(new Pair<>(newTile.getRow(),
+                newTile.getColumn())) && (currentPlayersSteps > 0)
+                && state == GameState.InPlay;
+
+        if(canMove) {
+            currentPlayersTurn.getPiece().getLocation().removeOccupier();
+            currentPlayersTurn.getPiece().setLocation(newTile);
+            currentPlayersSteps--;
+        }
+
+        if (currentPlayersSteps <= 0) {
+            endTurn();
+            this.getPlayerTurnOrder();
+            this.fillDetectiveSlips();
+            this.allocateWeapons();
+            this.turn();
+//            for(Room room: this.board.getRooms()){
+//                System.out.println(room.getWeaponPiece());
+//            }
+        }
+    }
+
+    private void endTurn() {
+        turnIndicator = (turnIndicator + 1) % playerOrder.size();
+        currentPlayersTurn = playerOrder.get(turnIndicator).getKey();
+    }
 
     /**
      * Represents a turn within the game.
@@ -40,8 +142,12 @@ public class Cluedo {
         boolean running = true;
         while (running) {
             this.turnNo++;
+            sc.nextLine();
             for (PlayerPiece playerPiece : this.playerPieces) {
-                if(!running){
+                if (!running) {
+                    break;
+                }
+                if (this.turnNo > 10) {
                     break;
                 }
                 System.out.println("Current Turn: " + this.turnNo + "\nCurrent Player: " + playerPiece.getBelongsTo());
@@ -53,29 +159,35 @@ public class Cluedo {
                     boolean madeSuggestion = false;
                     boolean madeAccusation = false;
                     while (!endTurn) {
-                        int playerChoice = this.askOptions(playerPiece.getLocation().getType().equals("room")&& !playerPiece.getLocation().getBelongsTo().getName().equals("X"), rolledDice, madeSuggestion, madeAccusation);
+                        int playerChoice = this.askOptions(playerPiece, rolledDice, madeSuggestion, madeAccusation);
                         this.board.getGrid().print(); //Print out the grid.
                         if (playerChoice == 1) {
-                            //Roll Dice
-                            int steps = rollDice();
+                            int steps = rollDice(); //Roll Dice
                             System.out.println(playerPiece + " rolled " + steps);
                             while (steps > 0) {
                                 System.out.println("Steps left:" + steps);
-                                String direction = this.getUserDirection();
+                                String direction = this.getUserDirection(playerPiece);
                                 System.out.println("Player chose to go: " + direction);
                                 if (direction.equals("u") || direction.equals("d") || direction.equals("l") || direction.equals("r")) {
                                     Tile oldLocation = playerPiece.getLocation();
-                                    this.playerMove(playerPiece, direction);
-                                    if (oldLocation.equals(playerPiece.getLocation())) {
-                                        System.out.println("Player could not move in that direction.");
-                                    } else if (playerPiece.getLocation().getType().equals("room") && oldLocation.getType().equals("door")) {
-                                        steps = 0;
-                                    } else if (!(playerPiece.getLocation().getType().equals("room") && oldLocation.getType().equals("room"))) {
-                                        steps--;
-                                    } else if (playerPiece.getLocation().getType().equals("passage") && oldLocation.getType().equals("room")) {
-                                        useSecretPassage(playerPiece.getLocation().getBelongsTo(), playerPiece);
-                                        steps--;
+                                    Tile newLocation = this.playerMoveNewLocation(playerPiece, direction);
+                                    if(newLocation !=null && newLocation.isAvailable()){
+                                        this.playerMove(newLocation, playerPiece);
+                                        if (oldLocation.equals(playerPiece.getLocation())) {
+                                            System.out.println("Player could not move in that direction.");
+                                        } else if (playerPiece.getLocation().getType().equals("room") && oldLocation.getType().equals("door")) {
+                                            steps = 0;
+                                        } else if (!(playerPiece.getLocation().getType().equals("room") && oldLocation.getType().equals("room"))) {
+                                            steps--;
+                                        } else if (playerPiece.getLocation().getType().equals("passage") && oldLocation.getType().equals("room")) {
+                                            useSecretPassage(playerPiece.getLocation().getBelongsTo(), playerPiece);
+                                            steps--;
+                                        }
                                     }
+                                    else{
+                                        System.out.println("Invalid Direction!");
+                                    }
+
                                 } else if (direction.equals("s")) {
                                     steps = 0;
                                     playerPiece.setPlaying(false);
@@ -86,18 +198,15 @@ public class Cluedo {
                             rolledDice = true;
                         } else if (playerChoice == 2) {
                             //Make Accusation
-                            madeAccusation = true;
                             if (!this.makeAccusation(this.getCardChoices(playerPiece))) {
                                 System.out.println("You made an invalid accusation. You have been eliminated.");
                                 playerPiece.setKicked(true);
                                 playerPiece.setPlaying(false);
-                                break;
+                            } else {
+                                running = false;
+                                System.out.println(playerPiece.getBelongsTo().getName() + " won the game!");
                             }
-                            else{
-                                running= false;
-                                System.out.println(playerPiece.getBelongsTo().getName()+" won the game!");
-                                break;
-                            }
+                            break;
                         } else if (playerChoice == 3) {
                             //Skip turn
                             System.out.println("You skipped your turn.");
@@ -112,43 +221,97 @@ public class Cluedo {
             }
         }
     }
-
-    public int askOptions(boolean inRoom, boolean rolledDice, boolean madeAccusation, boolean madeSuggestion) {
+    private Tile playerMoveNewLocation(PlayerPiece playerPiece, String direction){
+        System.out.println(playerPiece + " trying to move " + direction + ".");
+        Tile playerLocation = playerPiece.getLocation();
+        System.out.println("Player in: " + playerLocation.getRow() + " " + playerLocation.getColumn());
+        int newRow = playerLocation.getRow();
+        int newColumn = playerLocation.getColumn();
+        switch (direction) {
+            case "u":
+                newRow -= 1;
+                break;
+            case "d":
+                newRow += 1;
+                break;
+            case "l":
+                newColumn -= 1;
+                break;
+            case "r":
+                newColumn += 1;
+                break;
+        }
+        if (newRow >= 0 && newColumn >= 0 && newRow < this.board.getGrid().getRows() && newColumn < this.board.getGrid().getColumns()) {
+            System.out.println(newRow + " " + newColumn);
+            return this.board.getGrid().getTile(newRow, newColumn);
+        }
+        return null;
+    }
+    private void playerMove(Tile newLocation, PlayerPiece playerPiece){
+        Tile playerLocation = playerPiece.getLocation();
+        if (newLocation.getType().equals("passage")) {
+            this.useSecretPassage(newLocation.getBelongsTo(), playerPiece);
+        } else {
+            playerLocation.removeOccupier();
+            playerPiece.setLocation(newLocation);
+            newLocation.setOccupier(playerPiece);
+            System.out.println("Player moved to: " + playerLocation.getRow() + " " + playerLocation.getColumn());
+            this.board.getGrid().print();
+        }
+    }
+    public int askOptions(PlayerPiece playerPiece, boolean rolledDice, boolean madeAccusation, boolean madeSuggestion) {
         //What do you want to do?
         //1: Roll Dice
         //2: Skip (can press s when choosing direction to skip the rest of the steps and end turn)
         //3: Make a accusation
         //4: Make a suggestion (This shows up only when the player's in a room)
         boolean madeChoice = false;
-        int answer = 0;
+        boolean inRoom = playerPiece.getLocation().getType().equals("room") && !playerPiece.getLocation().getBelongsTo().getName().equals("X");
+        int choice = 0;
         while (!madeChoice) {
+            List<Integer> aiOptions = new ArrayList<Integer>();
             boolean suggestion = false;
             System.out.println("What do you want to do?");
             if (!rolledDice) {
                 System.out.println("1. Roll the dice");
+                aiOptions.add(1);
             }
             if (!madeAccusation) {
                 System.out.println("2. Make an accusation");
+                if (this.turnNo > 15) {
+                    aiOptions.add(2);
+                }
+
             }
             System.out.println("3. Skip");
+            aiOptions.add(3);
             if (inRoom) {
                 if (!madeSuggestion) {
                     System.out.println("4. Make a suggestion");
                     suggestion = true;
+                    aiOptions.add(1);
                 }
             }
-            System.out.println("Please enter the number.");
-            String str = sc.nextLine();
-            if( str.matches("-?\\d+(\\.\\d+)?")){
-                answer = Integer.parseInt(str);
-                if((answer == 1 && !rolledDice) || (answer == 2 && !madeAccusation) || answer == 3 || (answer == 4 && suggestion)){
-                    madeChoice = true;
-                } else {
-                    System.out.println("Invalid option.");
+            if (!playerPiece.getBelongsTo().isAI()) {//If not an AI
+                System.out.println("Please enter the number.");
+                String str = sc.nextLine();
+                if (str.matches("-?\\d+(\\.\\d+)?")) {
+                    choice = Integer.parseInt(str);
+                    if ((choice == 1 && !rolledDice) || (choice == 2 && !madeAccusation) || choice == 3 || (choice == 4 && suggestion)) {
+                        madeChoice = true;
+                    } else {
+                        System.out.println("Invalid option.");
+                    }
                 }
+            } else {
+                System.out.println("AI Choices: " + aiOptions);
+                choice = aiOptions.get((int) (Math.random() * aiOptions.size()));
+                System.out.println("AI chose: " + choice);
+                madeChoice = true;
             }
+
         }
-        return answer;
+        return choice;
     }
 
     private RoomCard findRoomCard(String search) {
@@ -287,55 +450,29 @@ public class Cluedo {
                 playerPiece.setLocation(conservatoryPassage);
                 break;
         }
+        this.board.getGrid().print();
 
     }
 
-    private String getUserDirection() {
+    private String getUserDirection(PlayerPiece playerPiece) {
         System.out.println("Which direction would you like to go?\n(u=up, d=down, l=left, r=right)");
-        return sc.nextLine().toLowerCase();
+        if (!playerPiece.getBelongsTo().isAI()) {
+            return sc.nextLine().toLowerCase();
+        }
+        List<String> options = new ArrayList<>();
+        if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "u")).isAvailable()){
+            options.add("u");
+        }
+        if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "d")).isAvailable()){
+            options.add("d");
+        }if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "l")).isAvailable()){
+            options.add("l");
+        }if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "r")).isAvailable()){
+            options.add("r");
+        }
+        return options.get((int) (Math.random() * options.size()));
     }
 
-    private void playerMove(PlayerPiece playerPiece, String direction) {
-        // Row will be -1 from player location with the same column value
-        System.out.println(playerPiece + " trying to move " + direction + ".");
-        Tile playerLocation = playerPiece.getLocation();
-        System.out.println("Player in: " + playerLocation.getRow() + " " + playerLocation.getColumn());
-        int newRow = playerLocation.getRow();
-        int newColumn = playerLocation.getColumn();
-        switch (direction) {
-            case "u":
-                newRow -= 1;
-                break;
-            case "d":
-                newRow += 1;
-                break;
-            case "l":
-                newColumn -= 1;
-                break;
-            case "r":
-                newColumn += 1;
-                break;
-        }
-        if (newRow >= 0 && newColumn >= 0 && newRow < this.board.getGrid().getRows() && newColumn < this.board.getGrid().getColumns()) {
-            System.out.println(newRow + " " + newColumn);
-            Tile newLocation = this.board.getGrid().getTile(newRow, newColumn);
-
-            System.out.println("New Location:" + newLocation);
-            System.out.println("Cords: " + newLocation.getRow() + " " + newLocation.getColumn());
-            if (newLocation.available()) {
-                if (newLocation.getType().equals("passage")) {
-                    this.useSecretPassage(newLocation.getBelongsTo(), playerPiece);
-                } else {
-                    playerLocation.removeOccupier();
-                    playerPiece.setLocation(newLocation);
-                    newLocation.setOccupier(playerPiece);
-                    System.out.println("Player moved to: " + playerLocation.getRow() + " " + playerLocation.getColumn());
-                    this.board.getGrid().print();
-                }
-
-            }
-        }
-    }
 
     public void allocateWeapons() {
         Collections.shuffle(this.getWeaponPieces());
@@ -452,9 +589,12 @@ public class Cluedo {
      * Temporary function to setUp players
      */
     public void setUpPlayers() {
-        this.players.add(new Player("Diogo"));
-        this.players.add(new Player("Hayden"));
-        this.players.add(new Player("Gogo"));
+        this.players.add(new AI("Diogo"));
+        this.players.add(new AI("Hayden"));
+        this.players.add(new AI("Gogo"));
+//        this.players.add(new Human("Diogo"));
+//        this.players.add(new Human("Hayden"));
+//        this.players.add(new Human("Gogo"));
     }
 
     /**
@@ -551,7 +691,7 @@ public class Cluedo {
                     shared = true;
                 } else {
                     Card card = this.cards.get(0);
-                    if(!envelope.has(card)){
+                    if (!envelope.has(card)) {
                         player.addCard(card);
                     }
                     cards.remove(0);

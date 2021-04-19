@@ -36,4 +36,8 @@ public class Player {
             piece.getSlip().markSlip(card, true);
         }
     }
+    public boolean isAI(){
+        return this instanceof AI;
+    }
+
 }
