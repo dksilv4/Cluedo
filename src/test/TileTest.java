@@ -63,6 +63,6 @@ public class TileTest {
         this.tile.setBelongsTo(room);
         assertEquals("\u001B[32m" + this.room.getName().charAt(0) + "\u001B[0m", this.tile.toString());
         this.tile.setType("");
-        assertEquals("x", this.tile.toString());
+        assertEquals("\u001B[30mx\u001B[0m", this.tile.toString());
     }
 }

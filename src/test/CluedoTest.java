@@ -8,12 +8,14 @@ import static org.junit.Assert.*;
 
 public class CluedoTest {
     private Cluedo cluedo;
+    Player playerA;
+    Player playerB;
 
     @Before
     public void setUp() {
         this.cluedo = new Cluedo();
-        Player playerA = new Player("a");
-        Player playerB = new Player("b");
+        this.playerA = new Player("a");
+        this.playerB = new Player("b");
         List<Player> p = new ArrayList<>();
         p.add(playerA);
         p.add(playerB);
@@ -121,5 +123,34 @@ public class CluedoTest {
         System.out.println(this.cluedo.getRoomCards());
         assertEquals(11, testPlayers.get(0).getCards().size());
         assertEquals(10, testPlayers.get(1).getCards().size());
+    }
+
+    @Test
+    public void testUseSecretPassage(){
+        Room study = this.cluedo.getBoard().getRoom("Study");
+        Room kitchen = this.cluedo.getBoard().getRoom("Kitchen");
+        Room conservatory = this.cluedo.getBoard().getRoom("Conservatory");
+        Room lounge = this.cluedo.getBoard().getRoom("Lounge");
+        PlayerPiece playerPieceA = this.playerA.getPiece();
+
+        playerPieceA.setLocation(study.getTiles().get(0));
+        assertEquals(study, playerPieceA.getLocation().getBelongsTo());
+        this.cluedo.useSecretPassage(study, playerPieceA);
+        assertEquals(kitchen, playerPieceA.getLocation().getBelongsTo());
+
+        playerPieceA.setLocation(kitchen.getTiles().get(0));
+        assertEquals(kitchen, playerPieceA.getLocation().getBelongsTo());
+        this.cluedo.useSecretPassage(kitchen, playerPieceA);
+        assertEquals(study, playerPieceA.getLocation().getBelongsTo());
+
+        playerPieceA.setLocation(lounge.getTiles().get(0));
+        assertEquals(lounge, playerPieceA.getLocation().getBelongsTo());
+        this.cluedo.useSecretPassage(lounge, playerPieceA);
+        assertEquals(conservatory, playerPieceA.getLocation().getBelongsTo());
+
+        playerPieceA.setLocation(conservatory.getTiles().get(0));
+        assertEquals(conservatory, playerPieceA.getLocation().getBelongsTo());
+        this.cluedo.useSecretPassage(conservatory, playerPieceA);
+        assertEquals(lounge, playerPieceA.getLocation().getBelongsTo());
     }
 }
