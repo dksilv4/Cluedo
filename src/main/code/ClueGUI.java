@@ -66,19 +66,22 @@ public class ClueGUI extends Application {
                 if (gameModel.state() == GameState.InPlay) {
 
                     Pane board = (Pane) root.getCenter();
+                    HBox actionContainer = (HBox) root.getBottom();
+                    // Disable roll
                     if (gameModel.getStepsLeft() <= 0) {
                         for (Node n : board.getChildren())  {
                             n.setDisable(true);
                         }
-                        HBox actionContainer = (HBox) root.getBottom();
                         actionContainer.getChildren().get(1).setDisable(false);
-                    } else {
+                    } else { // Disable board.
                         for (Node n : board.getChildren())  {
                             n.setDisable(false);
                         }
-                        HBox actionContainer = (HBox) root.getBottom();
                         actionContainer.getChildren().get(1).setDisable(true);
                     }
+                    // Enable accusations.
+                    actionContainer.getChildren().get(0).setDisable(false);
+
 
                     if (!playerGUIGenerated[0]) {
                         try {
@@ -90,9 +93,11 @@ public class ClueGUI extends Application {
                             e.printStackTrace();
                         }
                         playerCardPanels[0] =
-                                generatePlayersCardPanels(gameModel.getPlayers());
+                                generatePlayersCardPanels(gameModel.getPlayers(),
+                                        theStage);
                         playerPieceDSlipPanels[0] =
-                                generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces());
+                                generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces(),
+                                        theStage, gameModel);
 
                         playerGUIGenerated[0] = true;
                     }
@@ -104,8 +109,8 @@ public class ClueGUI extends Application {
                     // Render current player's cards.
                     root.setLeft(playerCardPanels[0].get(currPlayer));
 
-                    double tileHeight = gameBoardCanvas.getHeight() * 0.03575;
-                    double tileWidth = gameBoardCanvas.getWidth() * 0.04175;
+                    double tileHeight = gameBoardCanvas.getHeight() / gameBoard.getGrid().getRows();
+                    double tileWidth = gameBoardCanvas.getWidth() / gameBoard.getGrid().getColumns();
 
                     // Search the tiles of each room that has a weapon piece in it
                     // and choose the first available tile to render the weapon
@@ -136,24 +141,68 @@ public class ClueGUI extends Application {
                         playerPieceSprites[0].get(pp).render(x, y);
                     }
 
-                }
-                // Update turn.
-                updateTurnIndicator(currPlayer, gameModel);
-
-                // Set tile size to be relative to container size, magic number
-                // scaling, not nice but works.
-                double tileHeight = gameBoardCanvas.getHeight() * 0.03575;
-                double tileWidth = gameBoardCanvas.getWidth() * 0.04175;
-
-                // Render tiles and weapon pieces.
-                for (List<Tile> row : boardTiles.getGrid()) {
-                    for (Tile t : row) {
-                        tileSprites[0].get(t).setDims(tileWidth, tileHeight);
-                        double x = t.getColumn() * tileWidth;
-                        double y = t.getRow() * tileHeight;
-                        tileSprites[0].get(t).render(x, y);
+                    // End players turn if they have been kicked.
+                    PlayerPiece currPP = gameModel.getCurrentPlayersTurn().getPiece();
+                    if (currPP.isKicked()) {
+                        System.out.println(currPP.getName() +
+                                " is not in the game anymore, skipping.");
+                        gameModel.endTurn();
                     }
+
+                    // If player has just entered a room, end their turn. Buggy, removed.
+//                    if (currPP.getLocation().getType().equals("room")
+//                            && !gameModel.getLocAtTurnStart().getType().equals("room")) {
+//                        System.out.println("Entered " + currPP.getLocation().getType());
+//                        gameModel.endTurn();
+//                    }
+
+                } else if (gameModel.state() == GameState.MakingAccusation) {
+                    // Disable game board.
+                    Pane board = (Pane) root.getCenter();
+                    for (Node n : board.getChildren())  {
+                        n.setDisable(false);
+                    }
+                    // Disable buttons while accusation is in progress.
+                    HBox actionContainer = (HBox) root.getBottom();
+                    actionContainer.getChildren().get(0).setDisable(true);
+                    actionContainer.getChildren().get(1).setDisable(true);
+
+                    // Build up selections from player and pass to make accusation.
+                    CardChoice choices = gameModel.getAccusationChoices();
+                    if (choices.getRoom() != null && choices.getWeapon() != null &&
+                            choices.getSuspect() != null) {
+                        gameModel.makeAccusation(choices);
+                    }
+                } else if (gameModel.state() == GameState.GameOver) {
+                    // Disable game board.
+                    Pane board = (Pane) root.getCenter();
+                    for (Node n : board.getChildren())  {
+                        n.setDisable(false);
+                    }
+                    // Disable buttons while accusation is in progress.
+                    HBox actionContainer = (HBox) root.getBottom();
+                    actionContainer.getChildren().get(0).setDisable(true);
+                    actionContainer.getChildren().get(1).setDisable(true);
+
+                    // Display that game has ended somehow.
                 }
+                    // Update turn.
+                    updateTurnIndicator(currPlayer, gameModel);
+
+                    // Set tile size to be relative to container size.
+                    double tileHeight = gameBoardCanvas.getHeight() / gameBoard.getGrid().getRows();
+                    double tileWidth = gameBoardCanvas.getWidth() / gameBoard.getGrid().getColumns();
+
+                    // Render tiles and weapon pieces.
+                    for (List<Tile> row : boardTiles.getGrid()) {
+                        for (Tile t : row) {
+                            tileSprites[0].get(t).setDims(tileWidth, tileHeight);
+                            double x = t.getColumn() * tileWidth;
+                            double y = t.getRow() * tileHeight;
+                            tileSprites[0].get(t).render(x, y);
+                        }
+                    }
+
             }
         }.start();
 
@@ -177,13 +226,15 @@ public class ClueGUI extends Application {
         HBox actionContainer = initActionsPane(model);
 
         gameBoardCanvas.setPrefHeight(700);
-        gameBoardCanvas.setPrefWidth(850);
+        gameBoardCanvas.prefWidthProperty().bind(theStage.widthProperty().multiply(0.70));
 
         root.setCenter(gameBoardCanvas);
         root.setTop(turnIndicator);
         root.setBottom(actionContainer);
         BorderPane.setAlignment(gameBoardCanvas, Pos.CENTER);
 
+        theStage.setWidth(850);
+        theStage.setHeight(700);
         theStage.setX(0);
         theStage.setY(0);
         theStage.sizeToScene();
@@ -267,10 +318,10 @@ public class ClueGUI extends Application {
      * @return Collection of detective slip containers.
      */
     private HashMap<PlayerPiece, VBox> generateCharactersDetectiveSlipPanels(
-            List<PlayerPiece> playerPieces) {
+            List<PlayerPiece> playerPieces, Stage theStage, Cluedo model) {
         HashMap<PlayerPiece, VBox> dSlipPanels = new HashMap<>();
         for (PlayerPiece pp : playerPieces) {
-            dSlipPanels.put(pp, generateDetectiveSlipPanel(pp));
+            dSlipPanels.put(pp, generateDetectiveSlipPanel(pp, theStage, model));
         }
         return dSlipPanels;
     }
@@ -282,7 +333,7 @@ public class ClueGUI extends Application {
      * @param pp Player piece to generate a detective slip for.
      * @return Container representing detective slip.
      */
-    private VBox generateDetectiveSlipPanel(PlayerPiece pp) {
+    private VBox generateDetectiveSlipPanel(PlayerPiece pp, Stage theStage, Cluedo model) {
         VBox dSlipPanel = new VBox();
         dSlipPanel.setPadding(new Insets(10, 10, 10, 10));
         dSlipPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
@@ -290,6 +341,7 @@ public class ClueGUI extends Application {
         // Display who's detective slip this is.
         Text dSlipOwner = new Text(pp.getName() + "'s Detective Slip");
         dSlipOwner.setFont(new Font(20));
+        dSlipPanel.prefWidthProperty().bind(theStage.widthProperty().multiply(0.15));
         dSlipPanel.getChildren().add(dSlipOwner);
 
         // Add all cards and their marking to container.
@@ -304,10 +356,17 @@ public class ClueGUI extends Application {
             Pane spacer = new Pane(); // Enables full justification of nodes.
 
             HBox cardContainer = new HBox();
+            Text cardName = new Text(card.getName());
             cardContainer.setSpacing(10);
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            cardContainer.getChildren().addAll(new Text(card.getName()), spacer,
+            cardName.setOnMouseClicked(event -> {
+                if (model.state() == GameState.MakingAccusation) {
+                    model.addAccusationSelection(card.getName());
+                }
+            });
+
+            cardContainer.getChildren().addAll(cardName, spacer,
                     new Text(Boolean.toString(marked)));
 
             // Don't add a checkbox for cards held by player.
@@ -379,6 +438,10 @@ public class ClueGUI extends Application {
             model.rollDice(model.state(), model.getPlayOrder());
         });
 
+        makeAccusation.setOnMouseClicked(event -> {
+            model.beginAccusation();
+        });
+
         actionContainer.setPadding(new Insets(10, 10, 10, 10));
         actionContainer.setAlignment(Pos.CENTER);
         actionContainer.setStyle("-fx-background-color: " + BCKGND_CLR);
@@ -388,18 +451,20 @@ public class ClueGUI extends Application {
         return actionContainer;
     }
 
-    private HashMap<Player, VBox> generatePlayersCardPanels(List<Player> players) {
+    private HashMap<Player, VBox> generatePlayersCardPanels(List<Player> players,
+                                                            Stage theStage) {
         HashMap<Player, VBox> cardPanels = new HashMap<>();
         for (Player p : players) {
-            cardPanels.put(p, generateCardPanel(p));
+            cardPanels.put(p, generateCardPanel(p, theStage));
         }
         return cardPanels;
     }
 
-    private VBox generateCardPanel(Player player) {
+    private VBox generateCardPanel(Player player, Stage theStage) {
         VBox cardPanel = new VBox();
         cardPanel.setPadding(new Insets(10, 10, 10, 10));
         cardPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
+        cardPanel.prefWidthProperty().bind(theStage.widthProperty().multiply(0.15));
 
         // Display who's cards these are.
         Text cardsOwner = new Text(player.getName() + "'s Cards");

@@ -39,7 +39,10 @@ public class Sprite {
                 break;
             case UsePassage:
                 imView.setOnMouseClicked(event -> {
-                    // @ToDo
+                    Room currRoom = model.getCurrentPlayersTurn()
+                            .getPiece().getLocation().getBelongsTo();
+                    model.useSecretPassage(currRoom);
+                    model.endTurn();
                 });
                 break;
             default:
