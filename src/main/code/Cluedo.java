@@ -372,7 +372,6 @@ public class Cluedo {
                         foundCards.add(card);
                     }
                 }
-
             }
         }
         if (foundCards.size() > 0) {
