@@ -347,38 +347,43 @@ public class Cluedo {
         return new CardChoice(playerPiece, roomCard, weaponCard, suspectCard);
 
     }
+    public static void main(String[] args) {
+        Cluedo cluedo = new Cluedo();
+        cluedo.setUpPlayers();
+        CardChoice cc = new CardChoice(cluedo.getPlayerPieces().get(0),cluedo.findRoomCard("Billiard"),cluedo.findWeaponCard("Candlestick"), cluedo.findSuspectCard("Prof Plum"));
+        System.out.println(cc);
+        cluedo.verifySuggestion(cc);
+
+    }
 
     public void verifySuggestion(CardChoice cardChoices) {
+        System.out.println("Making suggestion");
         RoomCard room = cardChoices.getRoom();
         WeaponCard weapon = cardChoices.getWeapon();
         SuspectCard suspect = cardChoices.getSuspect();
         PlayerPiece playerPiece = currentPlayersTurn.getPiece();
-        boolean endSuggestion = false;
-        int prevIndex = this.getPlayerPieces().indexOf(playerPiece) - 1;
-        while (!endSuggestion) {
-            List<Card> foundCards = new ArrayList<Card>();
-            PlayerPiece piece = this.getPlayerPieces().get(prevIndex);
-            if (!piece.equals(playerPiece) && piece.getBelongsTo() != null) {
-                Player player = piece.getBelongsTo();
-                List<Card> playerCards = player.getCards();
-                for (Card card : playerCards) {
+        for(Player player: this.players){
+            if(player!= playerPiece.getBelongsTo()){
+                List<Card> foundCards = new ArrayList<Card>();
+                for(Card card: player.getCards()){
                     if (card instanceof RoomCard && card.equals(room) || card instanceof WeaponCard && card.equals(weapon) || card instanceof SuspectCard && card.equals(suspect)) {
                         foundCards.add(card);
+                        System.out.println("Found Card!");
                     }
                 }
-                if (foundCards.size() == 0) {
-                    endSuggestion = true;
-                } else {
-                    Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size() + 1));
-                    logMessage("Card has been revealed from " + player + " " + revealedCard);
-                    prevIndex--;
-                    if (prevIndex < 0) {
-                        prevIndex = 6;
-                    }
+                if(foundCards.size()>0){
+                    Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
+                    System.out.println("Card has been revealed from " + player + " " + revealedCard);
+                    player.getPiece().getSlip().markSlip(revealedCard, true);
+                }
+                else{
+                    state = GameState.InPlay;
+                    return;
                 }
             }
 
         }
+
     }
 
     public boolean makeAccusation(CardChoice cardChoice) {
@@ -815,9 +820,7 @@ public class Cluedo {
         this.roomCards = roomCards;
     }
 
-//    public static void main(String[] args) {
-//        Cluedo cluedo = new Cluedo();
-//    }
+
 
     /**
      * @return weaponPieces
