@@ -363,26 +363,25 @@ public class Cluedo {
         WeaponCard weapon = cardChoices.getWeapon();
         SuspectCard suspect = cardChoices.getSuspect();
         PlayerPiece playerPiece = currentPlayersTurn.getPiece();
-        System.out.println(playerPiece.getBelongsTo() + "made a suggestion that " + suspect + "was the murderer! They used " + weapon + " in" + room + ".");
+        System.out.println(playerPiece.getBelongsTo() + " made a suggestion that " + suspect + " was the murderer! They used " + weapon + " in " + room + ".");
+        List<Card> foundCards = new ArrayList<Card>();
         for (Player player : this.players) {
             if (player != playerPiece.getBelongsTo()) {
-                List<Card> foundCards = new ArrayList<Card>();
                 for (Card card : player.getCards()) {
                     if (card instanceof RoomCard && card.equals(room) || card instanceof WeaponCard && card.equals(weapon) || card instanceof SuspectCard && card.equals(suspect)) {
                         foundCards.add(card);
                     }
                 }
-                if (foundCards.size() > 0) {
-                    Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
-                    System.out.println("Found Card!");
-                    System.out.println("Card has been revealed from " + player + " " + revealedCard);
-                    player.getPiece().getSlip().markSlip(revealedCard, true);
-                } else {
-                    System.out.println("No cards found, ended suggestion!");
-                    state = GameState.InPlay;
-                    break;
-                }
+
             }
+        }
+        if (foundCards.size() > 0) {
+            Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
+            System.out.println("Found Card!");
+            System.out.println("Card has been revealed from " + playerPiece.getBelongsTo() + " " + revealedCard);
+            playerPiece.getSlip().markSlip(revealedCard, true);
+        } else {
+            System.out.println("No cards found, ended suggestion!");
         }
         state = GameState.InPlay;
     }
