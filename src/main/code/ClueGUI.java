@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -285,8 +286,8 @@ public class ClueGUI extends Application {
                 }
                     // Display messages for players.
                     HBox actionContainer = (HBox) root.getBottom();
-                    ((Text) actionContainer.getChildren().get(4)).setText(getMsgLogs(gameModel));
-
+                    Text messages = new Text(getMsgLogs(gameModel));
+                    ((ScrollPane) actionContainer.getChildren().get(4)).setContent(messages);
 
                     // Update turn.
                     updateTurnIndicator(currPlayer, gameModel);
@@ -315,16 +316,9 @@ public class ClueGUI extends Application {
     private String getMsgLogs(Cluedo model) {
         List<String> messages = model.getMessageLogs();
         String output = new String();
-        int numMsgsToLoad = 5;
 
-        if (messages.size() > numMsgsToLoad) {
-            for (int i = numMsgsToLoad; i < messages.size(); i++) {
-                output += "> " + messages.get(i) + '\n';
-            }
-        } else {
-            for (String m : messages) {
-                output += "> " + m + '\n';
-            }
+        for (String m : messages) {
+            output += "> " + m + '\n';
         }
 
         return output;
@@ -348,7 +342,7 @@ public class ClueGUI extends Application {
 
         Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
         HBox turnIndicator = initTurnIndicator();
-        HBox actionContainer = initActionsPane(model);
+        HBox actionContainer = initActionsPane(model, theStage);
 
         gameBoardCanvas.setPrefHeight(700);
         gameBoardCanvas.prefWidthProperty().bind(theStage.widthProperty().multiply(0.70));
@@ -594,13 +588,16 @@ public class ClueGUI extends Application {
         return roomSprites;
     }
 
-    private HBox initActionsPane(Cluedo model) {
+    private HBox initActionsPane(Cluedo model, Stage theStage) {
         HBox actionContainer = new HBox();
         Button rollDice = new Button("Roll Dice");
         Button makeAccusation = new Button("Make Accusation");
         Button makeSuggestion = new Button("Make Suggestion");
         Button skipTurn = new Button("Skip Turn");
-        Text messageLogs = new Text("This is the message log box where events of the game will be displayed.");
+        ScrollPane messageLogs = new ScrollPane();
+
+        messageLogs.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        messageLogs.prefHeightProperty().bind(theStage.widthProperty().multiply(0.10));
 
         makeAccusation.setDisable(true);
         makeSuggestion.setDisable(true);
@@ -611,17 +608,21 @@ public class ClueGUI extends Application {
         });
 
         makeAccusation.setOnMouseClicked(event -> {
-            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() + " is making an accusation.");
+            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName()
+                    + " is making an accusation.");
             model.setState(GameState.MakingAccusation);
         });
 
         skipTurn.setOnMouseClicked(event -> {
+            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() +
+                    " has skipped their turn.");
             model.setState(GameState.InPlay);
             model.endTurn();
         });
 
         makeSuggestion.setOnMouseClicked(event -> {
-            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() + " is making a suggestion.");
+            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName()
+                    + " is making a suggestion.");
             model.setState(GameState.MakingSuggestion);
         });
 

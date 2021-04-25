@@ -121,9 +121,6 @@ public class Cluedo {
     }
 
     public void logMessage(String msg) {
-        if (messageLogs.size() > 6) {
-            messageLogs = messageLogs.subList(0, 5);
-        }
         messageLogs.add(msg);
     }
 
