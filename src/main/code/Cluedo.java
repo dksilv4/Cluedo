@@ -138,7 +138,7 @@ public class Cluedo {
         // Generate immediately adjacent tiles.
         for (int row = tileRow - 1; row <= tileRow + 1; row++) {
             if (row == tileRow || row > board.getGrid().getRows() ||
-            row < 0) {
+                    row < 0) {
                 continue;
             }
             neighbours.add(new Pair<>(row, tileCol));
@@ -155,7 +155,7 @@ public class Cluedo {
                 newTile.getColumn())) && (currentPlayersSteps > 0)
                 && state == GameState.InPlay; // Add check for is kicked.
 
-        if(canMove) {
+        if (canMove) {
             currentPlayersTurn.getPiece().getLocation().removeOccupier();
             currentPlayersTurn.getPiece().setLocation(newTile);
             currentPlayersSteps--;
@@ -347,10 +347,11 @@ public class Cluedo {
         return new CardChoice(playerPiece, roomCard, weaponCard, suspectCard);
 
     }
+
     public static void main(String[] args) {
         Cluedo cluedo = new Cluedo();
         cluedo.setUpPlayers();
-        CardChoice cc = new CardChoice(cluedo.getPlayerPieces().get(0),cluedo.findRoomCard("Billiard"),cluedo.findWeaponCard("Candlestick"), cluedo.findSuspectCard("Prof Plum"));
+        CardChoice cc = new CardChoice(cluedo.getPlayerPieces().get(0), cluedo.findRoomCard("Billiard"), cluedo.findWeaponCard("Candlestick"), cluedo.findSuspectCard("Prof Plum"));
         System.out.println(cc);
         cluedo.verifySuggestion(cc);
 
@@ -362,32 +363,32 @@ public class Cluedo {
         WeaponCard weapon = cardChoices.getWeapon();
         SuspectCard suspect = cardChoices.getSuspect();
         PlayerPiece playerPiece = currentPlayersTurn.getPiece();
-        for(Player player: this.players){
-            if(player!= playerPiece.getBelongsTo()){
+        System.out.println(playerPiece.getBelongsTo() + "made a suggestion that " + suspect + "was the murderer! They used " + weapon + " in" + room + ".");
+        for (Player player : this.players) {
+            if (player != playerPiece.getBelongsTo()) {
                 List<Card> foundCards = new ArrayList<Card>();
-                for(Card card: player.getCards()){
+                for (Card card : player.getCards()) {
                     if (card instanceof RoomCard && card.equals(room) || card instanceof WeaponCard && card.equals(weapon) || card instanceof SuspectCard && card.equals(suspect)) {
                         foundCards.add(card);
-                        System.out.println("Found Card!");
                     }
                 }
-                if(foundCards.size()>0){
+                if (foundCards.size() > 0) {
                     Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
+                    System.out.println("Found Card!");
                     System.out.println("Card has been revealed from " + player + " " + revealedCard);
                     player.getPiece().getSlip().markSlip(revealedCard, true);
-                }
-                else{
+                } else {
+                    System.out.println("No cards found, ended suggestion!");
                     state = GameState.InPlay;
-                    return;
+                    break;
                 }
             }
-
         }
-
+        state = GameState.InPlay;
     }
 
     public boolean makeAccusation(CardChoice cardChoice) {
-        boolean successful =  (cardChoice.getRoom().equals(this.envelope.getRoom())
+        boolean successful = (cardChoice.getRoom().equals(this.envelope.getRoom())
                 && cardChoice.getWeapon().equals(this.envelope.getWeapon())
                 && cardChoice.getSuspect().equals(this.envelope.getSuspect()));
         state = (successful) ? GameState.GameOver : GameState.InPlay;
@@ -819,7 +820,6 @@ public class Cluedo {
         // assign the list into its class variable
         this.roomCards = roomCards;
     }
-
 
 
     /**
