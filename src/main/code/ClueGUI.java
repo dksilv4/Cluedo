@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -52,6 +53,7 @@ public class ClueGUI extends Application {
         final HashMap<PlayerPiece, Sprite>[] playerPieceSprites = new HashMap[]{new HashMap<>()};
         final HashMap<String, Sprite>[] weapPieceSprites = new HashMap[]{new HashMap<>()};
         gameBoardCanvas.setDisable(true);
+        final HashMap<Room, Text>[] roomSprites = new HashMap[]{new HashMap<>()};
 
         final boolean[] playerGUIGenerated = {false};
 
@@ -108,6 +110,8 @@ public class ClueGUI extends Application {
                                 generateCharactersDetectiveSlipPanels(gameModel.getPlayerPieces(),
                                         theStage, gameModel);
 
+                        roomSprites[0] = generateRoomSprites(gameModel, gameBoardCanvas);
+
                         playerGUIGenerated[0] = true;
                     }
 
@@ -148,6 +152,19 @@ public class ClueGUI extends Application {
                         double x = pp.getLocation().getColumn() * tileWidth;
                         double y = pp.getLocation().getRow() * tileHeight;
                         playerPieceSprites[0].get(pp).render(x, y);
+                    }
+
+                    // Render room names.
+                    for (Room r : gameModel.getBoard().getRooms()) {
+                        Text roomName = roomSprites[0].get(r);
+
+                        // Get top right and bottom left tile to calculate size.
+                        List<Tile> tiles = r.getTiles();
+                        double x = tiles.get(tiles.size() / 2).getColumn() * tileWidth;
+                        double y = tiles.get(tiles.size() / 2).getRow() * tileHeight;
+
+                        roomName.setX(x);
+                        roomName.setY(y);
                     }
 
                     // Check if all players have lost the game and the game is over.
@@ -272,6 +289,7 @@ public class ClueGUI extends Application {
                             tileSprites[0].get(t).render(x, y);
                         }
                     }
+
 
             }
         }.start();
@@ -430,6 +448,14 @@ public class ClueGUI extends Application {
         VBox dSlipPanel = new VBox();
         dSlipPanel.setPadding(new Insets(10, 10, 10, 10));
         dSlipPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
+        Button revealSlip = new Button("Reveal Slip");
+
+        revealSlip.setOnMousePressed(event -> {
+            for (int i = 1; i < dSlipPanel.getChildren().size() - 1; i++) {
+                Node child = dSlipPanel.getChildren().get(i);
+                child.setVisible(!child.isVisible());
+            }
+        });
 
         // Display who's detective slip this is.
         Text dSlipOwner = new Text(pp.getName() + "'s Detective Slip");
@@ -479,11 +505,12 @@ public class ClueGUI extends Application {
                 cardContainer.getChildren().add(new Pane());
             }
 
+            cardContainer.setVisible(false);
             dSlipPanel.getChildren().add(cardContainer);
-
             it.remove();
         }
 
+        dSlipPanel.getChildren().add(revealSlip);
         return dSlipPanel;
     }
 
@@ -520,7 +547,29 @@ public class ClueGUI extends Application {
                 tileSprites.put(t, s);
             }
         }
+
         return tileSprites;
+    }
+
+    private HashMap<Room, Text> generateRoomSprites(Cluedo model, Pane gameBoardCanvas) {
+        HashMap<Room, Text> roomSprites = new HashMap<>();
+
+        for (Room r : model.getBoard().getRooms()) {
+            Text roomName = new Text(r.getName());
+
+            // Get top right and bottom left tile to calculate size.
+            List<Tile> tiles = r.getTiles();
+            double x = tiles.get(tiles.size() / 2).getColumn() * DEFAULT_TILE_SIZE;
+            double y = tiles.get(tiles.size() / 2).getRow() * DEFAULT_TILE_SIZE;
+
+            roomName.setX(x);
+            roomName.setY(y);
+
+            roomSprites.put(r, roomName);
+            gameBoardCanvas.getChildren().add(roomName);
+        }
+
+        return roomSprites;
     }
 
     private HBox initActionsPane(Cluedo model) {
@@ -530,6 +579,7 @@ public class ClueGUI extends Application {
         Button makeSuggestion = new Button("Make Suggestion");
         Button skipTurn = new Button("Skip Turn");
         Text messageLogs = new Text("This is the message log box where events of the game will be displayed.");
+
         makeAccusation.setDisable(true);
         makeSuggestion.setDisable(true);
         skipTurn.setDisable(true);
@@ -544,7 +594,6 @@ public class ClueGUI extends Application {
         });
 
         skipTurn.setOnMouseClicked(event -> {
-            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() + " has skipped their turn.");
             model.setState(GameState.InPlay);
             model.endTurn();
         });
@@ -578,6 +627,14 @@ public class ClueGUI extends Application {
         cardPanel.setPadding(new Insets(10, 10, 10, 10));
         cardPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
         cardPanel.prefWidthProperty().bind(theStage.widthProperty().multiply(0.15));
+        Button revealCards = new Button("Reveal Cards");
+
+        revealCards.setOnMousePressed(event -> {
+            for (int i = 1; i < cardPanel.getChildren().size() - 1; i++) {
+                Node child = cardPanel.getChildren().get(i);
+                child.setVisible(!child.isVisible());
+            }
+        });
 
         // Display who's cards these are.
         Text cardsOwner = new Text(player.getName() + "'s Cards");
@@ -587,9 +644,11 @@ public class ClueGUI extends Application {
         // Add all cards to container.
         for (Card c : player.getCards()) {
             Text cardName = new Text(c.getName());
+            cardName.setVisible(false);
             cardPanel.getChildren().add(cardName);
         }
 
+        cardPanel.getChildren().add(revealCards);
         return cardPanel;
     }
 

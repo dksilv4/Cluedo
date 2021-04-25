@@ -374,11 +374,11 @@ public class Cluedo {
                 }
                 if (foundCards.size() > 0) {
                     Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
-                    System.out.println("Found Card!");
+                    logMessage("Found Card!");
                     System.out.println("Card has been revealed from " + player + " " + revealedCard);
                     player.getPiece().getSlip().markSlip(revealedCard, true);
                 } else {
-                    System.out.println("No cards found, ended suggestion!");
+                    logMessage("No cards found, ended suggestion!");
                     state = GameState.InPlay;
                     break;
                 }
