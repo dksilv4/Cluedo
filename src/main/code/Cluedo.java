@@ -27,6 +27,7 @@ public class Cluedo {
     private Tile locAtTurnStart;
     private PlayerPiece winner = null;
     private List<String> messageLogs;
+    private boolean suggestionMade = false;
 
     /**
      * Initializes Cluedo and loads all the necessary data to run the game
@@ -120,6 +121,9 @@ public class Cluedo {
     }
 
     public void logMessage(String msg) {
+        if (messageLogs.size() > 6) {
+            messageLogs = messageLogs.subList(0, 5);
+        }
         messageLogs.add(msg);
     }
 
@@ -174,7 +178,16 @@ public class Cluedo {
         return locAtTurnStart;
     }
 
+    public void playerHasUsedSuggestion() {
+        suggestionMade = true;
+    }
+
+    public boolean isSuggestionMade() {
+        return suggestionMade;
+    }
+
     public void endTurn() {
+        suggestionMade = false;
         locAtTurnStart = currentPlayersTurn.getPiece().getLocation();
         accusationChoices = new CardChoice();
         suggestionChoices = new CardChoice();
@@ -357,11 +370,11 @@ public class Cluedo {
 
     }
 
-    public void verifySuggestion(CardChoice cardChoices) {
-        System.out.println("Making suggestion");
+    public Card verifySuggestion(CardChoice cardChoices) {
         RoomCard room = cardChoices.getRoom();
         WeaponCard weapon = cardChoices.getWeapon();
         SuspectCard suspect = cardChoices.getSuspect();
+        Card revealedCard = null;
         PlayerPiece playerPiece = currentPlayersTurn.getPiece();
         System.out.println(playerPiece.getBelongsTo() + " made a suggestion that " + suspect + " was the murderer! They used " + weapon + " in " + room + ".");
         List<Card> foundCards = new ArrayList<Card>();
@@ -375,7 +388,7 @@ public class Cluedo {
             }
         }
         if (foundCards.size() > 0) {
-            Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
+            revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
             System.out.println("Found Card!");
             System.out.println("Card has been revealed from " + playerPiece.getBelongsTo() + " " + revealedCard);
             playerPiece.getSlip().markSlip(revealedCard, true);
@@ -383,6 +396,7 @@ public class Cluedo {
             System.out.println("No cards found, ended suggestion!");
         }
         state = GameState.InPlay;
+        return revealedCard;
     }
 
     public boolean makeAccusation(CardChoice cardChoice) {

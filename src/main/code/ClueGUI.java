@@ -233,12 +233,27 @@ public class ClueGUI extends Application {
                     actionContainer.getChildren().get(0).setDisable(false);
                     actionContainer.getChildren().get(1).setDisable(true);
                     actionContainer.getChildren().get(3).setDisable(true);
+                    if(gameModel.isSuggestionMade()) {
+                        actionContainer.getChildren().get(1).setDisable(true);
+                    }
 
                     // Build up selections from player and pass to make suggestion.
                     CardChoice choices = gameModel.getSuggestionChoices();
                     if (choices.getRoom() != null && choices.getWeapon() != null &&
                             choices.getSuspect() != null) {
-                        gameModel.verifySuggestion(choices);
+                        Card foundCard = gameModel.verifySuggestion(choices);
+                        if (foundCard != null) {
+                            logMessage(gameModel, currPlayer.getPiece().getName()
+                                    + "'s suggestion was successful.");
+                            Alert markYourCard = new Alert(Alert.AlertType.INFORMATION,
+                                    "Your suggestion revealed " + foundCard.getName()
+                                            + " make sure to mark your detective slip!");
+                            markYourCard.show();
+                            gameModel.playerHasUsedSuggestion();
+                        } else {
+                            logMessage(gameModel, currPlayer.getPiece().getName()
+                                    + "'s suggestion was unsuccessful.");
+                        }
                     }
 
                 } else if (gameModel.state() == GameState.GameOver) {
@@ -463,6 +478,7 @@ public class ClueGUI extends Application {
         dSlipPanel.prefWidthProperty().bind(theStage.widthProperty().multiply(0.15));
         dSlipPanel.getChildren().add(dSlipOwner);
 
+
         // Add all cards and their marking to container.
         DetectiveSlip dSlip = pp.getSlip();
         Iterator it = dSlip.getCards().entrySet().iterator();
@@ -477,6 +493,8 @@ public class ClueGUI extends Application {
             HBox cardContainer = new HBox();
             Text cardName = new Text(card.getName());
             cardContainer.setSpacing(10);
+            String initMarking = marked ? "Marked" : "Not Marked";
+            Text markedDisplay = new Text(initMarking);
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
             cardName.setOnMouseClicked(event -> {
@@ -488,7 +506,7 @@ public class ClueGUI extends Application {
             });
 
             cardContainer.getChildren().addAll(cardName, spacer,
-                    new Text(Boolean.toString(marked)));
+                    markedDisplay);
 
             // Don't add a checkbox for cards held by player.
             if (pp.getBelongsTo() != null
@@ -496,13 +514,17 @@ public class ClueGUI extends Application {
                 CheckBox cardMarker = new CheckBox();
                 cardMarker.setOnMouseClicked(event -> {
                     dSlip.markSlip(card, true);
-                    System.out.printf("Marked:  %s \n", card.getName());
+                    markedDisplay.setText("Marked");
+                    System.out.printf("Marked: %s \n", card.getName());
                     cardMarker.setDisable(true);
                 });
 
                 cardContainer.getChildren().add(cardMarker);
             } else {
-                cardContainer.getChildren().add(new Pane());
+                CheckBox cardMarker = new CheckBox();
+                cardMarker.setDisable(true);
+                cardMarker.setSelected(true);
+                cardContainer.getChildren().add(cardMarker);
             }
 
             cardContainer.setVisible(false);
