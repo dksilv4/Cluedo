@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.image.Image;
@@ -13,6 +14,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -72,15 +74,22 @@ public class ClueGUI extends Application {
                         for (Node n : board.getChildren())  {
                             n.setDisable(true);
                         }
-                        actionContainer.getChildren().get(1).setDisable(false);
+                        actionContainer.getChildren().get(3).setDisable(false);
                     } else { // Disable board.
                         for (Node n : board.getChildren())  {
                             n.setDisable(false);
                         }
-                        actionContainer.getChildren().get(1).setDisable(true);
+                        actionContainer.getChildren().get(3).setDisable(true);
                     }
-                    // Enable accusations.
+                    // Enable accusations, skip and suggestions.
                     actionContainer.getChildren().get(0).setDisable(false);
+                    if (gameModel.getCurrentPlayersTurn().getPiece().getLocation().getBelongsTo() == null ||
+                            gameModel.getCurrentPlayersTurn().getPiece().getLocation().getBelongsTo().getName().equals("X")) {
+                        actionContainer.getChildren().get(1).setDisable(true);
+                    } else {
+                        actionContainer.getChildren().get(1).setDisable(false);
+                    }
+                    actionContainer.getChildren().get(2).setDisable(false);
 
 
                     if (!playerGUIGenerated[0]) {
@@ -141,6 +150,26 @@ public class ClueGUI extends Application {
                         playerPieceSprites[0].get(pp).render(x, y);
                     }
 
+                    // Check if all players have lost the game and the game is over.
+                    if (playerGUIGenerated[0]
+                            && gameModel.state() != GameState.AssigningPlayerPieces) {
+                        List<Pair<Player, Integer>> playOrder = gameModel.getPlayOrder();
+                        List<PlayerPiece> piecesStillPlaying = new ArrayList<>();
+                        for (int i = 0; i < playOrder.size(); i++) {
+                            if(playOrder.get(i).getKey().getPiece().isKicked()) {
+                                continue;
+                            } else {
+                                piecesStillPlaying.add(playOrder.get(i).getKey().getPiece());
+                            }
+                        }
+                        if (piecesStillPlaying.isEmpty()) {
+                            // Game over all players have lost.
+                            gameBoardCanvas.setDisable(true);
+                            gameModel.setState(GameState.GameOver);
+                            System.out.println("Game over, all players have lost.");
+                        }
+                    }
+
                     // End players turn if they have been kicked.
                     PlayerPiece currPP = gameModel.getCurrentPlayersTurn().getPiece();
                     if (currPP.isKicked()) {
@@ -148,6 +177,7 @@ public class ClueGUI extends Application {
                                 " is not in the game anymore, skipping.");
                         gameModel.endTurn();
                     }
+
 
                     // If player has just entered a room, end their turn. Buggy, removed.
 //                    if (currPP.getLocation().getType().equals("room")
@@ -164,8 +194,9 @@ public class ClueGUI extends Application {
                     }
                     // Disable buttons while accusation is in progress.
                     HBox actionContainer = (HBox) root.getBottom();
-                    actionContainer.getChildren().get(0).setDisable(true);
-                    actionContainer.getChildren().get(1).setDisable(true);
+                    for (Node n : actionContainer.getChildren())  {
+                        n.setDisable(true);
+                    }
 
                     // Build up selections from player and pass to make accusation.
                     CardChoice choices = gameModel.getAccusationChoices();
@@ -173,19 +204,58 @@ public class ClueGUI extends Application {
                             choices.getSuspect() != null) {
                         gameModel.makeAccusation(choices);
                     }
+                } else if (gameModel.state() == GameState.MakingSuggestion) {
+                    // Disable game board.
+                    Pane board = (Pane) root.getCenter();
+                    for (Node n : board.getChildren())  {
+                        n.setDisable(false);
+                    }
+
+                    // Disable roll and suggestion.
+                    HBox actionContainer = (HBox) root.getBottom();
+                    actionContainer.getChildren().get(0).setDisable(false);
+                    actionContainer.getChildren().get(1).setDisable(true);
+                    actionContainer.getChildren().get(3).setDisable(true);
+
+                    // Build up selections from player and pass to make suggestion.
+                    CardChoice choices = gameModel.getSuggestionChoices();
+                    if (choices.getRoom() != null && choices.getWeapon() != null &&
+                            choices.getSuspect() != null) {
+                        gameModel.verifySuggestion(choices);
+                    }
+
                 } else if (gameModel.state() == GameState.GameOver) {
                     // Disable game board.
                     Pane board = (Pane) root.getCenter();
                     for (Node n : board.getChildren())  {
                         n.setDisable(false);
                     }
-                    // Disable buttons while accusation is in progress.
+                    // Disable buttons.
                     HBox actionContainer = (HBox) root.getBottom();
-                    actionContainer.getChildren().get(0).setDisable(true);
-                    actionContainer.getChildren().get(1).setDisable(true);
+                    for (Node n : actionContainer.getChildren())  {
+                        n.setDisable(true);
+                    }
+
+                    // Disable det slip.
+                    VBox currDSlip = (VBox) root.getRight();
+                    for (Node n : currDSlip.getChildren())  {
+                        n.setDisable(true);
+                    }
 
                     // Display that game has ended somehow.
+                    this.stop();
+                    String endGameMsg = (gameModel.getWinner() == null) ? "Game Over (No winner)"
+                            : "Game Over (" + gameModel.getWinner().getName() + "  wins!)";
+
+                    Alert gameOverAlert = new Alert(Alert.AlertType.INFORMATION, endGameMsg);
+                    gameOverAlert.show();
+
                 }
+                    // Display messages for players.
+                    HBox actionContainer = (HBox) root.getBottom();
+                    ((Text) actionContainer.getChildren().get(4)).setText(getMsgLogs(gameModel));
+
+
                     // Update turn.
                     updateTurnIndicator(currPlayer, gameModel);
 
@@ -207,6 +277,28 @@ public class ClueGUI extends Application {
         }.start();
 
         theStage.show();
+    }
+
+    private String getMsgLogs(Cluedo model) {
+        List<String> messages = model.getMessageLogs();
+        String output = new String();
+        int numMsgsToLoad = 5;
+
+        if (messages.size() > numMsgsToLoad) {
+            for (int i = numMsgsToLoad; i < messages.size(); i++) {
+                output += "> " + messages.get(i) + '\n';
+            }
+        } else {
+            for (String m : messages) {
+                output += "> " + m + '\n';
+            }
+        }
+
+        return output;
+    }
+
+    private void logMessage(Cluedo model, String msg) {
+        model.logMessage(msg);
     }
 
     /**
@@ -308,6 +400,7 @@ public class ClueGUI extends Application {
         newPrefix.setFont(new Font(20));
 
         turnIndicator.getChildren().addAll(newPrefix, newName, newStepCount);
+
     }
 
     /**
@@ -363,6 +456,8 @@ public class ClueGUI extends Application {
             cardName.setOnMouseClicked(event -> {
                 if (model.state() == GameState.MakingAccusation) {
                     model.addAccusationSelection(card.getName());
+                } else if (model.state() == GameState.MakingSuggestion) {
+                    model.addSuggestionSelection(card.getName());
                 }
             });
 
@@ -432,21 +527,39 @@ public class ClueGUI extends Application {
         HBox actionContainer = new HBox();
         Button rollDice = new Button("Roll Dice");
         Button makeAccusation = new Button("Make Accusation");
+        Button makeSuggestion = new Button("Make Suggestion");
+        Button skipTurn = new Button("Skip Turn");
+        Text messageLogs = new Text("This is the message log box where events of the game will be displayed.");
         makeAccusation.setDisable(true);
+        makeSuggestion.setDisable(true);
+        skipTurn.setDisable(true);
 
         rollDice.setOnMouseClicked(event -> {
             model.rollDice(model.state(), model.getPlayOrder());
         });
 
         makeAccusation.setOnMouseClicked(event -> {
-            model.beginAccusation();
+            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() + " is making an accusation.");
+            model.setState(GameState.MakingAccusation);
+        });
+
+        skipTurn.setOnMouseClicked(event -> {
+            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() + " has skipped their turn.");
+            model.setState(GameState.InPlay);
+            model.endTurn();
+        });
+
+        makeSuggestion.setOnMouseClicked(event -> {
+            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() + " is making a suggestion.");
+            model.setState(GameState.MakingSuggestion);
         });
 
         actionContainer.setPadding(new Insets(10, 10, 10, 10));
         actionContainer.setAlignment(Pos.CENTER);
         actionContainer.setStyle("-fx-background-color: " + BCKGND_CLR);
 
-        actionContainer.getChildren().addAll(makeAccusation, rollDice);
+        actionContainer.getChildren().addAll(makeAccusation, makeSuggestion, skipTurn,
+                rollDice, messageLogs);
 
         return actionContainer;
     }

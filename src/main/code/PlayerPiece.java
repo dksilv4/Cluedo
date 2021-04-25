@@ -61,4 +61,8 @@ public class PlayerPiece extends Piece{
     public void setKicked(boolean kicked) {
         this.kicked = kicked;
     }
+
+    public boolean ableToPlay(){
+        return !this.isKicked() && this.belongsTo != null;
+    }
 }

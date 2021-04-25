@@ -4,5 +4,6 @@ public enum GameState {
     AssigningPlayerPieces,
     InPlay,
     MakingAccusation,
-    GameOver
+    GameOver,
+    MakingSuggestion
 }

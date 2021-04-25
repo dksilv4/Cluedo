@@ -23,7 +23,10 @@ public class Cluedo {
     private GameState state;
     private static Random rand = new Random();
     private CardChoice accusationChoices;
+    private CardChoice suggestionChoices;
     private Tile locAtTurnStart;
+    private PlayerPiece winner = null;
+    private List<String> messageLogs;
 
     /**
      * Initializes Cluedo and loads all the necessary data to run the game
@@ -35,11 +38,13 @@ public class Cluedo {
             this.setSpawns();
 
             playerOrder = new ArrayList<>();
+            messageLogs = new ArrayList<>();
             turnIndicator = 0;
             // Choose a random player to roll the dice first.
             currentPlayersTurn = players.get(rand.nextInt(players.size()));
             state = GameState.AssigningPlayerPieces;
             accusationChoices = new CardChoice();
+            suggestionChoices = new CardChoice();
             System.out.println(envelope.toString());
         }
     }
@@ -51,34 +56,75 @@ public class Cluedo {
 
         if (suspect != null) {
             this.accusationChoices.setSuspect(suspect);
-            System.out.println(cardName + " added to selection, current selection \n" +
-                    this.accusationChoices.toString());
-            System.out.println();
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their accusation.");
             return;
         }
         if (room != null) {
             this.accusationChoices.setRoom(room);
-            System.out.println(cardName + " added to selection, current selection \n" +
-                    this.accusationChoices.toString());
-            System.out.println();
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their accusation.");
             return;
         }
         if (weapon != null) {
             this.accusationChoices.setWeapon(weapon);
-            System.out.println(cardName + " added to selection, current selection \n" +
-                    this.accusationChoices.toString());
-
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their accusation.");
             return;
         }
 
+    }
+
+    public void addSuggestionSelection(String cardName) {
+        SuspectCard suspect = findSuspectCard(cardName);
+        RoomCard room = findRoomCard(currentPlayersTurn.getPiece().getLocation().getBelongsTo().getName());
+        WeaponCard weapon = findWeaponCard(cardName);
+
+        this.suggestionChoices.setRoom(room);
+        if (findRoomCard(cardName) != null) {
+            logMessage("The room for a suggestion can only be the room you are currently in.");
+            return;
+        }
+        if (suspect != null) {
+            this.suggestionChoices.setSuspect(suspect);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their suggestion.");
+            return;
+        }
+        if (weapon != null) {
+            this.suggestionChoices.setWeapon(weapon);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their suggestion.");
+            return;
+        }
     }
 
     public CardChoice getAccusationChoices() {
         return this.accusationChoices;
     }
 
+    public CardChoice getSuggestionChoices() {
+        return suggestionChoices;
+    }
+
     public GameState state() {
         return this.state;
+    }
+
+    public void setState(GameState s) {
+        this.state = s;
+    }
+
+    public PlayerPiece getWinner() {
+        return winner;
+    }
+
+    public void logMessage(String msg) {
+        messageLogs.add(msg);
+    }
+
+    public List<String> getMessageLogs() {
+        return messageLogs;
     }
 
     // Moves the current player's player piece.
@@ -131,17 +177,17 @@ public class Cluedo {
     public void endTurn() {
         locAtTurnStart = currentPlayersTurn.getPiece().getLocation();
         accusationChoices = new CardChoice();
+        suggestionChoices = new CardChoice();
         turnIndicator = (turnIndicator + 1) % playerOrder.size();
         currentPlayersTurn = playerOrder.get(turnIndicator).getKey();
         currentPlayersSteps = 0;
-        System.out.println(playerOrder);
     }
 
     public void rollDice(GameState currentState, List<Pair<Player, Integer>> playerOrder) {
         switch (currentState) {
             case AssigningPlayerPieces:
                 int roll = rollDice();
-                System.out.println(currentPlayersTurn.getName() + " rolled " + roll);
+                logMessage(currentPlayersTurn.getName() + " rolled " + roll);
                 playerOrder.add(new Pair<>(currentPlayersTurn, roll));
 
                 int nextPlayersIndex = (players.indexOf(currentPlayersTurn) + 1) % players.size();
@@ -154,11 +200,12 @@ public class Cluedo {
                     currentPlayersTurn = playerOrder.get(0).getKey();
                     currentPlayersSteps = rollDice();
                     state = GameState.InPlay;
-                    System.out.println("All player pieces assigned.");
+                    logMessage("All player pieces assigned.");
                 }
                 break;
             case InPlay:
                 currentPlayersSteps = rollDice();
+                logMessage(currentPlayersTurn.getName() + " rolled a " + currentPlayersSteps);
                 locAtTurnStart = currentPlayersTurn.getPiece().getLocation();
                 break;
             default:
@@ -299,7 +346,6 @@ public class Cluedo {
         }
         return new CardChoice(playerPiece, roomCard, weaponCard, suspectCard);
 
-
     }
 
     public void verifySuggestion(CardChoice cardChoices) {
@@ -312,7 +358,7 @@ public class Cluedo {
         while (!endSuggestion) {
             List<Card> foundCards = new ArrayList<Card>();
             PlayerPiece piece = this.getPlayerPieces().get(prevIndex);
-            if (!piece.equals(playerPiece)) {
+            if (!piece.equals(playerPiece) && piece.getBelongsTo() != null) {
                 Player player = piece.getBelongsTo();
                 List<Card> playerCards = player.getCards();
                 for (Card card : playerCards) {
@@ -324,7 +370,7 @@ public class Cluedo {
                     endSuggestion = true;
                 } else {
                     Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size() + 1));
-                    System.out.println("Card has been revealed from " + player + " " + revealedCard);
+                    logMessage("Card has been revealed from " + player + " " + revealedCard);
                     prevIndex--;
                     if (prevIndex < 0) {
                         prevIndex = 6;
@@ -335,21 +381,23 @@ public class Cluedo {
         }
     }
 
-    public void beginAccusation() {
-        System.out.println("Accusation in progress");
-        state = GameState.MakingAccusation;
-    }
-
     public boolean makeAccusation(CardChoice cardChoice) {
         boolean successful =  (cardChoice.getRoom().equals(this.envelope.getRoom())
                 && cardChoice.getWeapon().equals(this.envelope.getWeapon())
                 && cardChoice.getSuspect().equals(this.envelope.getSuspect()));
         state = (successful) ? GameState.GameOver : GameState.InPlay;
+        logMessage(currentPlayersTurn.getPiece().getName() + " accused " +
+                cardChoice.getSuspect().getName() + " of murder in the " + cardChoice.getRoom().getName() + " \n   with the "
+                + cardChoice.getWeapon().getName() + " accusation success = " + successful + ".");
         if (!successful) {
             currentPlayersTurn.getPiece().setKicked(true);
+            logMessage(currentPlayersTurn.getPiece().getName() + " has been removed from the game.");
+        } else {
+            // Player wins.
+            winner = currentPlayersTurn.getPiece();
+            logMessage(winner + " has won the game.");
+            setState(GameState.GameOver);
         }
-        System.out.println(currentPlayersTurn.getPiece().getName() + " accused " +
-                cardChoice.toString() + "success = " + successful);
         endTurn();
         return successful;
     }
