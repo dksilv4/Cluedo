@@ -47,6 +47,8 @@ public class Cluedo {
             accusationChoices = new CardChoice();
             suggestionChoices = new CardChoice();
             System.out.println(envelope.toString());
+            logMessage("This is the message log box where \n" +
+                    " events of the game will be displayed.");
         }
     }
 
@@ -154,7 +156,7 @@ public class Cluedo {
 
         boolean canMove = neighbours.contains(new Pair<>(newTile.getRow(),
                 newTile.getColumn())) && (currentPlayersSteps > 0)
-                && state == GameState.InPlay; // Add check for is kicked.
+                && state == GameState.InPlay && !newTile.isOccupied();
 
         if (canMove) {
             currentPlayersTurn.getPiece().getLocation().removeOccupier();

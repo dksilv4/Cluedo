@@ -1,6 +1,5 @@
 package code;
 
-import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -30,12 +29,18 @@ public class Sprite {
         imView.setImage(img);
     }
 
+    /**
+     * Assigns the given action to the sprite
+     *
+     * @param action    Action to assign to the sprite.
+     * @param model     Model to apply the action to.
+     * @param t         Tile to potentially use in the action.
+     */
     public void assignClickAction(Action action, Cluedo model, Tile t) {
         switch (action) {
             case Move:
-                imView.setOnMouseClicked(event -> {
-                    model.movePlayerPiece(t);
-                });
+                imView.setOnMouseClicked(event ->
+                        model.movePlayerPiece(t));
                 break;
             case UsePassage:
                 imView.setOnMouseClicked(event -> {

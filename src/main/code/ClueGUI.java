@@ -12,7 +12,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -26,12 +25,16 @@ import java.util.List;
 
 /**
  * This class acts as the View and Controller of the Clue! game's MVC structure,
- * currently it only renders the tiles and rooms from the Model.
+ * it renders all entities of the game e.g. player pieces, rooms, secret passages
+ * etc. this is achieved via Sprite objects and the AnimationTimer class which
+ * provides a rapid refreshing of the entities. The sprites also accept user
+ * clicks as input for movement, other input such as dice rolling is implemented
+ * using buttons.
  */
 public class ClueGUI extends Application {
 
-    private double DEFAULT_TILE_SIZE = 30;
-    private static String CURR_DIR = Paths.get("").toAbsolutePath()
+    private final double DEFAULT_TILE_SIZE = 30;
+    private static final String CURR_DIR = Paths.get("").toAbsolutePath()
             .toString();
     private HashMap<String, String> playerPieceColours; // {PlayerPiece: Colour} mapping.
     private BorderPane root;
@@ -50,10 +53,10 @@ public class ClueGUI extends Application {
         // Set-up scene and generate sprites.
         Pane gameBoardCanvas = initGUI(theStage, gameModel);
         final HashMap<Tile, Sprite>[] tileSprites = new HashMap[]{generateTileSprites(boardTiles,
-                gameBoardCanvas, gameModel)};
+                                                    gameBoardCanvas, gameModel)};
         final HashMap<PlayerPiece, Sprite>[] playerPieceSprites = new HashMap[]{new HashMap<>()};
         final HashMap<String, Sprite>[] weapPieceSprites = new HashMap[]{new HashMap<>()};
-        gameBoardCanvas.setDisable(true);
+                                                           gameBoardCanvas.setDisable(true);
         final HashMap<Room, Text>[] roomSprites = new HashMap[]{new HashMap<>()};
 
         final boolean[] playerGUIGenerated = {false};
@@ -86,14 +89,13 @@ public class ClueGUI extends Application {
                     }
                     // Enable accusations, skip and suggestions.
                     actionContainer.getChildren().get(0).setDisable(false);
-                    if (gameModel.getCurrentPlayersTurn().getPiece().getLocation().getBelongsTo() == null ||
-                            gameModel.getCurrentPlayersTurn().getPiece().getLocation().getBelongsTo().getName().equals("X")) {
-                        actionContainer.getChildren().get(1).setDisable(true);
-                    } else {
-                        actionContainer.getChildren().get(1).setDisable(false);
-                    }
                     actionContainer.getChildren().get(2).setDisable(false);
                     actionContainer.getChildren().get(4).setDisable(false);
+
+                    // Disable
+                    actionContainer.getChildren().get(1).setDisable(
+                            gameModel.getCurrentPlayersTurn().getPiece().getLocation().getBelongsTo() == null ||
+                            gameModel.getCurrentPlayersTurn().getPiece().getLocation().getBelongsTo().getName().equals("X"));
 
 
                     if (!playerGUIGenerated[0]) {
@@ -129,13 +131,13 @@ public class ClueGUI extends Application {
 
                     // Search the tiles of each room that has a weapon piece in it
                     // and choose the first available tile to render the weapon
-                    // pieces at.
+                    // pieces to.
                     for (Room r : gameBoard.getRooms()) {
                         if (r.getWeaponPiece() != null) {
                             List<Tile> potentialWeapPlaces = new ArrayList<>();
                             for (Tile t : r.getTiles()) {
                                 if (!t.isOccupied() && t != r.getSecretPassage() &&
-                                        t.getType() != "wall") {
+                                        !t.getType().equals("wall")) {
                                     potentialWeapPlaces.add(t);
                                 }
                             }
@@ -161,7 +163,7 @@ public class ClueGUI extends Application {
                         if (r.getName().equals("X")) continue;
                         Text roomName = roomSprites[0].get(r);
 
-                        // Get top right and bottom left tile to calculate size.
+                        // Get top right and bottom left tile to calculate center.
                         List<Tile> tiles = r.getTiles();
 
                         Tile topLeft = tiles.get(0);
@@ -183,15 +185,12 @@ public class ClueGUI extends Application {
                         List<Pair<Player, Integer>> playOrder = gameModel.getPlayOrder();
                         List<PlayerPiece> piecesStillPlaying = new ArrayList<>();
                         for (int i = 0; i < playOrder.size(); i++) {
-                            if (playOrder.get(i).getKey().getPiece().isKicked()) {
-                                continue;
-                            } else {
+                            if (!playOrder.get(i).getKey().getPiece().isKicked()) {
                                 piecesStillPlaying.add(playOrder.get(i).getKey().getPiece());
                             }
                         }
                         if (piecesStillPlaying.isEmpty()) {
                             // Game over all players have lost.
-                            gameBoardCanvas.setDisable(true);
                             gameModel.setState(GameState.GameOver);
                             logMessage(gameModel, "Game over, all players have lost.");
                         }
@@ -206,7 +205,8 @@ public class ClueGUI extends Application {
                     }
 
 
-                    // If player has just entered a room, end their turn. Buggy, removed.
+                    // If player has just entered a room, end their turn.
+                    // Buggy, removed.
 //                    if (currPP.getLocation().getType().equals("room")
 //                            && !gameModel.getLocAtTurnStart().getType().equals("room")) {
 //                        System.out.println("Entered " + currPP.getLocation().getType());
@@ -226,7 +226,7 @@ public class ClueGUI extends Application {
                     }
                     actionContainer.getChildren().get(4).setDisable(false);
 
-                    // Build up selections from player and pass to make accusation.
+                    // Build up selections from player and pass to make accusation once filled.
                     CardChoice choices = gameModel.getAccusationChoices();
                     if (choices.getRoom() != null && choices.getWeapon() != null &&
                             choices.getSuspect() != null) {
@@ -273,7 +273,7 @@ public class ClueGUI extends Application {
                     for (Node n : board.getChildren()) {
                         n.setDisable(false);
                     }
-                    // Disable buttons execept message logs.
+                    // Disable buttons except message logs.
                     HBox actionContainer = (HBox) root.getBottom();
                     for (Node n : actionContainer.getChildren()) {
                         n.setDisable(true);
@@ -286,16 +286,22 @@ public class ClueGUI extends Application {
                         n.setDisable(true);
                     }
 
+                    // Disable player cards.
+                    VBox currCards = (VBox) root.getLeft();
+                    for (Node n : currCards.getChildren()) {
+                        n.setDisable(true);
+                    }
+
                     // Display that game has ended somehow.
                     this.stop();
                     String endGameMsg = (gameModel.getWinner() == null) ? "Game Over (No winner)"
                             : "Game Over (" + gameModel.getWinner().getName() + "  wins!)";
-
+                    logMessage(gameModel, endGameMsg);
                     Alert gameOverAlert = new Alert(Alert.AlertType.INFORMATION, endGameMsg);
                     gameOverAlert.show();
 
                 }
-                // Display messages for players.
+                // Update message logs.
                 HBox actionContainer = (HBox) root.getBottom();
                 Text messages = new Text(getMsgLogs(gameModel));
                 ((ScrollPane) actionContainer.getChildren().get(4)).setContent(messages);
@@ -324,37 +330,52 @@ public class ClueGUI extends Application {
         theStage.show();
     }
 
+    /**
+     * Obtains the collection of message logs that the model stores, these are
+     * to be displayed to the players of the game.
+     *
+     * @param model Game model to obtain messages from.
+     * @return Messages obtained.
+     */
     private String getMsgLogs(Cluedo model) {
         List<String> messages = model.getMessageLogs();
-        String output = new String();
+        StringBuilder output = new StringBuilder();
 
         for (String m : messages) {
-            output += "> " + m + '\n';
+            output.append("> ").append(m).append('\n');
         }
 
-        return output;
+        return output.toString();
     }
 
+    /**
+     * Allows the GUI to log messages to be displayed.
+     *
+     * @param model Model to store message to.
+     * @param msg   Message to store.
+     */
     private void logMessage(Cluedo model, String msg) {
         model.logMessage(msg);
     }
 
     /**
-     * Sets-up the stage, and root containers which hold the contents of the GUI.
+     * All game elements such as detective slips, buttons for actions, player
+     * cards, the board etc. are stored in 5 general containers which themselves
+     * are stored in the root scene named "root", all of these parent containers
+     * are initialised here.
      *
      * @param theStage The stage which contains all nodes
      * @return The node that the game board renders to
      */
     private Pane initGUI(Stage theStage, Cluedo model) {
-        // Main container for GUI (currently only holds board canvas but will
-        // later hold turn relevant stuff, dice, detective cards etc.)
+        // Initialise containers.
         root = new BorderPane();
         Scene theScene = new Scene(root);
-
-        Pane gameBoardCanvas = new Pane(); // Canvas to render game board to.
+        Pane gameBoardCanvas = new Pane();
         HBox turnIndicator = initTurnIndicator();
         HBox actionContainer = initActionsPane(model, theStage);
 
+        // Set some properties of containers.
         gameBoardCanvas.setPrefHeight(700);
         gameBoardCanvas.prefWidthProperty().bind(theStage.widthProperty().multiply(0.70));
 
@@ -375,7 +396,8 @@ public class ClueGUI extends Application {
     }
 
     /**
-     * Creates and returns the container that displays who's turn it current is.
+     * Initialises the container that displays who's turn it current is,
+     * the colour of the player piece is also shown here.
      *
      * @return Container that displays who's turn it current is.
      */
@@ -410,11 +432,14 @@ public class ClueGUI extends Application {
      * Updates the turn indicator to display the given player as being the
      * current turn.
      *
-     * @param currentPlayer
+     * @param currentPlayer The player who's information to display.
+     * @param model         The model to get the information from.
      */
     private void updateTurnIndicator(Player currentPlayer, Cluedo model) {
         HBox turnIndicator = (HBox) root.getTop();
 
+        // If the game has not started yet, display who's rolling to be assigned
+        // player pieces.
         if (model.state() == GameState.AssigningPlayerPieces) {
             turnIndicator.getChildren().clear();
             Text newPrefix = new Text("Rolling for Assignment: ");
@@ -424,7 +449,10 @@ public class ClueGUI extends Application {
             turnIndicator.getChildren().addAll(newPrefix, newName);
             return;
         }
-        String currentPlayerCol = playerPieceColours.get(currentPlayer.getPiece().getName());
+
+        // Otherwise display the current players player piece colour and how many steps they have.
+        String currentPlayerCol = playerPieceColours
+                                    .get(currentPlayer.getPiece().getName());
         turnIndicator.getChildren().clear();
 
         Text newStepCount = new Text(" (Steps Left: " + model.getStepsLeft() + ")");
@@ -438,15 +466,17 @@ public class ClueGUI extends Application {
         newPrefix.setFont(new Font(20));
 
         turnIndicator.getChildren().addAll(newPrefix, newName, newStepCount);
-
     }
 
     /**
      * Generates containers which display detective slip contents for all
      * player pieces.
      *
-     * @param playerPieces Player pieces to generate containers for.
-     * @return Collection of detective slip containers.
+     * @param playerPieces  The player pieces who's detective slips containers are
+     *                      generated for.
+     * @param theStage      The window of the game, allows dimension setting.
+     * @param model         The game model to get player piece info from.
+     * @return              A map of player pieces and their detective slip containers.
      */
     private HashMap<PlayerPiece, VBox> generateCharactersDetectiveSlipPanels(
             List<PlayerPiece> playerPieces, Stage theStage, Cluedo model) {
@@ -458,11 +488,13 @@ public class ClueGUI extends Application {
     }
 
     /**
-     * Creates and returns a container which displays the contents of the
-     * given player piece's detective slip.
+     * Generates containers which display detective slip contents for a player piece.
      *
-     * @param pp Player piece to generate a detective slip for.
-     * @return Container representing detective slip.
+     * @param pp            The player piece who's detective slips containers are
+     *                      generated for.
+     * @param theStage      The window of the game, allows dimension setting.
+     * @param model         The game model to get player piece info from.
+     * @return              A container for the pp's detective slip.
      */
     private VBox generateDetectiveSlipPanel(PlayerPiece pp, Stage theStage, Cluedo model) {
         VBox dSlipPanel = new VBox();
@@ -470,6 +502,7 @@ public class ClueGUI extends Application {
         dSlipPanel.setStyle("-fx-background-color: " + BCKGND_CLR);
         Button revealSlip = new Button("Reveal Slip");
 
+        // Assign button action to hide and reveal detective slip cards on click.
         revealSlip.setOnMousePressed(event -> {
             for (int i = 1; i < dSlipPanel.getChildren().size() - 1; i++) {
                 Node child = dSlipPanel.getChildren().get(i);
@@ -482,7 +515,6 @@ public class ClueGUI extends Application {
         dSlipOwner.setFont(new Font(20));
         dSlipPanel.prefWidthProperty().bind(theStage.widthProperty().multiply(0.15));
         dSlipPanel.getChildren().add(dSlipOwner);
-
 
         // Add all cards and their marking to container.
         DetectiveSlip dSlip = pp.getSlip();
@@ -502,6 +534,8 @@ public class ClueGUI extends Application {
             Text markedDisplay = new Text(initMarking);
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
+            // Accusations and suggestions choices are made by clicking cards in
+            // the player's detective slip so those actions are assigned here.
             cardName.setOnMouseClicked(event -> {
                 if (model.state() == GameState.MakingAccusation) {
                     model.addAccusationSelection(card.getName());
@@ -513,26 +547,26 @@ public class ClueGUI extends Application {
             cardContainer.getChildren().addAll(cardName, spacer,
                     markedDisplay);
 
-            // Don't add a checkbox for cards held by player.
+            // For cards that are held by the player, automatically check and
+            // disable them.
+            CheckBox cardMarker = new CheckBox();
             if (pp.getBelongsTo() != null
                     && !pp.getBelongsTo().getCards().contains(card)) {
-                CheckBox cardMarker = new CheckBox();
+
+                // Assign checkbox to mark the correspond card when clicked.
                 cardMarker.setOnMouseClicked(event -> {
                     dSlip.markSlip(card, true);
                     markedDisplay.setText("Marked");
                     System.out.println(pp.getName() + " has marked: " + card.getName());
                     cardMarker.setDisable(true);
                 });
-
-                cardContainer.getChildren().add(cardMarker);
             } else {
-                CheckBox cardMarker = new CheckBox();
                 cardMarker.setDisable(true);
                 cardMarker.setSelected(true);
-                cardContainer.getChildren().add(cardMarker);
             }
+            cardContainer.getChildren().add(cardMarker);
 
-            cardContainer.setVisible(false);
+            cardContainer.setVisible(false);        // Hide cards initially.
             dSlipPanel.getChildren().add(cardContainer);
             it.remove();
         }
@@ -541,13 +575,17 @@ public class ClueGUI extends Application {
         return dSlipPanel;
     }
 
+
     /**
-     * Iterates over tiles in the game board and generates a corresponding
-     * Sprite to represent each one in the GUI.
+     * Generates sprites for all tiles in the game board to allow a visual
+     * representation of them to be rendered to the screen.
      *
-     * @param boardTiles      The Model from which the GUI is rendered
-     * @param gameBoardCanvas The node to which the GUI renders the game board
-     * @return A hashmap which maps tiles to Sprites
+     * @param boardTiles        The grid in the model which represents the board
+     *                          as a collection of tiles.
+     * @param gameBoardCanvas   The pane to render the tiles to.
+     * @param model             The model to get the tiles from.
+     * @return                  A mapping of tile to its sprite.
+     * @throws FileNotFoundException If the tile images cannot be loaded.
      */
     private HashMap<Tile, Sprite> generateTileSprites(Grid boardTiles,
                                                       Pane gameBoardCanvas, Cluedo model)
@@ -565,9 +603,13 @@ public class ClueGUI extends Application {
                         t.getRow() * DEFAULT_TILE_SIZE);
 
                 gameBoardCanvas.getChildren().add(s.getImView());
+
+                // Assign on-click action to normal tiles to allow movement.
                 if (!t.getType().equals("wall") && !t.getType().equals("passage")) {
                     s.assignClickAction(Action.Move, model, t);
                 }
+
+                // Assign on-click action to passage tiles to allow their use.
                 if (t.getType().equals("passage")) {
                     s.assignClickAction(Action.UsePassage, model, t);
                 }
@@ -578,9 +620,18 @@ public class ClueGUI extends Application {
         return tileSprites;
     }
 
+    /**
+     * Generates a text field for each room with the rooms corresponding name to
+     * allow users to know which room is which.
+     *
+     * @param model             The model to get the room info from.
+     * @param gameBoardCanvas   The pane to render the room names to.
+     * @return                  A mapping of room to corresponding text field.
+     */
     private HashMap<Room, Text> generateRoomSprites(Cluedo model, Pane gameBoardCanvas) {
         HashMap<Room, Text> roomSprites = new HashMap<>();
 
+        // For each room generate a text field and render it in the center of the room.
         for (Room r : model.getBoard().getRooms()) {
             if (r.getName().equals("X")) continue;
 
@@ -608,6 +659,15 @@ public class ClueGUI extends Application {
         return roomSprites;
     }
 
+    /**
+     * Initialises the bottom pane of the UI which stores buttons for rolling
+     * the dice, skipping turns, making accusations and suggestions and also
+     * holds the message log box.
+     *
+     * @param model     The model to get send the users button click actions to.
+     * @param theStage  The pane to render the buttons and log box to.
+     * @return          The container holding the buttons and log box.
+     */
     private HBox initActionsPane(Cluedo model, Stage theStage) {
         HBox actionContainer = new HBox();
         Button rollDice = new Button("Roll Dice");
@@ -616,16 +676,18 @@ public class ClueGUI extends Application {
         Button skipTurn = new Button("Skip Turn");
         ScrollPane messageLogs = new ScrollPane();
 
+        // Set properties to enforce a nice looking UI.
         messageLogs.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        actionContainer.prefWidthProperty().bind(theStage.widthProperty().multiply(0.25));
-        actionContainer.prefHeightProperty().bind(theStage.widthProperty().multiply(0.1));
+
+        // Disable initially until players are assigned pieces.
         makeAccusation.setDisable(true);
         makeSuggestion.setDisable(true);
         skipTurn.setDisable(true);
 
-        rollDice.setOnMouseClicked(event -> {
-            model.rollDice(model.state(), model.getPlayOrder());
-        });
+        // Assign on-click actions for buttons, fairly self-explanatory.
+        rollDice.setOnMouseClicked(event ->
+                model.rollDice(model.state(), model.getPlayOrder()
+                ));
 
         makeAccusation.setOnMouseClicked(event -> {
             logMessage(model, model.getCurrentPlayersTurn().getPiece().getName()
@@ -634,7 +696,7 @@ public class ClueGUI extends Application {
         });
 
         skipTurn.setOnMouseClicked(event -> {
-            logMessage(model, model.getCurrentPlayersTurn().getPiece().getName() +
+            logMessage(model, model.getCurrentPlayersTurn().getName() +
                     " has skipped their turn.");
             model.setState(GameState.InPlay);
             model.endTurn();
@@ -649,6 +711,7 @@ public class ClueGUI extends Application {
         actionContainer.setPadding(new Insets(10, 10, 10, 10));
         actionContainer.setAlignment(Pos.CENTER);
         actionContainer.setStyle("-fx-background-color: " + BCKGND_CLR);
+        actionContainer.prefHeightProperty().bind(theStage.widthProperty().multiply(0.1));
 
         actionContainer.getChildren().addAll(makeAccusation, makeSuggestion, skipTurn,
                 rollDice, messageLogs);
@@ -656,6 +719,13 @@ public class ClueGUI extends Application {
         return actionContainer;
     }
 
+    /**
+     * Generates containers for all player's cards.
+     *
+     * @param players   Players to generate card containers for.
+     * @param theStage  The application window, for dimension setting.
+     * @return          Mapping of player to their card container.
+     */
     private HashMap<Player, VBox> generatePlayersCardPanels(List<Player> players,
                                                             Stage theStage) {
         HashMap<Player, VBox> cardPanels = new HashMap<>();
@@ -665,6 +735,13 @@ public class ClueGUI extends Application {
         return cardPanels;
     }
 
+    /**
+     * Generates container for player's cards.
+     *
+     * @param player    Player to generate card container for.
+     * @param theStage  The application window, for dimension setting.
+     * @return          Player's card container.
+     */
     private VBox generateCardPanel(Player player, Stage theStage) {
         VBox cardPanel = new VBox();
         cardPanel.setPadding(new Insets(10, 10, 10, 10));
@@ -672,6 +749,7 @@ public class ClueGUI extends Application {
         cardPanel.prefWidthProperty().bind(theStage.widthProperty().multiply(0.15));
         Button revealCards = new Button("Reveal Cards");
 
+        // Assign button to reveal and hide player's cards.
         revealCards.setOnMousePressed(event -> {
             for (int i = 1; i < cardPanel.getChildren().size() - 1; i++) {
                 Node child = cardPanel.getChildren().get(i);
@@ -679,7 +757,6 @@ public class ClueGUI extends Application {
             }
         });
 
-        // Display who's cards these are.
         Text cardsOwner = new Text(player.getName() + "'s Cards");
         cardsOwner.setFont(new Font(20));
         cardPanel.getChildren().add(cardsOwner);
@@ -696,10 +773,10 @@ public class ClueGUI extends Application {
     }
 
     /**
-     * Obtains the current directory and from there obtains the images directory.
+     * Loads tile images.
      *
-     * @throws FileNotFoundException If method fails to generate
-     *                               FileInputStreams for images to load.
+     * @return Images loaded
+     * @throws FileNotFoundException If images could not be loaded.
      */
     private HashMap<String, Image> initTileImgs() throws FileNotFoundException {
         List<String> tileTypeNames =
@@ -724,6 +801,13 @@ public class ClueGUI extends Application {
         return tileImages;
     }
 
+    /**
+     * Loads player piece images.
+     *
+     * @param playerPieceList List of player pieces to load images for.
+     * @return                Images loaded
+     * @throws FileNotFoundException If images could not be loaded.
+     */
     private HashMap<String, Image> initPlayerPieceImgs(
             List<PlayerPiece> playerPieceList)
             throws FileNotFoundException {
@@ -751,13 +835,22 @@ public class ClueGUI extends Application {
         return playerPieceImages;
     }
 
+    /**
+     * Generates a sprite for each player piece to allow it to be rendered to
+     * the UI.
+     *
+     * @param playerPieces      Player peices to generate sprites for.
+     * @param gameBoardCanvas   Pane to render sprites to.
+     * @return                  Mapping of player piece to their sprite.
+     * @throws FileNotFoundException If images could not be loaded.
+     */
     private HashMap<PlayerPiece, Sprite> generatePlayerPieceSprites(
             List<PlayerPiece> playerPieces, Pane gameBoardCanvas)
             throws FileNotFoundException {
         HashMap<String, Image> playerPieceImages = initPlayerPieceImgs(playerPieces);
         HashMap<PlayerPiece, Sprite> playerPieceSprites = new HashMap<>();
 
-        // Iterate over player pieces and generate sprite for each one.
+        // Iterate over player pieces and generate a sprite for each one.
         for (PlayerPiece pp : playerPieces) {
             Sprite s = new Sprite(playerPieceImages.get(pp.getName()),
                     DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE,
@@ -771,6 +864,16 @@ public class ClueGUI extends Application {
         return playerPieceSprites;
     }
 
+    /**
+     * Generates a sprite for each weapon piece.
+     *
+     * @param rooms             Gets weapon pieces through rooms of game so that
+     *                          the weapon peiecs can be rendered to the room
+     *                          they are in.
+     * @param gameBoardCanvas   Pane to render weapon pieces to.
+     * @return                  Mapping of weapon piece name to sprite.
+     * @throws FileNotFoundException If weapon images could not be loaded.
+     */
     private HashMap<String, Sprite> generateWeaponPieceSprites(
             List<Room> rooms, Pane gameBoardCanvas)
             throws FileNotFoundException {
