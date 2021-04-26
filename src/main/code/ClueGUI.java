@@ -33,7 +33,7 @@ public class ClueGUI extends Application {
     private double DEFAULT_TILE_SIZE = 30;
     private static String CURR_DIR = Paths.get("").toAbsolutePath()
             .toString();
-    private HashMap<String, String> playerPieceColours; // PlayerPiece : Colour mapping.
+    private HashMap<String, String> playerPieceColours; // {PlayerPiece: Colour} mapping.
     private BorderPane root;
     private final String BCKGND_CLR = "#FEF9E7";
 
@@ -74,12 +74,12 @@ public class ClueGUI extends Application {
                     HBox actionContainer = (HBox) root.getBottom();
                     // Disable roll
                     if (gameModel.getStepsLeft() <= 0) {
-                        for (Node n : board.getChildren())  {
+                        for (Node n : board.getChildren()) {
                             n.setDisable(true);
                         }
                         actionContainer.getChildren().get(3).setDisable(false);
                     } else { // Disable board.
-                        for (Node n : board.getChildren())  {
+                        for (Node n : board.getChildren()) {
                             n.setDisable(false);
                         }
                         actionContainer.getChildren().get(3).setDisable(true);
@@ -93,6 +93,7 @@ public class ClueGUI extends Application {
                         actionContainer.getChildren().get(1).setDisable(false);
                     }
                     actionContainer.getChildren().get(2).setDisable(false);
+                    actionContainer.getChildren().get(4).setDisable(false);
 
 
                     if (!playerGUIGenerated[0]) {
@@ -157,15 +158,23 @@ public class ClueGUI extends Application {
 
                     // Render room names.
                     for (Room r : gameModel.getBoard().getRooms()) {
+                        if (r.getName().equals("X")) continue;
                         Text roomName = roomSprites[0].get(r);
 
                         // Get top right and bottom left tile to calculate size.
                         List<Tile> tiles = r.getTiles();
-                        double x = tiles.get(tiles.size() / 2).getColumn() * tileWidth;
-                        double y = tiles.get(tiles.size() / 2).getRow() * tileHeight;
 
-                        roomName.setX(x);
-                        roomName.setY(y);
+                        Tile topLeft = tiles.get(0);
+                        Tile botRight = tiles.get(tiles.size() - 1);
+
+                        double tlX = topLeft.getColumn() * tileWidth;
+                        double tlY = (topLeft.getRow() + 1) * tileHeight;
+
+                        double brX = botRight.getColumn() * tileWidth;
+                        double brY = (botRight.getRow() + 1) * tileHeight;
+
+                        roomName.setX((brX + tlX) / 2);
+                        roomName.setY((brY + tlY) / 2);
                     }
 
                     // Check if all players have lost the game and the game is over.
@@ -174,7 +183,7 @@ public class ClueGUI extends Application {
                         List<Pair<Player, Integer>> playOrder = gameModel.getPlayOrder();
                         List<PlayerPiece> piecesStillPlaying = new ArrayList<>();
                         for (int i = 0; i < playOrder.size(); i++) {
-                            if(playOrder.get(i).getKey().getPiece().isKicked()) {
+                            if (playOrder.get(i).getKey().getPiece().isKicked()) {
                                 continue;
                             } else {
                                 piecesStillPlaying.add(playOrder.get(i).getKey().getPiece());
@@ -184,14 +193,14 @@ public class ClueGUI extends Application {
                             // Game over all players have lost.
                             gameBoardCanvas.setDisable(true);
                             gameModel.setState(GameState.GameOver);
-                            System.out.println("Game over, all players have lost.");
+                            logMessage(gameModel, "Game over, all players have lost.");
                         }
                     }
 
                     // End players turn if they have been kicked.
                     PlayerPiece currPP = gameModel.getCurrentPlayersTurn().getPiece();
                     if (currPP.isKicked()) {
-                        System.out.println(currPP.getName() +
+                        logMessage(gameModel, currPP.getName() +
                                 " is not in the game anymore, skipping.");
                         gameModel.endTurn();
                     }
@@ -207,14 +216,15 @@ public class ClueGUI extends Application {
                 } else if (gameModel.state() == GameState.MakingAccusation) {
                     // Disable game board.
                     Pane board = (Pane) root.getCenter();
-                    for (Node n : board.getChildren())  {
+                    for (Node n : board.getChildren()) {
                         n.setDisable(false);
                     }
                     // Disable buttons while accusation is in progress.
                     HBox actionContainer = (HBox) root.getBottom();
-                    for (Node n : actionContainer.getChildren())  {
+                    for (Node n : actionContainer.getChildren()) {
                         n.setDisable(true);
                     }
+                    actionContainer.getChildren().get(4).setDisable(false);
 
                     // Build up selections from player and pass to make accusation.
                     CardChoice choices = gameModel.getAccusationChoices();
@@ -225,7 +235,7 @@ public class ClueGUI extends Application {
                 } else if (gameModel.state() == GameState.MakingSuggestion) {
                     // Disable game board.
                     Pane board = (Pane) root.getCenter();
-                    for (Node n : board.getChildren())  {
+                    for (Node n : board.getChildren()) {
                         n.setDisable(false);
                     }
 
@@ -234,7 +244,7 @@ public class ClueGUI extends Application {
                     actionContainer.getChildren().get(0).setDisable(false);
                     actionContainer.getChildren().get(1).setDisable(true);
                     actionContainer.getChildren().get(3).setDisable(true);
-                    if(gameModel.isSuggestionMade()) {
+                    if (gameModel.isSuggestionMade()) {
                         actionContainer.getChildren().get(1).setDisable(true);
                     }
 
@@ -260,18 +270,19 @@ public class ClueGUI extends Application {
                 } else if (gameModel.state() == GameState.GameOver) {
                     // Disable game board.
                     Pane board = (Pane) root.getCenter();
-                    for (Node n : board.getChildren())  {
+                    for (Node n : board.getChildren()) {
                         n.setDisable(false);
                     }
-                    // Disable buttons.
+                    // Disable buttons execept message logs.
                     HBox actionContainer = (HBox) root.getBottom();
-                    for (Node n : actionContainer.getChildren())  {
+                    for (Node n : actionContainer.getChildren()) {
                         n.setDisable(true);
                     }
+                    actionContainer.getChildren().get(4).setDisable(false);
 
                     // Disable det slip.
                     VBox currDSlip = (VBox) root.getRight();
-                    for (Node n : currDSlip.getChildren())  {
+                    for (Node n : currDSlip.getChildren()) {
                         n.setDisable(true);
                     }
 
@@ -284,27 +295,27 @@ public class ClueGUI extends Application {
                     gameOverAlert.show();
 
                 }
-                    // Display messages for players.
-                    HBox actionContainer = (HBox) root.getBottom();
-                    Text messages = new Text(getMsgLogs(gameModel));
-                    ((ScrollPane) actionContainer.getChildren().get(4)).setContent(messages);
+                // Display messages for players.
+                HBox actionContainer = (HBox) root.getBottom();
+                Text messages = new Text(getMsgLogs(gameModel));
+                ((ScrollPane) actionContainer.getChildren().get(4)).setContent(messages);
 
-                    // Update turn.
-                    updateTurnIndicator(currPlayer, gameModel);
+                // Update turn.
+                updateTurnIndicator(currPlayer, gameModel);
 
-                    // Set tile size to be relative to container size.
-                    double tileHeight = gameBoardCanvas.getHeight() / gameBoard.getGrid().getRows();
-                    double tileWidth = gameBoardCanvas.getWidth() / gameBoard.getGrid().getColumns();
+                // Set tile size to be relative to container size.
+                double tileHeight = gameBoardCanvas.getHeight() / gameBoard.getGrid().getRows();
+                double tileWidth = gameBoardCanvas.getWidth() / gameBoard.getGrid().getColumns();
 
-                    // Render tiles and weapon pieces.
-                    for (List<Tile> row : boardTiles.getGrid()) {
-                        for (Tile t : row) {
-                            tileSprites[0].get(t).setDims(tileWidth, tileHeight);
-                            double x = t.getColumn() * tileWidth;
-                            double y = t.getRow() * tileHeight;
-                            tileSprites[0].get(t).render(x, y);
-                        }
+                // Render tiles and weapon pieces.
+                for (List<Tile> row : boardTiles.getGrid()) {
+                    for (Tile t : row) {
+                        tileSprites[0].get(t).setDims(tileWidth, tileHeight);
+                        double x = t.getColumn() * tileWidth;
+                        double y = t.getRow() * tileHeight;
+                        tileSprites[0].get(t).render(x, y);
                     }
+                }
 
 
             }
@@ -372,12 +383,12 @@ public class ClueGUI extends Application {
         HBox turnIndicator = new HBox();
         playerPieceColours = new HashMap<>();
 
-        playerPieceColours.put("Rev Green",     "#0ed145");
-        playerPieceColours.put("Prof Plum",     "#b83dba");
-        playerPieceColours.put("Mrs White",     "#ffffff");
-        playerPieceColours.put("Mrs Peacock",   "#00a8f3");
+        playerPieceColours.put("Rev Green", "#0ed145");
+        playerPieceColours.put("Prof Plum", "#b83dba");
+        playerPieceColours.put("Mrs White", "#ffffff");
+        playerPieceColours.put("Mrs Peacock", "#00a8f3");
         playerPieceColours.put("Miss Scarlett", "#ec1c24");
-        playerPieceColours.put("Col Mustard",   "#fff200");
+        playerPieceColours.put("Col Mustard", "#fff200");
 
         Text displayText = new Text("Currently Rolling for Player Piece Assignment: ");
         displayText.setFont(new Font(20));
@@ -509,7 +520,7 @@ public class ClueGUI extends Application {
                 cardMarker.setOnMouseClicked(event -> {
                     dSlip.markSlip(card, true);
                     markedDisplay.setText("Marked");
-                    System.out.printf("Marked: %s \n", card.getName());
+                    System.out.println(pp.getName() + " has marked: " + card.getName());
                     cardMarker.setDisable(true);
                 });
 
@@ -571,15 +582,24 @@ public class ClueGUI extends Application {
         HashMap<Room, Text> roomSprites = new HashMap<>();
 
         for (Room r : model.getBoard().getRooms()) {
+            if (r.getName().equals("X")) continue;
+
             Text roomName = new Text(r.getName());
 
             // Get top right and bottom left tile to calculate size.
             List<Tile> tiles = r.getTiles();
-            double x = tiles.get(tiles.size() / 2).getColumn() * DEFAULT_TILE_SIZE;
-            double y = tiles.get(tiles.size() / 2).getRow() * DEFAULT_TILE_SIZE;
 
-            roomName.setX(x);
-            roomName.setY(y);
+            Tile topLeft = tiles.get(0);
+            Tile botRight = tiles.get(tiles.size() - 1);
+
+            double tlX = topLeft.getColumn() * DEFAULT_TILE_SIZE;
+            double tlY = (topLeft.getRow() + 1) * DEFAULT_TILE_SIZE;
+
+            double brX = botRight.getColumn() * DEFAULT_TILE_SIZE;
+            double brY = (botRight.getRow() + 1) * DEFAULT_TILE_SIZE;
+
+            roomName.setX((brX + tlX) / 2);
+            roomName.setY((brY + tlY) / 2);
 
             roomSprites.put(r, roomName);
             gameBoardCanvas.getChildren().add(roomName);
@@ -597,8 +617,8 @@ public class ClueGUI extends Application {
         ScrollPane messageLogs = new ScrollPane();
 
         messageLogs.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        messageLogs.prefHeightProperty().bind(theStage.widthProperty().multiply(0.10));
-
+        actionContainer.prefWidthProperty().bind(theStage.widthProperty().multiply(0.25));
+        actionContainer.prefHeightProperty().bind(theStage.widthProperty().multiply(0.1));
         makeAccusation.setDisable(true);
         makeSuggestion.setDisable(true);
         skipTurn.setDisable(true);
