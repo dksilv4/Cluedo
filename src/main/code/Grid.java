@@ -8,28 +8,31 @@ import java.util.List;
  */
 public class Grid {
     private List<List<Tile>> grid = new ArrayList<List<Tile>>();
-    private int rows;
-    private int columns;
+    private int rows; // how many rows the grid has
+    private int columns; // how many columns the grid has
 
     /**
      * Constructs and initializes a Grid
      */
     public Grid() {
-
     }
+
+    /**
+     * @return rows
+     */
     public int getRows(){
         return this.rows;
     }
+
+    /**
+     * @return columns
+     */
     public int getColumns(){
         return this.columns;
     }
 
-    public Tile getTileAtPos(int row, int col) {
-        return grid.get(row).get(col);
-    }
-
     /**
-     * Build a grid
+     * Build a grid with size rows X columns
      *
      * @param rows    the number of rows
      * @param columns the number of columns
@@ -46,12 +49,15 @@ public class Grid {
         }
     }
 
+    /**
+     * Deletes the grid that was previously generated
+     */
     public void deleteGrid() {
         this.grid = new ArrayList<List<Tile>>();
     }
 
     /**
-     * Returns a Grid object
+     * Returns the list of lists of tiles that represents the overall map/board
      *
      * @return a grid object
      */
@@ -60,7 +66,7 @@ public class Grid {
     }
 
     /**
-     * Prints a Grid object
+     * Prints each row in grid separately to show the overall size and items within the variable grid
      */
     public void print() {
         for (List<Tile> row : this.grid) {
@@ -71,7 +77,7 @@ public class Grid {
     }
 
     /**
-     * Changes a Tile
+     * Changes a Tile to be a Wall Tile
      *
      * @param row    the row number of a tile
      * @param column the column number of a tile
@@ -79,6 +85,12 @@ public class Grid {
     public void addWallTile(int row, int column) {
         this.grid.get(row).set(column, new Wall(row, column));
     }
+
+    /**Changes a Tile to be a Door Tile
+     *
+     * @param row the row number of Door to be added to
+     * @param column the column to add the Door to
+     */
     public void addDoorTile(int row, int column){
         this.grid.get(row).set(column, new Door(row, column));
     }
@@ -113,27 +125,25 @@ public class Grid {
                     tile.setBelongsTo(room);
                     tile.setType("room");
                 }
-//                if(room.getName().equals("X")){
-//                    System.out.println("{XXXXXXXXXXXXXX");
-//                    System.out.println(x+y);
-//                }
-//                room.addTile(this.getTile(x, y));
             }
         }
         this.addRoomDoors(room, start_row, start_column);
     }
 
-    /**
-     * Add doors to a Room
+
+    /**Adds the doors to all the rooms to the side the doors are meant to be
      *
-     * @param room a Room
+     * @param room Room instance to be added
+     * @param start_row row where the first tile of the room begins
+     * @param start_column column where the first tile of the room begins
      */
     private void addRoomDoors(Room room, int start_row, int start_column) {
-        System.out.println(room.getTiles());
         List<Tile> topTiles = new ArrayList<Tile>();
         List<Tile> rightTiles = new ArrayList<Tile>();
         List<Tile> bottomTiles = new ArrayList<Tile>();
         List<Tile> leftTiles = new ArrayList<Tile>();
+
+        //Gets a separate list of all the tiles that are in one of the four side of room
         for (Tile tile : room.getTiles()) {
             if (tile.getRow()== start_row) {
                 topTiles.add(tile);
@@ -148,16 +158,9 @@ public class Grid {
                 leftTiles.add(tile);
             }
         }
-//        System.out.println("TOP");
-//        System.out.println(topTiles);
-//        System.out.println("RIGHT");
-//        System.out.println(rightTiles);
-//        System.out.println("BOTTOM");
-//        System.out.println(bottomTiles);
-//        System.out.println("LEFT");
-//        System.out.println(leftTiles);
+        // Goes through how many doors the room depending on the string value representing the door it adds a
+        // door in the middle of the corresponding side of the room
         for (String door_loc : room.getDoors()) {
-            System.out.println(door_loc);
             switch (door_loc) {
                 case "T":
                     Tile tile = topTiles.get(Math.round(topTiles.size() >> 1));

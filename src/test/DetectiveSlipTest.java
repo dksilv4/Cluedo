@@ -88,4 +88,24 @@ public class DetectiveSlipTest {
         assertEquals(true, this.slip.getCards().get(newWeapon));
     }
 
+    public void testTestAddWeaponCards() {
+    }
+
+    public void testTestAddSuspectCards() {
+    }
+
+    public void testTestAddRoomCards() {
+    }
+
+    public void testCheck() {
+    }
+
+    public void testTestAddCard() {
+    }
+
+    public void testMarkSlip() {
+    }
+
+    public void testGetCards() {
+    }
 }

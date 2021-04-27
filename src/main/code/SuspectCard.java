@@ -1,9 +1,9 @@
 package code;
 
+/**
+ * SuspectCard extends Card that represents a suspect.
+ */
 public class SuspectCard extends Card {
-    /**
-     * PlayerPiece represents a player's piece
-     */
 
     /**
      * Constructs a PlayerPiece with a name

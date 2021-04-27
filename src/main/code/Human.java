@@ -5,6 +5,9 @@ package code;
  */
 public class Human extends Player{
 
+    /**
+     * @param name name of the human player
+     */
     public Human(String name) {
         super(name);
     }

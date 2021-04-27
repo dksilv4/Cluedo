@@ -1,27 +1,33 @@
 package code;
 
+import javafx.util.Pair;
 import org.json.JSONObject;
 
 import java.util.*;
-import javafx.util.Pair;
 
 public class Cluedo {
-    private List<SuspectCard> suspectCards;
-    private List<WeaponCard> weaponCards;
-    private List<RoomCard> roomCards;
-    private List<PlayerPiece> playerPieces;
-    private List<WeaponPiece> weaponPieces;
-    private final List<Card> cards = new ArrayList<Card>();
-    private List<Player> players = new ArrayList<Player>();
-    private final Board board = new Board();
-    private Scanner sc = new Scanner(System.in);
-    private List<Pair<Player, Integer>> playerOrder = new ArrayList<>();
-    private Envelope envelope;
-    private Player currentPlayersTurn;
-    private int currentPlayersSteps;
-    private int turnIndicator = 0; // This will iterate through playerOrder to indicate who's turn it is.
-    private GameState state;
-    int turnNo = 0;
+    private List<SuspectCard> suspectCards; // list of suspects cards
+    private List<WeaponCard> weaponCards; // list of weapon cards
+    private List<RoomCard> roomCards; // list of room cards
+    private List<PlayerPiece> playerPieces; // list of all the playing pieces
+    private List<WeaponPiece> weaponPieces; // list of all the weapon pieces
+    private final List<Card> cards = new ArrayList<Card>(); // list of all cards // used to give out cards
+    private List<Player> players = new ArrayList<Player>(); // list of all the players
+    private final Board board = new Board(); // board variable for a Board instance
+    private Scanner sc = new Scanner(System.in); // Used for inputs
+    private Envelope envelope; // murder envelope variable
+    private Player currentPlayersTurn; // variable that indicates the current player playing
+    private List<Pair<Player, Integer>> playerOrder; // list of all the players in order of their initial roll
+    private int turnIndicator; // This will iterate through playerOrder to indicate who's turn it is.
+    private int currentPlayersSteps; // steps the player can take after rolling the dice
+    private GameState state; // game state
+    private static Random rand = new Random(); // random number generator
+    private CardChoice accusationChoices; // accusation choice
+    private CardChoice suggestionChoices; // suggestion choice
+    private Tile locAtTurnStart; // location at the start of a round of the player
+    private PlayerPiece winner = null; // winner
+    private List<String> messageLogs; // message logs
+    private boolean suggestionMade = false; // if suggestion has been made (used to enable or disable the player from making a suggestion)
 
     /**
      * Initializes Cluedo and loads all the necessary data to run the game
@@ -31,59 +37,142 @@ public class Cluedo {
             this.setUpPlayers();
             this.setUpCards();
             this.setSpawns();
-            this.getPlayerTurnOrder();
-            this.fillDetectiveSlips();
-            this.allocateWeapons();
-            this.turn();
+
+            playerOrder = new ArrayList<>();
+            messageLogs = new ArrayList<>();
+            turnIndicator = 0;
+            // Choose a random player to roll the dice first.
+            currentPlayersTurn = players.get(rand.nextInt(players.size()));
+            state = GameState.AssigningPlayerPieces;
+            accusationChoices = new CardChoice();
+            suggestionChoices = new CardChoice();
+            logMessage("This is the message log box where \n" +
+                    " events of the game will be displayed.");
         }
     }
+
+    public Envelope getEnvelope() {
+        return this.envelope;
+    }
+
+    /**
+     * Make a selection of a card for an accusation.
+     *
+     * @param cardName String of the name of the card
+     */
+    public void addAccusationSelection(String cardName) {
+        SuspectCard suspect = findSuspectCard(cardName);
+        RoomCard room = findRoomCard(cardName);
+        WeaponCard weapon = findWeaponCard(cardName);
+
+        if (suspect != null) {
+            this.accusationChoices.setSuspect(suspect);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their accusation.");
+            return;
+        }
+        if (room != null) {
+            this.accusationChoices.setRoom(room);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their accusation.");
+            return;
+        }
+        if (weapon != null) {
+            this.accusationChoices.setWeapon(weapon);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their accusation.");
+            return;
+        }
+
+    }
+
+    /**
+     * Takes in a name of a card and is used to fill in the suggestion choice to be able to make a suggestion
+     *
+     * @param cardName name of card
+     */
+    public void addSuggestionSelection(String cardName) {
+        SuspectCard suspect = findSuspectCard(cardName);
+        RoomCard room = findRoomCard(currentPlayersTurn.getPiece().getLocation().getBelongsTo().getName());
+        WeaponCard weapon = findWeaponCard(cardName);
+
+        this.suggestionChoices.setRoom(room);
+        if (findRoomCard(cardName) != null) {
+            logMessage("The room for a suggestion can only be the room you are currently in.");
+            return;
+        }
+        if (suspect != null) {
+            this.suggestionChoices.setSuspect(suspect);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their suggestion.");
+            return;
+        }
+        if (weapon != null) {
+            this.suggestionChoices.setWeapon(weapon);
+            logMessage(currentPlayersTurn.getPiece().getName() + " selected "
+                    + cardName + " as part of their suggestion.");
+            return;
+        }
+    }
+
+    /**
+     * @return CardChoice, the accusation made by a player
+     */
+    public CardChoice getAccusationChoices() {
+        return this.accusationChoices;
+    }
+
+    /**
+     * @return CardChoice, the suggestion made by a player
+     */
+    public CardChoice getSuggestionChoices() {
+        return suggestionChoices;
+    }
+
+    /**
+     * @return GameState, the state of the game
+     */
     public GameState state() {
         return this.state;
     }
-    public Player getCurrentPlayersTurn() {
-        return this.currentPlayersTurn;
-    }
-    public int getStepsLeft() {
-        return currentPlayersSteps;
-    }
-    public List<Pair<Player, Integer>> getPlayOrder() {
-        return this.playerOrder;
-    }
-    private void assignPlayerPiecesB(List<Pair<Player, Integer>> playerOrder) {
-        playerOrder.sort(Comparator.comparing(p -> -p.getValue()));
 
-        for (int i = 0; i < playerOrder.size(); i++) {
-            playerOrder.get(i).getKey().setPiece(this.playerPieces.get(i));
-        }
-    }
-    public void rollDiceB(GameState currentState, List<Pair<Player, Integer>> playerOrder) {
-        switch (currentState) {
-            case AssigningPlayerPieces:
-                int roll = rollDice();
-                System.out.println(currentPlayersTurn.getName() + " rolled " + roll);
-                playerOrder.add(new Pair<>(currentPlayersTurn, roll));
-
-                int nextPlayersIndex = (players.indexOf(currentPlayersTurn) + 1) % players.size();
-                currentPlayersTurn = players.get(nextPlayersIndex);
-
-                if (playerOrder.size() == players.size()) {
-                    this.assignPlayerPiecesB(playerOrder);
-                    this.fillDetectiveSlips();
-                    this.allocateWeapons();
-                    currentPlayersTurn = playerOrder.get(0).getKey();
-                    currentPlayersSteps = rollDice();
-                    state = GameState.InPlay;
-                    System.out.println("All player pieces assigned.");
-                }
-                break;
-            case InPlay:
-                currentPlayersSteps = rollDice();
-                break;
-            default:
-
-        }
+    /**
+     * Set the state of the game
+     *
+     * @param s game state
+     */
+    public void setState(GameState s) {
+        this.state = s;
     }
 
+    /**
+     * @return PlayerPiece, the winner of the game
+     */
+    public PlayerPiece getWinner() {
+        return winner;
+    }
+
+    /**
+     * Add lines to messageLogs
+     *
+     * @param msg string variable to be added to the message logs
+     */
+    public void logMessage(String msg) {
+        messageLogs.add(msg);
+    }
+
+    /**
+     * @return A list of string, get messageLogs
+     */
+    public List<String> getMessageLogs() {
+        return messageLogs;
+    }
+
+    /**
+     * Move the current player's piece to a new tile.
+     *
+     * @param newTile new tile to be moved to
+     */
     // Moves the current player's player piece.
     public void movePlayerPiece(Tile newTile) {
         // Check if the target tile is a position that can be moved to.
@@ -110,9 +199,9 @@ public class Cluedo {
 
         boolean canMove = neighbours.contains(new Pair<>(newTile.getRow(),
                 newTile.getColumn())) && (currentPlayersSteps > 0)
-                && state == GameState.InPlay;
+                && state == GameState.InPlay && !newTile.isOccupied();
 
-        if(canMove) {
+        if (canMove) {
             currentPlayersTurn.getPiece().getLocation().removeOccupier();
             currentPlayersTurn.getPiece().setLocation(newTile);
             currentPlayersSteps--;
@@ -120,108 +209,318 @@ public class Cluedo {
 
         if (currentPlayersSteps <= 0) {
             endTurn();
-            this.getPlayerTurnOrder();
-            this.fillDetectiveSlips();
-            this.allocateWeapons();
-            this.turn();
-//            for(Room room: this.board.getRooms()){
-//                System.out.println(room.getWeaponPiece());
-//            }
         }
     }
 
-    private void endTurn() {
-        turnIndicator = (turnIndicator + 1) % playerOrder.size();
-        currentPlayersTurn = playerOrder.get(turnIndicator).getKey();
+    /**
+     * @return int, return how many steps are left
+     */
+    public int getStepsLeft() {
+        return currentPlayersSteps;
     }
 
     /**
-     * Represents a turn within the game.
+     * @return Tile, get the starting tile location of the turn
      */
-    public void turn() {
-        boolean running = true;
-        while (running) {
-            this.turnNo++;
-            sc.nextLine();
-            for (PlayerPiece playerPiece : this.playerPieces) {
-                if (!running) {
-                    break;
-                }
-                if (this.turnNo > 10) {
-                    break;
-                }
-                System.out.println("Current Turn: " + this.turnNo + "\nCurrent Player: " + playerPiece.getBelongsTo());
-                System.out.println(envelope);
-                if (playerPiece.ableToPlay()) {
-                    playerPiece.setPlaying(true);
-                    boolean endTurn = false;
-                    boolean rolledDice = false;
-                    boolean madeSuggestion = false;
-                    boolean madeAccusation = false;
-                    while (!endTurn) {
-                        int playerChoice = this.askOptions(playerPiece, rolledDice, madeSuggestion, madeAccusation);
-                        this.board.getGrid().print(); //Print out the grid.
-                        if (playerChoice == 1) {
-                            int steps = rollDice(); //Roll Dice
-                            System.out.println(playerPiece + " rolled " + steps);
-                            while (steps > 0) {
-                                System.out.println("Steps left:" + steps);
-                                String direction = this.getUserDirection(playerPiece);
-                                System.out.println("Player chose to go: " + direction);
-                                if (direction.equals("u") || direction.equals("d") || direction.equals("l") || direction.equals("r")) {
-                                    Tile oldLocation = playerPiece.getLocation();
-                                    Tile newLocation = this.playerMoveNewLocation(playerPiece, direction);
-                                    if(newLocation !=null && newLocation.isAvailable()){
-                                        this.playerMove(newLocation, playerPiece);
-                                        if (oldLocation.equals(playerPiece.getLocation())) {
-                                            System.out.println("Player could not move in that direction.");
-                                        } else if (playerPiece.getLocation().getType().equals("room") && oldLocation.getType().equals("door")) {
-                                            steps = 0;
-                                        } else if (!(playerPiece.getLocation().getType().equals("room") && oldLocation.getType().equals("room"))) {
-                                            steps--;
-                                        } else if (playerPiece.getLocation().getType().equals("passage") && oldLocation.getType().equals("room")) {
-                                            useSecretPassage(playerPiece.getLocation().getBelongsTo(), playerPiece);
-                                            steps--;
-                                        }
-                                    }
-                                    else{
-                                        System.out.println("Invalid Direction!");
-                                    }
+    public Tile getLocAtTurnStart() {
+        return locAtTurnStart;
+    }
 
-                                } else if (direction.equals("s")) {
-                                    steps = 0;
-                                    playerPiece.setPlaying(false);
-                                } else {
-                                    System.out.println("Invalid Direction!");
-                                }
-                            }
-                            rolledDice = true;
-                        } else if (playerChoice == 2) {
-                            //Make Accusation
-                            if (!this.makeAccusation(this.getCardChoices(playerPiece))) {
-                                System.out.println("You made an invalid accusation. You have been eliminated.");
-                                playerPiece.setKicked(true);
-                                playerPiece.setPlaying(false);
-                            } else {
-                                running = false;
-                                System.out.println(playerPiece.getBelongsTo().getName() + " won the game!");
-                            }
-                            break;
-                        } else if (playerChoice == 3) {
-                            //Skip turn
-                            System.out.println("You skipped your turn.");
-                            endTurn = true;
-                        } else if (playerChoice == 4) {
-                            //Make Suggestion
-                            this.verifySuggestion(this.getCardChoices(playerPiece));
-                            madeSuggestion = true;
-                        }
+    /**
+     * Set that a player has made a suggestion
+     */
+    public void playerHasUsedSuggestion() {
+        suggestionMade = true;
+    }
+
+    /**
+     * @return Boolean value representing if a suggestion has been made
+     */
+    public boolean isSuggestionMade() {
+        return suggestionMade;
+    }
+
+    /**
+     * End the turn
+     * resets and changes variables to be ready for the new player for the next turn
+     */
+    public void endTurn() {
+        suggestionMade = false;
+        locAtTurnStart = currentPlayersTurn.getPiece().getLocation();
+        accusationChoices = new CardChoice();
+        suggestionChoices = new CardChoice();
+        turnIndicator = (turnIndicator + 1) % playerOrder.size();
+        currentPlayersTurn = playerOrder.get(turnIndicator).getKey();
+        currentPlayersSteps = 0;
+    }
+
+    /**
+     * Roll the dice to add steps to a player
+     *
+     * @param currentState GameState
+     * @param playerOrder
+     */
+    public void rollDice(GameState currentState, List<Pair<Player, Integer>> playerOrder) {
+        switch (currentState) {
+            case AssigningPlayerPieces:
+                int roll = rollDice();
+                logMessage(currentPlayersTurn.getName() + " rolled " + roll);
+                playerOrder.add(new Pair<>(currentPlayersTurn, roll));
+
+                int nextPlayersIndex = (players.indexOf(currentPlayersTurn) + 1) % players.size();
+                currentPlayersTurn = players.get(nextPlayersIndex);
+
+                if (playerOrder.size() == players.size()) {
+                    this.assignPlayerPieces(playerOrder);
+                    this.fillDetectiveSlips();
+                    this.allocateWeapons();
+                    currentPlayersTurn = playerOrder.get(0).getKey();
+                    currentPlayersSteps = rollDice();
+                    state = GameState.InPlay;
+                    logMessage("All player pieces assigned.");
+                }
+                break;
+            case InPlay:
+                currentPlayersSteps = rollDice();
+                logMessage(currentPlayersTurn.getName() + " rolled a " + currentPlayersSteps);
+                locAtTurnStart = currentPlayersTurn.getPiece().getLocation();
+                break;
+            default:
+
+        }
+    }
+
+    /**
+     * Return the order of the players for the game.
+     *
+     * @return List<Pair < Player, Integer>>
+     */
+    public List<Pair<Player, Integer>> getPlayOrder() {
+        return this.playerOrder;
+    }
+
+    /**
+     * Returns the RoomCard if the given string matches it.
+     *
+     * @param search
+     * @return
+     */
+    private RoomCard findRoomCard(String search) {
+        for (RoomCard card : this.getRoomCards()) {
+            if (card.getName().toLowerCase().equals(search.toLowerCase())) {
+                return card;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the WeaponCard if the given string matches it.
+     *
+     * @param search
+     * @return
+     */
+    public WeaponCard findWeaponCard(String search) {
+        for (WeaponCard card : this.getWeaponCards()) {
+            if (card.getName().toLowerCase().equals(search.toLowerCase())) {
+                return card;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the SuspectCard if the given string matches it.
+     *
+     * @param search
+     * @return SuspectCard
+     */
+    public SuspectCard findSuspectCard(String search) {
+        for (SuspectCard card : this.getSuspectCards()) {
+            if (card.getName().toLowerCase().equals(search.toLowerCase())) {
+                return card;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the CardChoice that the PlayerPiece given has made
+     *
+     * @param playerPiece
+     * @return CardChoice
+     */
+    public CardChoice getCardChoices(PlayerPiece playerPiece) {
+        System.out.println("Please select one of the following Rooms (Type in room name):");
+        System.out.println(this.getRoomCards());
+        boolean validCard = false;
+        RoomCard roomCard = this.findRoomCard(sc.nextLine());
+        if (roomCard == null) {
+            while (!validCard) {
+                System.out.println("Invalid input! Please select one of the following Rooms (Type in room name):");
+                System.out.println(this.getRoomCards());
+                roomCard = this.findRoomCard(sc.nextLine());
+                if (roomCard != null) {
+                    validCard = true;
+                }
+            }
+        }
+        validCard = false;
+        WeaponCard weaponCard = this.findWeaponCard(sc.nextLine());
+        if (weaponCard == null) {
+            while (!validCard) {
+                System.out.println("Invalid input! Please select one of the following weapons (Type in room name):");
+                System.out.println(this.getRoomCards());
+                weaponCard = this.findWeaponCard(sc.nextLine());
+                if (weaponCard != null) {
+                    validCard = true;
+                }
+            }
+        }
+        validCard = false;
+        SuspectCard suspectCard = this.findSuspectCard(sc.nextLine());
+        if (suspectCard == null) {
+            while (!validCard) {
+                System.out.println("Invalid input! Please select one of the following suspect (Type in room name):");
+                System.out.println(this.getRoomCards());
+                suspectCard = this.findSuspectCard(sc.nextLine());
+                if (suspectCard != null) {
+                    validCard = true;
+                }
+            }
+        }
+        return new CardChoice(playerPiece, roomCard, weaponCard, suspectCard);
+
+    }
+
+    /**
+     * Main method of Cluedo
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
+        Cluedo cluedo = new Cluedo();
+        cluedo.setUpPlayers();
+        CardChoice cc = new CardChoice(cluedo.getPlayerPieces().get(0), cluedo.findRoomCard("Billiard"), cluedo.findWeaponCard("Candlestick"), cluedo.findSuspectCard("Prof Plum"));
+        cluedo.verifySuggestion(cc);
+
+    }
+
+    /**
+     * Reveals the card that matches the CardChoice
+     *
+     * @param cardChoices
+     * @return Card
+     */
+    public Card verifySuggestion(CardChoice cardChoices) {
+        RoomCard room = cardChoices.getRoom();
+        WeaponCard weapon = cardChoices.getWeapon();
+        SuspectCard suspect = cardChoices.getSuspect();
+        Card revealedCard = null;
+        PlayerPiece playerPiece = currentPlayersTurn.getPiece();
+        System.out.println(playerPiece.getBelongsTo() + " made a suggestion that " + suspect + " was the murderer! They used " + weapon + " in " + room + ".");
+        List<Card> foundCards = new ArrayList<Card>();
+        // go through all the players and check if any of the suggestions apply to any of the players
+        for (Player player : this.players) {
+            if (player != playerPiece.getBelongsTo()) {
+                for (Card card : player.getCards()) {
+                    if (card instanceof RoomCard && card.equals(room) || card instanceof WeaponCard && card.equals(weapon) || card instanceof SuspectCard && card.equals(suspect)) {
+                        foundCards.add(card);
                     }
                 }
             }
         }
+        // if any cards were found, reveal one card
+        if (foundCards.size() > 0) {
+            revealedCard = foundCards.get((int) (Math.random() * foundCards.size()));
+            System.out.println("Found Card!");
+            System.out.println("Card has been revealed from " + playerPiece.getBelongsTo() + " " + revealedCard);
+            playerPiece.getSlip().markSlip(revealedCard, true);
+        } else {
+            System.out.println("No cards found, ended suggestion!");
+        }
+        state = GameState.InPlay;
+        return revealedCard;
     }
-    private Tile playerMoveNewLocation(PlayerPiece playerPiece, String direction){
+
+    /**
+     * Make a whole accusation with the CardChoice given. Makes the Player win if it is valid or kicks them out.
+     *
+     * @param cardChoice
+     * @return Boolean, True if the accusation was valid.
+     */
+    public boolean makeAccusation(CardChoice cardChoice) {
+        boolean successful = (cardChoice.getRoom().equals(this.envelope.getRoom())
+                && cardChoice.getWeapon().equals(this.envelope.getWeapon())
+                && cardChoice.getSuspect().equals(this.envelope.getSuspect()));
+        state = (successful) ? GameState.GameOver : GameState.InPlay;
+        logMessage(currentPlayersTurn.getPiece().getName() + " accused " +
+                cardChoice.getSuspect().getName() + " of murder in the " + cardChoice.getRoom().getName() + " \n   with the "
+                + cardChoice.getWeapon().getName() + " accusation success = " + successful + ".");
+        if (!successful) {
+            currentPlayersTurn.getPiece().setKicked(true);
+            logMessage(currentPlayersTurn.getPiece().getName() + " has been removed from the game.");
+        } else {
+            // Player wins.
+            winner = currentPlayersTurn.getPiece();
+            logMessage(winner + " has won the game.");
+            setState(GameState.GameOver);
+        }
+        endTurn();
+        return successful;
+    }
+
+    /**
+     * Uses a secret passage in the Room given
+     *
+     * @param room
+     */
+    public void useSecretPassage(Room room) {
+        String roomName = room.getName();
+        switch (roomName) {
+            case "Kitchen":
+                Room study = this.board.getRoom("Study");
+                Tile studyPassage = study.getSecretPassage();
+                this.currentPlayersTurn.getPiece().setLocation(studyPassage);
+                break;
+            case "Study":
+                Room kitchen = this.board.getRoom("Kitchen");
+                Tile kitchenPassage = kitchen.getSecretPassage();
+                this.currentPlayersTurn.getPiece().setLocation(kitchenPassage);
+                break;
+            case "Conservatory":
+                Room lounge = this.board.getRoom("Lounge");
+                Tile loungePassage = lounge.getSecretPassage();
+                this.currentPlayersTurn.getPiece().setLocation(loungePassage);
+                break;
+            case "Lounge":
+                Room conservatory = this.board.getRoom("Conservatory");
+                Tile conservatoryPassage = conservatory.getSecretPassage();
+                this.currentPlayersTurn.getPiece().setLocation(conservatoryPassage);
+                break;
+        }
+
+    }
+
+    /**
+     * Gets the input of which direction the Player wants to go
+     *
+     * @return String
+     */
+    private String getUserDirection() {
+        System.out.println("Which direction do you want to go?\n>>>");
+        String direction = sc.nextLine().toLowerCase();
+        return direction;
+    }
+
+    /**
+     * Moves the PlayerPiece to the given direction
+     *
+     * @param playerPiece PlayerPiece
+     * @param direction   String
+     */
+    private void playerMove(PlayerPiece playerPiece, String direction) {
+        // Row will be -1 from player location with the same column value
         System.out.println(playerPiece + " trying to move " + direction + ".");
         Tile playerLocation = playerPiece.getLocation();
         System.out.println("Player in: " + playerLocation.getRow() + " " + playerLocation.getColumn());
@@ -243,237 +542,22 @@ public class Cluedo {
         }
         if (newRow >= 0 && newColumn >= 0 && newRow < this.board.getGrid().getRows() && newColumn < this.board.getGrid().getColumns()) {
             System.out.println(newRow + " " + newColumn);
-            return this.board.getGrid().getTile(newRow, newColumn);
-        }
-        return null;
-    }
-    private void playerMove(Tile newLocation, PlayerPiece playerPiece){
-        Tile playerLocation = playerPiece.getLocation();
-        if (newLocation.getType().equals("passage")) {
-            this.useSecretPassage(newLocation.getBelongsTo(), playerPiece);
-        } else {
-            playerLocation.removeOccupier();
-            playerPiece.setLocation(newLocation);
-            newLocation.setOccupier(playerPiece);
-            System.out.println("Player moved to: " + playerLocation.getRow() + " " + playerLocation.getColumn());
-            this.board.getGrid().print();
-        }
-    }
-    public int askOptions(PlayerPiece playerPiece, boolean rolledDice, boolean madeAccusation, boolean madeSuggestion) {
-        //What do you want to do?
-        //1: Roll Dice
-        //2: Skip (can press s when choosing direction to skip the rest of the steps and end turn)
-        //3: Make a accusation
-        //4: Make a suggestion (This shows up only when the player's in a room)
-        boolean madeChoice = false;
-        boolean inRoom = playerPiece.getLocation().getType().equals("room") && !playerPiece.getLocation().getBelongsTo().getName().equals("X");
-        int choice = 0;
-        while (!madeChoice) {
-            List<Integer> aiOptions = new ArrayList<Integer>();
-            boolean suggestion = false;
-            System.out.println("What do you want to do?");
-            if (!rolledDice) {
-                System.out.println("1. Roll the dice");
-                aiOptions.add(1);
+            Tile newLocation = this.board.getGrid().getTile(newRow, newColumn);
+            System.out.println("New Location:" + newLocation);
+            System.out.println("Cords: " + newLocation.getRow() + " " + newLocation.getColumn());
+            if (newLocation.isAvailable()) {
+                playerLocation.removeOccupier();
+                playerPiece.setLocation(newLocation);
+                newLocation.setOccupier(playerPiece);
+                System.out.println("Player moved to: " + playerLocation.getRow() + " " + playerLocation.getColumn());
+                this.board.getGrid().print();
             }
-            if (!madeAccusation) {
-                System.out.println("2. Make an accusation");
-                if (this.turnNo > 15) {
-                    aiOptions.add(2);
-                }
-
-            }
-            System.out.println("3. Skip");
-            aiOptions.add(3);
-            if (inRoom) {
-                if (!madeSuggestion) {
-                    System.out.println("4. Make a suggestion");
-                    suggestion = true;
-                    aiOptions.add(1);
-                }
-            }
-            if (!playerPiece.getBelongsTo().isAI()) {//If not an AI
-                System.out.println("Please enter the number.");
-                String str = sc.nextLine();
-                if (str.matches("-?\\d+(\\.\\d+)?")) {
-                    choice = Integer.parseInt(str);
-                    if ((choice == 1 && !rolledDice) || (choice == 2 && !madeAccusation) || choice == 3 || (choice == 4 && suggestion)) {
-                        madeChoice = true;
-                    } else {
-                        System.out.println("Invalid option.");
-                    }
-                }
-            } else {
-                System.out.println("AI Choices: " + aiOptions);
-                choice = aiOptions.get((int) (Math.random() * aiOptions.size()));
-                System.out.println("AI chose: " + choice);
-                madeChoice = true;
-            }
-
-        }
-        return choice;
-    }
-
-    private RoomCard findRoomCard(String search) {
-        for (RoomCard card : this.getRoomCards()) {
-            if (card.getName().equalsIgnoreCase(search)) {
-                return card;
-            }
-        }
-        return null;
-    }
-
-    public WeaponCard findWeaponCard(String search) {
-        for (WeaponCard card : this.getWeaponCards()) {
-            if (card.getName().equalsIgnoreCase(search)) {
-                return card;
-            }
-        }
-        return null;
-    }
-
-    public SuspectCard findSuspectCard(String search) {
-        for (SuspectCard card : this.getSuspectCards()) {
-            if (card.getName().equalsIgnoreCase(search)) {
-                return card;
-            }
-        }
-        return null;
-    }
-
-    public CardChoice getCardChoices(PlayerPiece playerPiece) {
-        System.out.println("Please select one of the following Rooms (Type in room name):");
-        System.out.println(this.getRoomCards());
-        boolean validCard = false;
-        RoomCard roomCard = this.findRoomCard(sc.nextLine());
-        if (roomCard == null) {
-            while (!validCard) {
-                System.out.println("Invalid input! Please select one of the following Rooms (Type in room name):");
-                System.out.println(this.getRoomCards());
-                roomCard = this.findRoomCard(sc.nextLine());
-                if (roomCard != null) {
-                    validCard = true;
-                }
-            }
-        }
-        validCard = false;
-        System.out.println("Please select one of the following Weapon (Type in room name):");
-        System.out.println(this.getWeaponCards());
-        WeaponCard weaponCard = this.findWeaponCard(sc.nextLine());
-        if (weaponCard == null) {
-            while (!validCard) {
-                System.out.println("Invalid input! Please select one of the following weapons (Type in room name):");
-                System.out.println(this.getWeaponCards());
-                weaponCard = this.findWeaponCard(sc.nextLine());
-                if (weaponCard != null) {
-                    validCard = true;
-                }
-            }
-        }
-        validCard = false;
-        System.out.println("Please select one of the following Suspect (Type in room name):");
-        System.out.println(this.getSuspectCards());
-        SuspectCard suspectCard = this.findSuspectCard(sc.nextLine());
-        if (suspectCard == null) {
-            while (!validCard) {
-                System.out.println("Invalid input! Please select one of the following suspect (Type in room name):");
-                System.out.println(this.getSuspectCards());
-                suspectCard = this.findSuspectCard(sc.nextLine());
-                if (suspectCard != null) {
-                    validCard = true;
-                }
-            }
-        }
-        return new CardChoice(playerPiece, roomCard, weaponCard, suspectCard);
-
-
-    }
-
-    public void verifySuggestion(CardChoice cardChoices) {
-        RoomCard room = cardChoices.getRoom();
-        WeaponCard weapon = cardChoices.getWeapon();
-        SuspectCard suspect = cardChoices.getSuspect();
-        PlayerPiece playerPiece = cardChoices.getPlayerPiece();
-        boolean endSuggestion = false;
-        int prevIndex = this.getPlayerPieces().indexOf(playerPiece) - 1;
-        while (!endSuggestion) {
-            List<Card> foundCards = new ArrayList<Card>();
-            PlayerPiece piece = this.getPlayerPieces().get(prevIndex);
-            if (!piece.equals(playerPiece)) {
-                Player player = piece.getBelongsTo();
-                List<Card> playerCards = player.getCards();
-                for (Card card : playerCards) {
-                    if (card instanceof RoomCard && card.equals(room) || card instanceof WeaponCard && card.equals(weapon) || card instanceof SuspectCard && card.equals(suspect)) {
-                        foundCards.add(card);
-                    }
-                }
-                if (foundCards.size() == 0) {
-                    endSuggestion = true;
-                } else {
-                    Card revealedCard = foundCards.get((int) (Math.random() * foundCards.size() + 1));
-                    System.out.println("Card has been revealed from " + player + " " + revealedCard);
-                    prevIndex--;
-                    if (prevIndex < 0) {
-                        prevIndex = 6;
-                    }
-                }
-            }
-
         }
     }
 
-    public boolean makeAccusation(CardChoice cardChoice) {
-        return (cardChoice.getRoom().equals(this.envelope.getRoom()) && cardChoice.getWeapon().equals(this.envelope.getWeapon()) && cardChoice.getSuspect().equals(this.envelope.getSuspect()));
-    }
-
-    public void useSecretPassage(Room room, PlayerPiece playerPiece) {
-        String roomName = room.getName();
-        switch (roomName) {
-            case "Kitchen":
-                Room study = this.board.getRoom("Study");
-                Tile studyPassage = study.getSecretPassage();
-                playerPiece.setLocation(studyPassage);
-                break;
-            case "Study":
-                Room kitchen = this.board.getRoom("Kitchen");
-                Tile kitchenPassage = kitchen.getSecretPassage();
-                playerPiece.setLocation(kitchenPassage);
-                break;
-            case "Conservatory":
-                Room lounge = this.board.getRoom("Lounge");
-                Tile loungePassage = lounge.getSecretPassage();
-                playerPiece.setLocation(loungePassage);
-                break;
-            case "Lounge":
-                Room conservatory = this.board.getRoom("Conservatory");
-                Tile conservatoryPassage = conservatory.getSecretPassage();
-                playerPiece.setLocation(conservatoryPassage);
-                break;
-        }
-        this.board.getGrid().print();
-
-    }
-
-    private String getUserDirection(PlayerPiece playerPiece) {
-        System.out.println("Which direction would you like to go?\n(u=up, d=down, l=left, r=right)");
-        if (!playerPiece.getBelongsTo().isAI()) {
-            return sc.nextLine().toLowerCase();
-        }
-        List<String> options = new ArrayList<>();
-        if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "u")).isAvailable()){
-            options.add("u");
-        }
-        if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "d")).isAvailable()){
-            options.add("d");
-        }if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "l")).isAvailable()){
-            options.add("l");
-        }if(Objects.requireNonNull(this.playerMoveNewLocation(playerPiece, "r")).isAvailable()){
-            options.add("r");
-        }
-        return options.get((int) (Math.random() * options.size()));
-    }
-
-
+    /**
+     * Allocates WeaponPieces to the Rooms
+     */
     public void allocateWeapons() {
         Collections.shuffle(this.getWeaponPieces());
         List<Room> rooms = this.board.getRooms();
@@ -488,18 +572,39 @@ public class Cluedo {
         }
     }
 
+    /**
+     * @return A list of PlayerPieces in the game
+     */
     public List<PlayerPiece> getPlayerPieces() {
         return this.playerPieces;
     }
 
+    /**
+     * @return Board of the game
+     */
     public Board getBoard() {
         return this.board;
+    }
+
+    /**
+     * Assigns PlayerPieces to the Players in order
+     *
+     * @param playerOrder
+     */
+    private void assignPlayerPieces(List<Pair<Player, Integer>> playerOrder) {
+        Collections.sort(playerOrder, Comparator.comparing(p -> -p.getValue()));
+
+        for (int i = 0; i < playerOrder.size(); i++) {
+            playerOrder.get(i).getKey().setPiece(this.playerPieces.get(i));
+        }
+        locAtTurnStart = currentPlayersTurn.getPiece().getLocation();
     }
 
     /**
      * Assign the player pieces to the players.
      * Takes in playerHash which is a hashmap that contains all the players and the number they got from rolling the dice.
      * Player with the highest numbers gets a playerPiece assigned to them first.
+     * Used for terminal version of the game that was used for testing before gui was available
      *
      * @param playerHash
      */
@@ -521,18 +626,6 @@ public class Cluedo {
                 }
             }
         }
-    }
-
-    /**
-     * Rolls the dice for all the players and adds it to a HashMap and runs the assignPlayerPieces function giving the hashmap as a parameter.
-     */
-    public void getPlayerTurnOrder() {
-        Map<Player, Integer> turn = new HashMap<Player, Integer>();
-        for (Player player : this.players) {
-            turn.put(player, rollDice());
-        }
-        System.out.println(turn);
-        this.assignPlayerPieces(turn);
     }
 
     /**
@@ -589,12 +682,9 @@ public class Cluedo {
      * Temporary function to setUp players
      */
     public void setUpPlayers() {
-        this.players.add(new AI("Diogo"));
-        this.players.add(new AI("Hayden"));
-        this.players.add(new AI("Gogo"));
-//        this.players.add(new Human("Diogo"));
-//        this.players.add(new Human("Hayden"));
-//        this.players.add(new Human("Gogo"));
+        this.players.add(new Player("Diogo"));
+        this.players.add(new Player("Hayden"));
+        this.players.add(new Player("Gogo"));
     }
 
     /**
@@ -608,6 +698,10 @@ public class Cluedo {
         for (Player player : this.players) {
             player.fillSlip();
         }
+    }
+
+    public Player getCurrentPlayersTurn() {
+        return this.currentPlayersTurn;
     }
 
     /**
@@ -691,14 +785,13 @@ public class Cluedo {
                     shared = true;
                 } else {
                     Card card = this.cards.get(0);
+                    this.cards.remove(0);
                     if (!envelope.has(card)) {
                         player.addCard(card);
                     }
-                    cards.remove(0);
                 }
             }
         }
-
     }
 
     /**
@@ -779,9 +872,6 @@ public class Cluedo {
         this.roomCards = roomCards;
     }
 
-    public static void main(String[] args) {
-        Cluedo cluedo = new Cluedo();
-    }
 
     /**
      * @return weaponPieces
