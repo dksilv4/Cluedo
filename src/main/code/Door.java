@@ -1,5 +1,8 @@
 package code;
 
+/**
+ * Extension of Tile to represent a Door within the map
+ */
 public class Door extends Tile{
     /**
      * Constructs a Tile
@@ -11,6 +14,9 @@ public class Door extends Tile{
         super("door", row, column);
     }
 
+    /**
+     * @return string representing the class
+     */
     public String toString(){
         if(this.getOccupier()!=null){
             return this.getOccupier().toString();

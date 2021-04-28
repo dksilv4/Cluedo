@@ -24,21 +24,6 @@ public class CluedoTest {
     }
 
     @Test
-    public void testAssignPlayerPiecesAndSetPlayerOrder(){
-        Map<Player, Integer> playerHash = new HashMap<>();
-        int a = 11;
-        int b = 10;
-
-        playerHash.put(this.cluedo.getPlayers().get(0), a);
-        playerHash.put(this.cluedo.getPlayers().get(1), b);
-        this.cluedo.assignPlayerPieces(playerHash);
-        this.cluedo.setPlayerOrder(playerHash);
-        assertEquals("Miss Scarlett", this.cluedo.getPlayers().get(0).getPiece().getName());
-        assertEquals("Prof Plum", this.cluedo.getPlayers().get(1).getPiece().getName());
-
-    }
-
-    @Test
     public void testSetUpDetectiveSlips(){
         this.cluedo.setWeaponCardsAndPieces();
         this.cluedo.setRoomCards();
@@ -103,10 +88,9 @@ public class CluedoTest {
         this.cluedo.setEnvelope();
         this.cluedo.gatherCards();
         this.cluedo.giveOutCards();
-
-        System.out.println(this.cluedo.getRoomCards());
-        assertEquals(9, testPlayers.get(0).getCards().size());
-        assertEquals(9, testPlayers.get(1).getCards().size());
+        assertNotNull(this.cluedo.getEnvelope().getWeapon());
+        assertNotNull(this.cluedo.getEnvelope().getRoom());
+        assertNotNull(this.cluedo.getEnvelope().getSuspect());
     }
 
     @Test
@@ -118,39 +102,11 @@ public class CluedoTest {
         this.cluedo.setSuspectCardsAndPlayerPieces();
         this.cluedo.setWeaponCardsAndPieces();
         this.cluedo.setRoomCards();
+        this.cluedo.setEnvelope();
         this.cluedo.gatherCards();
         this.cluedo.giveOutCards();
-        System.out.println(this.cluedo.getRoomCards());
-        assertEquals(11, testPlayers.get(0).getCards().size());
-        assertEquals(10, testPlayers.get(1).getCards().size());
+        assertEquals(10, testPlayers.get(0).getCards().size());
+        assertEquals(8, testPlayers.get(1).getCards().size());
     }
 
-    @Test
-    public void testUseSecretPassage(){
-        Room study = this.cluedo.getBoard().getRoom("Study");
-        Room kitchen = this.cluedo.getBoard().getRoom("Kitchen");
-        Room conservatory = this.cluedo.getBoard().getRoom("Conservatory");
-        Room lounge = this.cluedo.getBoard().getRoom("Lounge");
-        PlayerPiece playerPieceA = this.playerA.getPiece();
-
-        playerPieceA.setLocation(study.getTiles().get(0));
-        assertEquals(study, playerPieceA.getLocation().getBelongsTo());
-        this.cluedo.useSecretPassage(study, playerPieceA);
-        assertEquals(kitchen, playerPieceA.getLocation().getBelongsTo());
-
-        playerPieceA.setLocation(kitchen.getTiles().get(0));
-        assertEquals(kitchen, playerPieceA.getLocation().getBelongsTo());
-        this.cluedo.useSecretPassage(kitchen, playerPieceA);
-        assertEquals(study, playerPieceA.getLocation().getBelongsTo());
-
-        playerPieceA.setLocation(lounge.getTiles().get(0));
-        assertEquals(lounge, playerPieceA.getLocation().getBelongsTo());
-        this.cluedo.useSecretPassage(lounge, playerPieceA);
-        assertEquals(conservatory, playerPieceA.getLocation().getBelongsTo());
-
-        playerPieceA.setLocation(conservatory.getTiles().get(0));
-        assertEquals(conservatory, playerPieceA.getLocation().getBelongsTo());
-        this.cluedo.useSecretPassage(conservatory, playerPieceA);
-        assertEquals(lounge, playerPieceA.getLocation().getBelongsTo());
-    }
 }

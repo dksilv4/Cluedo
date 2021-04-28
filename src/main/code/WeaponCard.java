@@ -1,6 +1,12 @@
 package code;
 
+/**
+ * Class that represents another type of card. Weapon Cards.
+ */
 public class WeaponCard extends Card {
+    /**
+     * @param name name of card
+     */
     public WeaponCard(String name) {
         super(name);
     }

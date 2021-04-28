@@ -1,7 +1,7 @@
 package code;
 
 /**
- * CardChoice represents the set of cards that a player choose on their turn.
+ * CardChoice represents the set of cards that a player chooses to make their suggestion or accusation.
  */
 public class CardChoice {
 
@@ -12,10 +12,10 @@ public class CardChoice {
 
     /**
      * Constructs and initializes a CardChoice taking a PlayerPiece, a RoomCard, a WeaponCard, and a SuspectCard.
-     * @param playerPiece
-     * @param room
-     * @param weapon
-     * @param suspect
+     * @param playerPiece player that made the choice
+     * @param room room where the player thinks the murder happened
+     * @param weapon weapon used for the murder
+     * @param suspect player that committed the murder
      */
     public CardChoice(PlayerPiece playerPiece, RoomCard room, WeaponCard weapon, SuspectCard suspect) {
         this.room = room;
@@ -23,10 +23,13 @@ public class CardChoice {
         this.suspect = suspect;
         this.playerPiece = playerPiece;
     }
+    public CardChoice(){
+
+    }
 
     /**
      * Return a RoomCard of a CardChoice.
-     * @return
+     * @return variable room
      */
     public RoomCard getRoom() {
         return room;
@@ -34,7 +37,7 @@ public class CardChoice {
 
     /**
      * Set a RoomCard for a CardChoice.
-     * @param room
+     * @param room room card
      */
     public void setRoom(RoomCard room) {
         this.room = room;
@@ -42,7 +45,7 @@ public class CardChoice {
 
     /**
      * Return a WeaponCard of a CardChoice.
-     * @return
+     * @return weapon
      */
     public WeaponCard getWeapon() {
         return weapon;
@@ -50,25 +53,34 @@ public class CardChoice {
 
     /**
      * Set a WeaponCard for a CardChoice.
-     * @param weapon
+     * @param weapon weapon card
      */
     public void setWeapon(WeaponCard weapon) {
         this.weapon = weapon;
     }
 
+    /**
+     * Return a SuspectCard of a CardChoice.
+     * @return suspect card
+     */
     public SuspectCard getSuspect() {
         return suspect;
     }
 
+    /**
+     * Set a SuspectCard for a CardChoice.
+     * @param suspect suspect card
+     */
     public void setSuspect(SuspectCard suspect) {
         this.suspect = suspect;
     }
 
+    /**
+     * Return a PlayerPiece of a CardChoice.
+     * @return player that made the suggestion or accusation
+     */
     public PlayerPiece getPlayerPiece() {
         return playerPiece;
     }
 
-    public void setPlayerPiece(PlayerPiece playerPiece) {
-        this.playerPiece = playerPiece;
-    }
 }

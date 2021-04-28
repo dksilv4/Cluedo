@@ -29,7 +29,7 @@ public class GUITest {
         gameModel.setUpPlayers();
         gameModel.setUpCards();
         gameModel.setSpawns();
-        gameModel.getPlayerTurnOrder();
+//        gameModel.getPlayerTurnOrder();
         playerPieceList = gameModel.getPlayerPieces();
     }
 

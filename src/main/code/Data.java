@@ -1,14 +1,12 @@
 package code;
-
 import java.io.File;  // Import the File class
 import java.io.FileNotFoundException;  // Import this class to handle errors
 import java.util.Dictionary;
 import java.util.Scanner; // Import the Scanner class to read text files
-
 import org.json.*;
 
 /**
- * Contains data for the game
+ * Class to read and write data from files for the game
  */
 public class Data {
     private String board;
@@ -24,16 +22,23 @@ public class Data {
         this.readFile(file_name);
     }
 
+    /**
+     * @return the text that represents the board
+     */
     public String getBoard() {
         return this.board;
     }
 
+
+    /**
+     * @return data from json file
+     */
     public JSONObject getJsonData() {
         return this.jsonData;
     }
 
     /**
-     * A method to read a file
+     * A method that depending on the filename it is either reads txt or json file.
      *
      * @param file_name a file name string
      */
@@ -48,7 +53,7 @@ public class Data {
     /**
      * Reads json file
      *
-     * @param file_name a JSON file
+     * @param file_name a JSON file name
      */
     private void readJSON(String file_name) {
         String data = readTxt(file_name); //assign your JSON String here
@@ -58,7 +63,7 @@ public class Data {
     }
 
     /**
-     * Reads a text file and build a string
+     * Reads a text file and returns a string representing the board data
      *
      * @param file_name a txt file
      * @return a string or null
@@ -66,7 +71,6 @@ public class Data {
     private String readTxt(String file_name) {
         try {
             File file = new File(this.projectPath + file_name);
-//            System.out.println(file.getAbsolutePath());
             Scanner myReader = new Scanner(file);
             StringBuilder data = new StringBuilder();
             while (myReader.hasNextLine()) {
@@ -81,14 +85,5 @@ public class Data {
             return null;
         }
     }
-
-    /**
-     * main method of Data
-     *
-     * @param args
-     */
-//    public static void main(String[] args) {
-//        Data data = new Data("data.json");
-//    }
 
 }

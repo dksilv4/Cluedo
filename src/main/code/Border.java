@@ -11,6 +11,9 @@ public class Border extends Tile{
         super("border", row, column);
     }
 
+    /**
+     * @return string that represents the class in the terminal
+     */
     public String toString(){
         return "\u001B[33mb\u001B[0m";
     }

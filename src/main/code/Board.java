@@ -28,15 +28,12 @@ public class Board {
         this.board_data = new Data("board.txt").getBoard();
         this.grid = new Grid();
         this.grid.makeGrid(28, 24);
-        this.grid.print();
         this.board_data_list = this.Lexer();
         this.getRoomDoors(board_data_list);
         this.cleanBoardData();
         this.placeRooms();
         this.rooms = this.getRooms();
         this.renderSecretPassages();
-
-
     }
 
     public void renderSecretPassages() {
